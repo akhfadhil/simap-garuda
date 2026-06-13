@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../views';
+
+@theme {
+  --font-display: "Bebas Neue", sans-serif;
+  --font-mono2: "DM Mono", monospace;
+  --color-brand: #E63946;
+  --color-role-ppk: #F4A261;
+  --color-role-pps: #2EC4B6;
+  --color-role-kpps: #A8DADC;
+}
