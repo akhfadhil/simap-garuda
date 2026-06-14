@@ -61,16 +61,12 @@
     @if($rekap)
     <div class="px-5 py-3 border-b dark:border-gray-700 border-gray-100">
         <div class="flex justify-between text-[11px] dark:text-gray-500 text-gray-400 mb-1">
-            <span>DPT</span>
-            <span class="font-semibold dark:text-gray-300 text-gray-600">{{ number_format($rekap->dpt_lk + $rekap->dpt_pr) }}</span>
-        </div>
-        <div class="flex justify-between text-[11px] dark:text-gray-500 text-gray-400 mb-1">
-            <span>Suara sah</span>
+            <span>Total suara Garuda</span>
             <span class="font-semibold dark:text-gray-300 text-gray-600">{{ number_format($rekap->suara_sah) }}</span>
         </div>
         <div class="flex justify-between text-[11px] dark:text-gray-500 text-gray-400">
-            <span>Suara tidak sah</span>
-            <span class="font-semibold dark:text-gray-300 text-gray-600">{{ number_format($rekap->suara_tidak_sah) }}</span>
+            <span>Status data</span>
+            <span class="font-semibold dark:text-gray-300 text-gray-600">{{ $isFinal ? 'Final' : 'Draft' }}</span>
         </div>
     </div>
     @endif

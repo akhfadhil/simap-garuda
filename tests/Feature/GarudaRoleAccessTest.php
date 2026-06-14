@@ -203,6 +203,10 @@ class GarudaRoleAccessTest extends TestCase
         $response->assertOk();
         $response->assertSee('Partai Garuda');
         $response->assertDontSee('Partai Kompetitor');
+        $response->assertDontSee('Data Pemilih');
+        $response->assertDontSee('Surat suara');
+        $response->assertDontSee('Disabilitas');
+        $response->assertDontSee('Suara Tidak Sah');
 
         $this->actingAs($this->saksiA)
             ->post(route('rekap.store', 'dpr_ri'), [
@@ -223,6 +227,13 @@ class GarudaRoleAccessTest extends TestCase
         $this->assertDatabaseHas('rekap_partai_suaras', [
             'partai_id' => $garuda->id,
             'suara' => 99,
+        ]);
+        $this->assertDatabaseHas('rekap_headers', [
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'dpt_lk' => 0,
+            'dpt_pr' => 0,
+            'suara_tidak_sah' => 0,
         ]);
         $this->assertDatabaseMissing('rekap_partai_suaras', [
             'partai_id' => $competitor->id,

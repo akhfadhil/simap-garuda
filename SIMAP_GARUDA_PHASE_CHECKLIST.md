@@ -95,7 +95,11 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 
 ### 5. Validasi Input Manual TPS
 
-- [ ] Perkuat validasi total suara sah, tidak sah, dan total pengguna.
+- [x] Hapus input DPT, pengguna hak pilih, surat suara, disabilitas, dan suara tidak sah dari form Saksi TPS.
+- [x] Batasi form Saksi TPS agar hanya menerima suara Partai Garuda dan caleg Garuda.
+- [x] Set field administratif lama ke `0` saat simpan rekap TPS agar schema lama tetap kompatibel.
+- [ ] Bersihkan tampilan agregasi Kordes/Korcam/Admin dari field administratif KPU yang tidak relevan untuk partai.
+- [ ] Bersihkan export laporan dari field suara tidak sah, DPT, surat suara, dan disabilitas.
 - [ ] Tambahkan status internal: draft, perlu dicek, final.
 - [ ] Tambahkan catatan internal partai untuk TPS bermasalah jika diperlukan.
 - [ ] Tentukan siapa yang boleh finalisasi: Saksi TPS saja atau juga Kordes/Korcam/Admin Partai.
@@ -107,7 +111,8 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Tetapkan input suara hanya melalui form manual Saksi TPS.
 - [x] Hapus command import Excel legacy dari project.
 - [x] Hapus file contoh import Excel legacy dari folder command.
-- [ ] Perkuat validasi form manual karena form adalah satu-satunya jalur input data.
+- [x] Perkuat validasi form manual untuk suara Partai Garuda dan caleg Garuda karena form adalah satu-satunya jalur input data.
+- [ ] Tambahkan validasi lanjutan untuk status internal dan catatan koreksi TPS.
 
 ### 7. Export Laporan Partai
 
@@ -162,5 +167,6 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Single-party guard tahap pertama selesai: setup hanya menampilkan master Partai Garuda, admin tidak bisa menambah partai selain Garuda, dan caleg tidak bisa ditambahkan ke partai kompetitor.
 - Scope Garuda sudah diterapkan ke form input Saksi TPS, rekap Kordes/Korcam/Admin, agregasi admin, chart, dan master export; request input manual yang membawa ID partai/caleg kompetitor ditolak.
 - Import command legacy sudah dihapus; data suara SIMAP Garuda hanya masuk lewat form manual Saksi TPS.
+- Form input Saksi TPS sudah disederhanakan: hanya suara Partai Garuda dan caleg Garuda yang diisi; data DPT, surat suara, disabilitas, serta suara tidak sah tidak lagi diminta dari saksi.
 - Dashboard legislatif sudah menampilkan ranking caleg Garuda, tetapi kartu total suara, wilayah kuat/lemah, TPS belum masuk, TPS bermasalah, chart default Garuda, dan export khusus Garuda belum selesai.
-- Next step: perkuat validasi input manual TPS, lalu cleanup data kompetitor lama di `rekap_partais` jika sudah diputus tidak perlu disimpan.
+- Next step: bersihkan tampilan agregasi dan export agar tidak lagi membawa field administratif KPU yang tidak relevan untuk SIMAP Garuda.

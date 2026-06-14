@@ -62,6 +62,13 @@ class KppsController extends Controller
         $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
         $tps = $this->activeTps();
+        $request->validate([
+            'suara_partai' => ['nullable', 'array'],
+            'suara_partai.*' => ['nullable', 'integer', 'min:0'],
+            'suara_caleg' => ['nullable', 'array'],
+            'suara_caleg.*' => ['nullable', 'integer', 'min:0'],
+            'finalisasi' => ['nullable', 'in:1'],
+        ]);
         $this->guardGarudaSuaraPayload($request, $jenis, $tps);
 
         $existing = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->first();
@@ -73,28 +80,23 @@ class KppsController extends Controller
             $status = request('finalisasi') == '1'
                 ? 'final'
                 : (($isAdminEdit && $existing?->status === 'final') ? 'final' : 'draft');
-            $suratSuaraDigunakan =
-                $request->integer('pengguna_dpt_lk') +
-                $request->integer('pengguna_dpt_pr') +
-                $request->integer('pengguna_dptb_lk') +
-                $request->integer('pengguna_dptb_pr') +
-                $request->integer('pengguna_dpk_lk') +
-                $request->integer('pengguna_dpk_pr');
-            $suratSuaraSisa = max(
-                0,
-                $request->integer('ss_diterima') - $suratSuaraDigunakan - $request->integer('ss_rusak')
-            );
-            $headerData = $request->only([
-                'dpt_lk', 'dpt_pr',
-                'pengguna_dpt_lk', 'pengguna_dpt_pr',
-                'pengguna_dptb_lk', 'pengguna_dptb_pr',
-                'pengguna_dpk_lk', 'pengguna_dpk_pr',
-                'ss_diterima', 'ss_rusak',
-                'disabilitas_lk', 'disabilitas_pr',
-                'suara_tidak_sah',
-            ]);
-            $headerData['ss_digunakan'] = $suratSuaraDigunakan;
-            $headerData['ss_sisa'] = $suratSuaraSisa;
+            $headerData = [
+                'dpt_lk' => 0,
+                'dpt_pr' => 0,
+                'pengguna_dpt_lk' => 0,
+                'pengguna_dpt_pr' => 0,
+                'pengguna_dptb_lk' => 0,
+                'pengguna_dptb_pr' => 0,
+                'pengguna_dpk_lk' => 0,
+                'pengguna_dpk_pr' => 0,
+                'ss_diterima' => 0,
+                'ss_digunakan' => 0,
+                'ss_rusak' => 0,
+                'ss_sisa' => 0,
+                'disabilitas_lk' => 0,
+                'disabilitas_pr' => 0,
+                'suara_tidak_sah' => 0,
+            ];
 
             $rekap = RekapHeader::updateOrCreate(
                 ['tps_id' => $tps->id, 'jenis' => $jenis],
