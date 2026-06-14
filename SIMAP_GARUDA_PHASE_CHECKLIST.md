@@ -101,7 +101,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [ ] Bersihkan tampilan agregasi Kordes/Korcam/Admin dari field administratif KPU yang tidak relevan untuk partai.
   - [x] Kordes: rekap desa hanya menampilkan suara Garuda, caleg Garuda, total Garuda, dan status TPS.
   - [x] Korcam: rekap kecamatan dan detail desa hanya menampilkan suara Garuda, caleg Garuda, total Garuda, dan status TPS.
-  - [ ] Admin: bersihkan rekap kabupaten dan detail wilayah.
+  - [x] Admin: rekap kabupaten dan detail wilayah hanya menampilkan suara Garuda, caleg Garuda, total Garuda, dan status TPS.
 - [ ] Bersihkan export laporan dari field suara tidak sah, DPT, surat suara, dan disabilitas.
 - [ ] Tambahkan status internal: draft, perlu dicek, final.
 - [ ] Tambahkan catatan internal partai untuk TPS bermasalah jika diperlukan.
