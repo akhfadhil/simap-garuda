@@ -188,28 +188,13 @@ php artisan backup:dokumen --dry-run
 # Restore dokumen arsip berdasarkan ID dokumen
 php artisan restore:dokumen {id}
 
-# Import data PPWP/DPD/DPR RI/DPRD historis dari folder Excel semua kecamatan
-php artisan import:ppwp-folder "storage/import/PPWP" --dry-run
-php artisan import:ppwp-folder "storage/import/PPWP"
-php artisan import:dpd-folder "storage/import/DPD" --dry-run
-php artisan import:dpd-folder "storage/import/DPD"
-php artisan import:dpr-ri-folder "storage/import/DPR RI" --dry-run
-php artisan import:dpr-ri-folder "storage/import/DPR RI"
-php artisan import:dprd-prov-folder "storage/import/DPRD PROV" --dry-run
-php artisan import:dprd-prov-folder "storage/import/DPRD PROV"
-php artisan import:dprd-kab-folder "storage/import/DPRD KAB" --dry-run
-php artisan import:dprd-kab-folder "storage/import/DPRD KAB"
-
-# Tulis laporan detail import ke storage/app/import-reports
-php artisan import:ppwp-folder "storage/import/PPWP" --dry-run --report
-
 # Buat dokumen TPS dummy dari File_contoh.pdf untuk jenis pemilu aktif
 php artisan seed:dummy-dokumen --status=menunggu_verifikasi
 ```
 
 Scheduler menjalankan backup dokumen harian melalui `app/Console/Kernel.php`.
 
-Jalankan command import dengan `--dry-run` terlebih dahulu untuk memvalidasi baris yang terbaca dan melihat koreksi otomatis sebelum menulis ke database. `import:ppwp-folder`, `import:dpd-folder`, `import:dpr-ri-folder`, `import:dprd-prov-folder`, dan `import:dprd-kab-folder` adalah helper data historis: satu file Excel mewakili satu kecamatan dan setiap sheet mewakili satu desa. Command ini memakai nama sheet sebagai nama desa utama, melewati sheet pembuka tanpa TPS, dan menerima opsi `--only=NAMA_KECAMATAN`, `--desa=NAMA_DESA`, serta `--report[=path]`. Untuk `dprd_kab`, master partai/caleg dipisah per dapil sehingga kecamatan yang diimport harus sudah memiliki dapil.
+SIMAP Garuda tidak memakai command import. Data suara masuk secara manual melalui form rekap Saksi TPS, lalu dipantau berjenjang oleh Kordes, Korcam, dan Admin Partai.
 
 ## Routes Penting
 
@@ -312,13 +297,7 @@ app/
     Kernel.php
     Commands/BackupDokumen.php
     Commands/RestoreDokumen.php
-    Commands/ImportPpwpFolder.php
-    Commands/ImportDpdFolder.php
-    Commands/ImportDprRiFolder.php
-    Commands/ImportDprdProvFolder.php
-    Commands/ImportDprdKabFolder.php
     Commands/SeedDummyDokumen.php
-    Commands/Concerns/WritesImportReport.php
   Http/
     Controllers/
       AuthController.php

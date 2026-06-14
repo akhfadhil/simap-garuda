@@ -14,17 +14,9 @@ This is a Laravel 12 application. Core PHP code lives in `app/`: controllers and
 - `npm run build` builds production frontend assets.
 - `composer test` clears config and runs the Laravel test suite.
 
-## Data Import Commands
+## Data Entry Policy
 
-Bangorejo Excel import helpers live in `app/Console/Commands`. Run them with `--dry-run` first to validate rows and review automatic corrections before writing to the database.
-
-- `php artisan import:ppwp-folder --dry-run`
-- `php artisan import:dpd-folder --dry-run`
-- `php artisan import:dpr-ri-folder --dry-run`
-- `php artisan import:bangorejo-dprd-prov --dry-run`
-- `php artisan import:bangorejo-dprd-kab --dry-run`
-
-`import:ppwp-folder`, `import:dpd-folder`, and `import:dpr-ri-folder` are temporary historical-data helpers for folders of Excel files where each file is one kecamatan and each sheet is one desa. Each command accepts an optional path argument, for example `php artisan import:ppwp-folder "storage/import/PPWP" --dry-run`, `php artisan import:dpd-folder "storage/import/DPD" --dry-run`, or `php artisan import:dpr-ri-folder "storage/import/DPR RI" --dry-run`.
+SIMAP Garuda does not use import commands. Vote data is entered manually from the Saksi TPS rekap form, then monitored by Kordes, Korcam, and Admin Partai. Do not add or restore Excel/CSV/JSON import commands unless the product direction changes explicitly.
 
 ## Coding Style & Naming Conventions
 
