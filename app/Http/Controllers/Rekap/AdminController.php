@@ -360,7 +360,7 @@ class AdminController extends Controller
             return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
         }
 
-        $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis);
+        $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis)->garuda();
         $partaiNomor = $this->partaiScopeNomor($jenis);
 
         if ($jenis === 'dprd_kab' && $dapilId) {
@@ -389,6 +389,26 @@ class AdminController extends Controller
         abort_if(! $partai, 403, 'Akun partai belum dihubungkan ke master partai.');
 
         return (int) $partai->nomor_urut;
+    }
+
+    private function applyGarudaPartaiQuery($query, string $alias = 'p')
+    {
+        $party = config('party');
+        $numbers = collect($party['historical_numbers'] ?? [])
+            ->map(fn ($number) => (int) $number)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        return $query->where(function ($query) use ($alias, $party, $numbers) {
+            $query->where("{$alias}.nama_partai", 'like', '%'.($party['short_name'] ?? 'Garuda').'%')
+                ->orWhere("{$alias}.nama_partai", 'like', '%'.($party['name'] ?? 'Partai Garuda').'%');
+
+            if ($numbers) {
+                $query->orWhereIn("{$alias}.nomor_urut", $numbers);
+            }
+        });
     }
 
     // Menghitung agregat suara per kecamatan.
@@ -433,6 +453,7 @@ class AdminController extends Controller
             $partaiRows = $this->baseSuaraAggregateQuery('rekap_partai_suaras', $jenis, $dapilId)
                 ->join('rekap_partais as p', 'p.id', '=', 's.partai_id')
                 ->where('p.jenis', $jenis)
+                ->tap(fn ($query) => $this->applyGarudaPartaiQuery($query, 'p'))
                 ->when($partaiNomor, fn ($query) => $query->where('p.nomor_urut', $partaiNomor))
                 ->when($jenis === 'dprd_kab' && $dapilId, fn ($query) => $query->where('p.dapil_id', $dapilId))
                 ->select('k.id as kecamatan_id', 's.partai_id', DB::raw('SUM(s.suara) as total_suara'))
@@ -454,6 +475,7 @@ class AdminController extends Controller
                 ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
                 ->join('rekap_partais as p', 'p.id', '=', 'c.partai_id')
                 ->where('p.jenis', $jenis)
+                ->tap(fn ($query) => $this->applyGarudaPartaiQuery($query, 'p'))
                 ->when($partaiNomor, fn ($query) => $query->where('p.nomor_urut', $partaiNomor))
                 ->when($jenis === 'dprd_kab' && $dapilId, fn ($query) => $query->where('p.dapil_id', $dapilId))
                 ->select('k.id as kecamatan_id', 's.caleg_id', 'p.id as partai_id', DB::raw('SUM(s.suara) as total_suara'))
@@ -500,9 +522,9 @@ class AdminController extends Controller
             'gubernur' => ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
             'bupati' => ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
             'dpd' => ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
-            'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->when($partaiNomorDprRi, fn ($q) => $q->where('nomor_urut', $partaiNomorDprRi))->orderBy('nomor_urut')->get()],
-            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->when($partaiNomorDprdProv, fn ($q) => $q->where('nomor_urut', $partaiNomorDprdProv))->orderBy('nomor_urut')->get()],
-            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->when($partaiNomorDprdKab, fn ($q) => $q->where('nomor_urut', $partaiNomorDprdKab))->orderBy('nomor_urut')->get()],
+            'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->when($partaiNomorDprRi, fn ($q) => $q->where('nomor_urut', $partaiNomorDprRi))->orderBy('nomor_urut')->get()],
+            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->when($partaiNomorDprdProv, fn ($q) => $q->where('nomor_urut', $partaiNomorDprdProv))->orderBy('nomor_urut')->get()],
+            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->garuda()->when($partaiNomorDprdKab, fn ($q) => $q->where('nomor_urut', $partaiNomorDprdKab))->orderBy('nomor_urut')->get()],
         ];
     }
 

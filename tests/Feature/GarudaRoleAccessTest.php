@@ -185,6 +185,50 @@ class GarudaRoleAccessTest extends TestCase
         ]);
     }
 
+    public function test_rekap_form_and_store_only_use_garuda_party(): void
+    {
+        $garuda = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 11,
+            'nama_partai' => 'Partai Garuda',
+        ]);
+        $competitor = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 1,
+            'nama_partai' => 'Partai Kompetitor',
+        ]);
+
+        $response = $this->actingAs($this->saksiA)->get(route('rekap.form', 'dpr_ri'));
+
+        $response->assertOk();
+        $response->assertSee('Partai Garuda');
+        $response->assertDontSee('Partai Kompetitor');
+
+        $this->actingAs($this->saksiA)
+            ->post(route('rekap.store', 'dpr_ri'), [
+                'suara_partai' => [
+                    $competitor->id => 99,
+                ],
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($this->saksiA)
+            ->post(route('rekap.store', 'dpr_ri'), [
+                'suara_partai' => [
+                    $garuda->id => 99,
+                ],
+            ])
+            ->assertRedirect(route('rekap.index'));
+
+        $this->assertDatabaseHas('rekap_partai_suaras', [
+            'partai_id' => $garuda->id,
+            'suara' => 99,
+        ]);
+        $this->assertDatabaseMissing('rekap_partai_suaras', [
+            'partai_id' => $competitor->id,
+        ]);
+    }
+
     private function user(string $role, array $extra = []): User
     {
         $defaults = [

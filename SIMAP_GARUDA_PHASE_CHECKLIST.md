@@ -80,7 +80,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Tentukan mode data legislatif: single-party Partai Garuda saja.
 - [x] Jika hanya Garuda, filter master `rekap_partais` ke slug/identitas Garuda di halaman setup.
 - [x] Batasi input caleg hanya untuk Partai Garuda.
-- [ ] Batasi dashboard dan export agar fokus pada suara Partai Garuda dan calegnya.
+- [x] Batasi dashboard dan export agar fokus pada suara Partai Garuda dan calegnya.
 - [x] Tambahkan guard agar admin tidak tanpa sengaja membuat data partai lain jika mode single-party aktif.
 
 ### 4. Dashboard Khusus Partai
@@ -161,5 +161,6 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Rekap non-legislatif sudah dinonaktifkan dari aplikasi dan dibersihkan lewat migration `2026_06_14_000002_remove_non_party_rekap_data`.
 - Jenis rekap resmi SIMAP Garuda sekarang hanya `dpr_ri`, `dprd_prov`, dan `dprd_kab`.
 - Single-party guard tahap pertama selesai: setup hanya menampilkan master Partai Garuda, admin tidak bisa menambah partai selain Garuda, dan caleg tidak bisa ditambahkan ke partai kompetitor.
+- Scope Garuda sudah diterapkan ke form input Saksi TPS, rekap Kordes/Korcam/Admin, agregasi admin, chart, dan master export; request input manual yang membawa ID partai/caleg kompetitor ditolak.
 - Dashboard legislatif sudah menampilkan ranking caleg Garuda, tetapi kartu total suara, wilayah kuat/lemah, TPS belum masuk, TPS bermasalah, chart default Garuda, dan export khusus Garuda belum selesai.
-- Next step: lanjutkan single-party guard ke form input rekap, export, chart, dan import command agar semua sumber data memakai scope Partai Garuda yang sama.
+- Next step: lanjutkan single-party guard ke import command dan cleanup data kompetitor lama di `rekap_partais` jika sudah diputus tidak perlu disimpan.

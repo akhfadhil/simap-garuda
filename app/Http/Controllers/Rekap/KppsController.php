@@ -62,6 +62,7 @@ class KppsController extends Controller
         $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
         $tps = $this->activeTps();
+        $this->guardGarudaSuaraPayload($request, $jenis, $tps);
 
         $existing = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->first();
         if ($existing && $existing->status === 'final' && ! $isAdminEdit) {
@@ -267,6 +268,7 @@ class KppsController extends Controller
             return [
                 'partais' => RekapPartai::with('calegs')
                     ->where('jenis', 'dpr_ri')
+                    ->garuda()
                     ->orderBy('nomor_urut')
                     ->get(),
                 'suara_partai' => $existingPartai,
@@ -278,6 +280,7 @@ class KppsController extends Controller
             return [
                 'partais' => RekapPartai::with('calegs')
                     ->where('jenis', 'dprd_prov')
+                    ->garuda()
                     ->orderBy('nomor_urut')
                     ->get(),
                 'suara_partai' => $existingPartai,
@@ -292,6 +295,7 @@ class KppsController extends Controller
             return [
                 'partais' => RekapPartai::with('calegs')
                     ->where('jenis', 'dprd_kab')
+                    ->garuda()
                     ->where('dapil_id', $dapilId)
                     ->orderBy('nomor_urut')
                     ->get(),
@@ -314,10 +318,33 @@ class KppsController extends Controller
             'gubernur' => ['calons' => RekapGubernurCalon::orderBy('nomor_urut')->get()],
             'bupati' => ['calons' => RekapBupatiCalon::orderBy('nomor_urut')->get()],
             'dpd' => ['calons' => RekapDpdCalon::orderBy('nomor_urut')->get()],
-            'dpr_ri' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->orderBy('nomor_urut')->get()],
-            'dprd_prov' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->orderBy('nomor_urut')->get()],
-            'dprd_kab' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->where('dapil_id', $kecamatan->dapil_id)->orderBy('nomor_urut')->get()],
+            'dpr_ri' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->orderBy('nomor_urut')->get()],
+            'dprd_prov' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->orderBy('nomor_urut')->get()],
+            'dprd_kab' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->garuda()->where('dapil_id', $kecamatan->dapil_id)->orderBy('nomor_urut')->get()],
         ];
+    }
+
+    private function guardGarudaSuaraPayload(Request $request, string $jenis, Tps $tps): void
+    {
+        $partais = RekapPartai::with('calegs')
+            ->where('jenis', $jenis)
+            ->garuda()
+            ->when($jenis === 'dprd_kab', fn ($query) => $query->where('dapil_id', $tps->desa?->kecamatan?->dapil_id))
+            ->get();
+        $allowedPartaiIds = $partais->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $allowedCalegIds = $partais
+            ->flatMap(fn ($partai) => $partai->calegs->pluck('id'))
+            ->map(fn ($id) => (string) $id)
+            ->all();
+
+        $requestedPartaiIds = array_keys($request->input('suara_partai', []));
+        $requestedCalegIds = array_keys($request->input('suara_caleg', []));
+
+        abort_if(
+            array_diff($requestedPartaiIds, $allowedPartaiIds) || array_diff($requestedCalegIds, $allowedCalegIds),
+            403,
+            'Input rekap hanya boleh untuk Partai Garuda dan calegnya.'
+        );
     }
 
     private function activeTps(): Tps

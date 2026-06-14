@@ -147,7 +147,7 @@ class PpsController extends Controller
         if ($jenis === 'dpd') {
             return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
         }
-        $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis);
+        $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis)->garuda();
 
         if ($jenis === 'dprd_kab') {
             $partais->where('dapil_id', $desa->kecamatan?->dapil_id);
@@ -164,9 +164,9 @@ class PpsController extends Controller
             'gubernur' => ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
             'bupati' => ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
             'dpd' => ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
-            'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->orderBy('nomor_urut')->get()],
-            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->orderBy('nomor_urut')->get()],
-            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->where('dapil_id', $desa->kecamatan?->dapil_id)->orderBy('nomor_urut')->get()],
+            'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->orderBy('nomor_urut')->get()],
+            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->orderBy('nomor_urut')->get()],
+            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->garuda()->where('dapil_id', $desa->kecamatan?->dapil_id)->orderBy('nomor_urut')->get()],
         ];
     }
 
