@@ -142,21 +142,13 @@
 
 @section('content')
 @php
-    $isKomisioner = Auth::user()->role === 'komisioner';
-    $roleLabel = $isKomisioner ? 'Komisioner' : 'Administrator';
-    $userRoleLabel = $isKomisioner ? 'Komisioner' : 'Admin Utama';
+    $roleLabel = 'Admin Partai';
+    $userRoleLabel = 'Admin Partai Garuda';
     $totalPengguna     = \App\Models\User::count();
     $totalTps          = \App\Models\Tps::count();
     $aktifJenis        = \App\Models\PemiluSetting::aktif();
     $totalPemiluAktif  = count($aktifJenis);
     $targetPemiluTps   = $totalTps * $totalPemiluAktif;
-    $dokumenJenisAktif = array_map('strtoupper', $aktifJenis);
-
-    $totalDokumenTerverifikasi = \App\Models\Dokumen::where('level', 'tps')
-                        ->whereIn('jenis', $dokumenJenisAktif)
-                        ->where('status', 'terverifikasi')
-                        ->count();
-    $persenDokumen     = $targetPemiluTps > 0 ? min(100, round(($totalDokumenTerverifikasi / $targetPemiluTps) * 100)) : 0;
 
     $totalRekapFinal   = \App\Models\RekapHeader::select('tps_id')
                         ->where('status', 'final')
@@ -166,21 +158,15 @@
                         ->count();
     $persenRekap       = $totalTps > 0 ? min(100, round(($totalRekapFinal / $totalTps) * 100)) : 0;
 
-    $menus = $isKomisioner ? [
-        ['label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.komisioner'), 'active' => true],
-        ['label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
-        ['label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
-        ['label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
-    ] : [
+    $menus = [
         ['label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin'), 'active' => true],
         ['label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
         ['label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
         ['label' => 'Kelola Kecamatan', 'icon' => 'map', 'route' => route('admin.kecamatan.index')],
         ['label' => 'Kelola Desa', 'icon' => 'location_city', 'route' => route('admin.desa.index')],
         ['label' => 'Kelola TPS', 'icon' => 'pin_drop', 'route' => route('admin.tps.index')],
-        ['label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.admin')],
         ['label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
-        ['label' => 'Setup Data Pemilu', 'icon' => 'settings', 'route' => route('admin.setup.index')],
+        ['label' => 'Setup Data Garuda', 'icon' => 'settings', 'route' => route('admin.setup.index')],
     ];
 @endphp
 
@@ -191,10 +177,10 @@
     <div class="p-5 flex items-center justify-between border-b admin-border">
         <div class="flex items-center gap-3">
             <div class="admin-primary-bg w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-                <img src="{{ asset('images/logo-kpu.png') }}" alt="SIMAP Logo" class="w-full h-full object-contain">
+                <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda Logo" class="w-full h-full object-contain">
             </div>
             <div>
-                <h1 class="admin-display admin-primary text-2xl leading-none">SIMAP</h1>
+                <h1 class="admin-display admin-primary text-2xl leading-none">SIMAP Garuda</h1>
                 <span class="admin-mono admin-muted-soft text-[10px] uppercase tracking-widest">{{ $roleLabel }}</span>
             </div>
         </div>
@@ -232,9 +218,9 @@
         <div class="p-6 flex flex-col gap-1">
             <div class="flex items-center gap-3 mb-2">
                 <div class="admin-primary-bg w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-                    <img src="{{ asset('images/logo-kpu.png') }}" alt="SIMAP Logo" class="w-full h-full object-contain">
+                    <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda Logo" class="w-full h-full object-contain">
                 </div>
-                <h1 class="admin-display admin-primary text-2xl leading-none">SIMAP</h1>
+                <h1 class="admin-display admin-primary text-2xl leading-none">SIMAP Garuda</h1>
             </div>
             <div class="admin-primary-bg px-2 py-1 w-max rounded-sm">
                 <span class="admin-display admin-primary uppercase text-[10px] tracking-[.2em]">{{ $roleLabel }}</span>
@@ -272,11 +258,11 @@
                     <span class="material-symbols-outlined text-3xl">menu</span>
                 </label>
                 <div class="admin-primary-bg md:hidden w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-                    <img src="{{ asset('images/logo-kpu.png') }}" alt="SIMAP" class="w-full h-full object-contain">
+                    <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda" class="w-full h-full object-contain">
                 </div>
                 <div class="hidden lg:block">
                     <p class="admin-mono admin-muted-soft text-[10px] uppercase tracking-[.24em]">Sistem Informasi</p>
-                    <p class="admin-text text-sm font-semibold leading-tight">Sistem Informasi Manajemen Arsip Pemilu</p>
+                    <p class="admin-text text-sm font-semibold leading-tight">Sistem Rekap dan Saksi Partai Garuda</p>
                 </div>
             </div>
 
@@ -307,7 +293,7 @@
                 <p class="admin-mono admin-muted-soft tracking-[.3em] text-xs mb-2">// {{ strtoupper($roleLabel) }}</p>
                 <h2 class="admin-display text-5xl lg:text-6xl admin-text leading-tight">DASHBOARD</h2>
                 <p class="admin-muted text-lg max-w-2xl mt-2">
-                    {{ $isKomisioner ? 'Pantau ringkasan dokumen, rekapitulasi, dan grafik pemilu seluruh kabupaten.' : 'Kelola seluruh sistem, wilayah, pengguna, dan dokumen pemilu.' }}
+                    Kelola pengguna, wilayah saksi, rekapitulasi suara, grafik, dan laporan internal Partai Garuda.
                 </p>
             </div>
 
@@ -332,17 +318,14 @@
                     </div>
                 </div>
 
-                <div class="admin-glass p-5 rounded-lg admin-stat" style="animation-delay: .4s" title="Persentase dokumen yang sudah terverifikasi">
+                <div class="admin-glass p-5 rounded-lg admin-stat" style="animation-delay: .4s" title="Jumlah jenis pemilihan yang aktif untuk input dan rekap">
                     <div class="flex justify-between items-start mb-4">
-                        <span class="admin-display admin-muted tracking-widest text-[10px]">DOKUMEN TERVERIFIKASI</span>
-                        <span class="admin-muted text-[10px] admin-mono">TPS x {{ $totalPemiluAktif }} AKTIF</span>
+                        <span class="admin-display admin-muted tracking-widest text-[10px]">JENIS PEMILIHAN AKTIF</span>
+                        <span class="admin-muted text-[10px] admin-mono">{{ number_format($targetPemiluTps) }} target rekap</span>
                     </div>
                     <div class="flex items-baseline gap-2">
-                        <span class="admin-display text-4xl text-[#e63946]">{{ number_format($totalDokumenTerverifikasi) }}/{{ number_format($targetPemiluTps) }}</span>
-                        <span class="admin-mono admin-muted-soft text-[11px] uppercase">{{ $persenDokumen }}% valid</span>
-                    </div>
-                    <div class="admin-surface-strong mt-6 h-1 w-full overflow-hidden rounded-full">
-                        <div class="h-full bg-[#e4bebc]/40" style="width:{{ $persenDokumen }}%"></div>
+                        <span class="admin-display text-4xl text-[#e63946]">{{ number_format($totalPemiluAktif) }}</span>
+                        <span class="admin-mono admin-muted-soft text-[11px] uppercase">aktif</span>
                     </div>
                 </div>
 
@@ -372,9 +355,7 @@
     </main>
 </div>
 
-@unless($isKomisioner)
 <a href="{{ route('admin.users.index') }}" class="fixed bottom-8 right-8 w-14 h-14 bg-[#e63946] rounded-full flex items-center justify-center text-white shadow-[0_0_20px_rgba(230,57,70,.4)] hover:scale-110 active:scale-95 transition z-[100]" title="Tambah pengguna">
     <span class="material-symbols-outlined text-3xl">add</span>
 </a>
-@endunless
 @endsection

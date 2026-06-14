@@ -1,20 +1,20 @@
 @extends('layouts.role-dashboard')
 @section('title', 'Rekapitulasi Data')
 @section('role_key', 'kpps')
-@section('role_title', 'KPPS')
-@section('role_subtitle', 'Kelompok Penyelenggara Pemungutan Suara')
+@section('role_title', 'Saksi TPS')
+@section('role_subtitle', 'Saksi Tempat Pemungutan Suara')
 @section('role_active', 'rekap')
 
 @section('role_content')
 <div class="mb-8">
-    <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// KPPS — Rekapitulasi</p>
+    <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// Saksi TPS - Rekapitulasi</p>
     <h1 class="font-display text-4xl tracking-[2px] admin-text">ISI DATA REKAPITULASI</h1>
-    <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">{{ $tps->nama }} · {{ $tps->desa->nama }}</p>
+    <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">{{ $tps->nama }} - {{ $tps->desa->nama }}</p>
 </div>
 
 @if(session('success'))
 <div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
-    ✓ {{ session('success') }}
+    {{ session('success') }}
 </div>
 @endif
 
@@ -30,10 +30,8 @@
 
 @foreach(\App\Models\RekapHeader::JENIS_LABELS as $jenis => $label)
 @if(in_array($jenis, $aktifJenis))
-    {{-- tampilkan card rekap --}}
-
 @php
-    $rekap   = $rekaps[$jenis] ?? null;
+    $rekap = $rekaps[$jenis] ?? null;
     $isDraft = $rekap && $rekap->status === 'draft';
     $isFinal = $rekap && $rekap->status === 'final';
 @endphp
@@ -45,7 +43,7 @@
                 @if($isFinal)
                     Difinalisasi {{ $rekap->difinalisasi_at->diffForHumans() }}
                 @elseif($isDraft)
-                    Tersimpan · belum difinalisasi
+                    Tersimpan - belum difinalisasi
                 @else
                     Belum diisi
                 @endif
@@ -91,7 +89,7 @@
         @endif
     </div>
 </div>
-    @endif
+@endif
 @endforeach
 </div>
 @endsection

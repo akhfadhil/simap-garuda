@@ -9,7 +9,7 @@ class Kecamatan extends Model
 
     // Relasi desa dalam kecamatan.
     public function desas() { return $this->hasMany(Desa::class); }
-    // Relasi user PPK di kecamatan.
+    // Relasi user Korcam di kecamatan.
     public function users() { return $this->hasMany(User::class); }
     // Relasi dapil kecamatan.
     public function dapil() { return $this->belongsTo(Dapil::class); }

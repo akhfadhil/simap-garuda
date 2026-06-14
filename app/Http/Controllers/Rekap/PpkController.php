@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PpkController extends Controller
 {
-    // Menampilkan daftar rekap TPS dalam kecamatan PPK.
+    // Menampilkan daftar rekap TPS dalam kecamatan Korcam.
     public function index()
     {
         $kecamatan = $this->activeKecamatan();
@@ -232,7 +232,7 @@ class PpkController extends Controller
         $master = $this->getAllMaster($kecamatan);
         $label = \App\Models\RekapHeader::JENIS_LABELS[$jenis];
         $wilayah = 'Kec. '.$kecamatan->nama;
-        $filename = 'Rekap_'.strtoupper($jenis).'_PPK_'.str_replace(' ', '_', $kecamatan->nama).'.xlsx';
+        $filename = 'Rekap_'.strtoupper($jenis).'_KORCAM_'.str_replace(' ', '_', $kecamatan->nama).'.xlsx';
 
         return \Maatwebsite\Excel\Facades\Excel::download(
             new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'ppk', $wilayah, $desas, $jenis),

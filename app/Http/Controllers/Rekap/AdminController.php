@@ -1189,7 +1189,7 @@ class AdminController extends Controller
         ];
     }
 
-    // Fitur sementara: admin bisa masuk ke form KPPS untuk koreksi rekap TPS.
+    // Fitur sementara: admin bisa masuk ke form Saksi TPS untuk koreksi rekap TPS.
     public function editTps(Request $request, string $jenis, Tps $tps)
     {
         abort_if($request->user()?->role !== 'admin', 403);
@@ -1210,7 +1210,7 @@ class AdminController extends Controller
         return redirect()->route('rekap.form', $jenis);
     }
 
-    // Menyimpan perubahan cell TPS dari tabel detail admin tanpa membuka form KPPS.
+    // Menyimpan perubahan cell TPS dari tabel detail admin tanpa membuka form Saksi TPS.
     public function inlineUpdate(Request $request, string $jenis)
     {
         abort_if($request->user()?->role !== 'admin', 403);

@@ -7,19 +7,19 @@ use App\Models\Kecamatan;
 
 class PpkController extends Controller
 {
-    // Menampilkan daftar PPS/desa dalam kecamatan PPK.
+    // Menampilkan daftar kordes/desa dalam kecamatan korcam.
     public function dataPps()
     {
         $kecamatan = $this->activeKecamatan();
 
         $desas = Desa::where('kecamatan_id', $kecamatan->id)
-            ->with(['tps.dokumens', 'users' => fn($q) => $q->where('role', 'pps')])
+            ->with(['tps.rekapHeaders', 'users' => fn($q) => $q->where('role', 'pps')])
             ->get();
 
         return view('ppk.data-pps', compact('desas'));
     }
 
-    // Mengaktifkan mode lihat dokumen PPS untuk desa tertentu.
+    // Mengaktifkan mode lihat kordes untuk desa tertentu.
     public function viewPps(Desa $desa)
     {
         $kecamatan = $this->activeKecamatan();

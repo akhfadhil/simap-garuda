@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMAP — @yield('title', 'Dashboard')</title>
+    <title>SIMAP Garuda - @yield('title', 'Dashboard')</title>
     <script>
         (function() {
             const saved  = localStorage.getItem('theme') || 'dark';
@@ -12,7 +12,7 @@
         })();
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="icon" type="image/png" href="{{ asset('images\logo-kpu.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-garuda.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
     @stack('styles')
@@ -30,8 +30,6 @@
         .role-pps   { background: rgba(46,196,182,0.15); color: #2EC4B6; border: 1px solid rgba(46,196,182,0.35); }
         .role-kpps  { background: rgba(168,218,220,0.15); color: #5BA4CF; border: 1px solid rgba(168,218,220,0.35); }
         .role-admin { background: rgba(220,38,38,0.15); color: #DC2626; border: 1px solid rgba(220,38,38,0.35); }
-        .role-komisioner { background: rgba(37,99,235,0.15); color: #2563EB; border: 1px solid rgba(37,99,235,0.35); }
-        .role-partai { background: rgba(124,58,237,0.15); color: #7C3AED; border: 1px solid rgba(124,58,237,0.35); }
         .rekap-table-scroll {
             max-height: calc(100vh - 5rem);
             overflow: auto;
@@ -57,15 +55,12 @@
 
         {{-- Brand --}}
         <a href="{{ route('dashboard.' . Auth::user()->role) }}" class="flex items-center gap-3 flex-shrink-0">
-            <!-- <div class="w-8 h-8 bg-red-600 flex items-center justify-center rounded">
-                <span class="font-display text-white text-base leading-none">KPU</span>
-            </div> -->
             <div class="w-8 h-8 flex items-center justify-center rounded overflow-hidden">
-                <img src="{{ asset('images/logo-kpu.png') }}" alt="KPU" class="w-full h-full object-contain">
+                <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda" class="w-full h-full object-contain">
             </div>
             <div class="hidden sm:block">
-                <p class="font-display text-lg leading-none dark:text-white text-gray-900 tracking-wide">SIMAP</p>
-                <p class="text-[9px] dark:text-gray-500 text-gray-400 tracking-widest uppercase">Sistem Informasi Manajemen Arsip Pemilu</p>
+                <p class="font-display text-lg leading-none dark:text-white text-gray-900 tracking-wide">SIMAP Garuda</p>
+                <p class="text-[9px] dark:text-gray-500 text-gray-400 tracking-widest uppercase">Sistem Rekap dan Saksi Partai Garuda</p>
             </div>
         </a>
 
@@ -143,7 +138,7 @@
 </main>
 <footer class="max-w-7xl mx-auto px-4 lg:px-8 pb-6">
     <p class="text-center text-[11px] dark:text-gray-600 text-gray-500">
-        &copy; 2026 KPU Kabupaten Banyuwangi
+        &copy; 2026 Partai Garuda
     </p>
 </footer>
 @endif
@@ -152,7 +147,7 @@
 <div id="pdf-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
     <div class="dark:bg-gray-900 bg-white border dark:border-gray-700 border-gray-200 w-full max-w-5xl h-[90vh] flex flex-col rounded-lg overflow-hidden shadow-2xl">
         <div class="flex items-center justify-between px-5 py-3 border-b dark:border-gray-700 border-gray-200 flex-shrink-0">
-            <span class="text-sm font-semibold dark:text-gray-300 text-gray-600">Preview Dokumen</span>
+            <span class="text-sm font-semibold dark:text-gray-300 text-gray-600">Preview File</span>
             <button onclick="closePreview()"
                     class="px-3 py-1.5 rounded-lg text-xs dark:text-gray-400 text-gray-500 dark:hover:bg-gray-800 hover:bg-gray-100 transition">
                 ✕ Tutup

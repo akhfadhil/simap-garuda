@@ -1,12 +1,12 @@
 @extends('layouts.admin')
-@section('title', 'Setup Data Pemilu')
+@section('title', 'Setup Data Garuda')
 @section('admin_active', 'setup')
 
 @section('admin_content')
 <div class="mb-8">
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// Admin — Setup</p>
-    <h1 class="font-display text-4xl tracking-[2px] admin-text">SETUP DATA PEMILU</h1>
-    <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Input master data paslon, calon, partai, dan caleg.</p>
+    <h1 class="font-display text-4xl tracking-[2px] admin-text">SETUP DATA GARUDA</h1>
+    <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Kelola jenis pemilihan aktif, dapil, caleg, dan referensi rekap Partai Garuda.</p>
 </div>
 
 @if(session('success'))
@@ -15,30 +15,11 @@
 </div>
 @endif
 
-@if(session('seed_result'))
-<div class="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
-    {{ session('seed_result') }}
-</div>
-@endif
-
 @if($errors->any())
 <div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 text-xs mb-6 rounded-lg font-medium">
     {{ $errors->first() }}
 </div>
 @endif
-
-{{-- Tools Setup --}}
-<div class="dark:bg-gray-800 bg-white rounded-xl p-6 border-l-4 border border-l-blue-500 dark:border-gray-700 border-gray-200 shadow-sm mb-8">
-    <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-3 font-semibold">// Tools Setup</p>
-    <p class="font-semibold text-sm mb-1 dark:text-gray-100 text-gray-800">Seed Partai</p>
-    <p class="text-xs dark:text-gray-500 text-gray-500 leading-relaxed mb-4">Isi otomatis 18 partai untuk DPR RI, DPRD Provinsi, dan DPRD Kabupaten per dapil. Aman dijalankan berulang.</p>
-    <form method="POST" action="{{ route('admin.tools.seed-partai') }}">
-        @csrf
-        <button class="px-4 py-2 text-xs font-semibold bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
-            Jalankan Seeder
-        </button>
-    </form>
-</div>
 
 {{-- TAB NAVIGATION --}}
 <div class="flex gap-1 mb-6 dark:bg-gray-900 bg-gray-100 p-1 rounded-xl w-fit">
@@ -55,7 +36,7 @@
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden mb-8">
     <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200">
         <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Aktifkan Jenis Pemilu</p>
-        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">Hanya jenis yang dicentang yang bisa diakses oleh KPPS, PPS, dan PPK.</p>
+        <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">Hanya jenis yang dicentang yang bisa diakses oleh Saksi TPS, Kordes, dan Korcam.</p>
     </div>
     <form method="POST" action="{{ route('admin.setup.pemilu.settings') }}" class="p-6">
         @csrf

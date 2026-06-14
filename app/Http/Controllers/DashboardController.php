@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    // Menampilkan dashboard admin kabupaten.
+    // Menampilkan dashboard admin Partai Garuda.
     public function admin(DashboardElectionSummary $summary)
     {
         $this->checkRole('admin');
@@ -18,16 +18,7 @@ class DashboardController extends Controller
         return view('dashboard.admin', ['electionSummary' => $summary->forUser(Auth::user())]);
     }
 
-    // Menampilkan dashboard komisioner kabupaten.
-    public function komisioner(DashboardElectionSummary $summary)
-    {
-        $this->checkRole('komisioner');
-        session()->forget(['admin_view_kecamatan_id', 'admin_view_desa_id', 'admin_view_tps_id']);
-
-        return view('dashboard.admin', ['electionSummary' => $summary->forUser(Auth::user())]);
-    }
-
-    // Menampilkan dashboard PPK sesuai kecamatan user.
+    // Menampilkan dashboard Korcam sesuai kecamatan user.
     public function ppk(DashboardElectionSummary $summary)
     {
         $user = Auth::user();
@@ -47,14 +38,14 @@ class DashboardController extends Controller
         ]);
     }
 
-    // Menampilkan dashboard PPS sesuai desa user.
+    // Menampilkan dashboard Kordes sesuai desa user.
     public function pps(DashboardElectionSummary $summary)
     {
         $user = Auth::user();
         $viewDesa = null;
 
         if ($user->role === 'pps') {
-            // PPS membuka dashboard wilayahnya sendiri.
+            // Kordes membuka dashboard wilayahnya sendiri.
         } else {
             abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
             $viewDesa = Desa::with('kecamatan')->findOrFail(session('admin_view_desa_id'));
@@ -68,14 +59,14 @@ class DashboardController extends Controller
         ]);
     }
 
-    // Menampilkan dashboard KPPS sesuai TPS user.
+    // Menampilkan dashboard Saksi TPS sesuai TPS user.
     public function kpps(DashboardElectionSummary $summary)
     {
         $user = Auth::user();
         $viewTps = null;
 
         if ($user->role === 'kpps') {
-            // KPPS membuka dashboard TPS miliknya sendiri.
+            // Saksi TPS membuka dashboard TPS miliknya sendiri.
         } else {
             abort_if(!session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
             $viewTps = Tps::with('desa.kecamatan')->findOrFail(session('admin_view_tps_id'));
@@ -122,7 +113,7 @@ class DashboardController extends Controller
         abort_if(!$allowed, 403, 'Akses ditolak.');
     }
 
-    // Menyimpan mode lihat sebagai PPK untuk admin.
+    // Menyimpan mode lihat sebagai Korcam untuk admin.
     public function viewAsPpk(Kecamatan $kecamatan)
     {
         session([
@@ -133,7 +124,7 @@ class DashboardController extends Controller
         return redirect()->route('dashboard.ppk');
     }
 
-    // Menyimpan mode lihat sebagai PPS untuk admin.
+    // Menyimpan mode lihat sebagai Kordes untuk admin.
     public function viewAsPps(Desa $desa)
     {
         session([
@@ -145,7 +136,7 @@ class DashboardController extends Controller
         return redirect()->route('dashboard.pps');
     }
 
-    // Menyimpan mode lihat sebagai KPPS untuk admin.
+    // Menyimpan mode lihat sebagai Saksi TPS untuk admin.
     public function viewAsKpps(Tps $tps)
     {
         $tps->load('desa');

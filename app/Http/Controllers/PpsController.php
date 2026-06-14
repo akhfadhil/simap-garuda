@@ -7,19 +7,19 @@ use App\Models\Tps;
 
 class PpsController extends Controller
 {
-    // Menampilkan daftar TPS dalam desa PPS.
+    // Menampilkan daftar TPS dalam desa kordes.
     public function dataTps()
     {
         $desa = $this->activeDesa();
 
         $tpsList = Tps::where('desa_id', $desa->id)
-            ->with(['dokumens', 'users' => fn($q) => $q->where('role', 'kpps')])
+            ->with(['rekapHeaders', 'users' => fn($q) => $q->where('role', 'kpps')])
             ->get();
 
         return view('pps.data-tps', compact('tpsList'));
     }
 
-    // Mengaktifkan mode lihat/upload dokumen KPPS untuk TPS tertentu.
+    // Mengaktifkan mode lihat saksi TPS untuk TPS tertentu.
     public function viewTps(Tps $tps)
     {
         $desa = $this->activeDesa();

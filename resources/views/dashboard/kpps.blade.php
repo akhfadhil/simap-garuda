@@ -1,8 +1,8 @@
 @extends('layouts.role-dashboard')
-@section('title', 'Dashboard KPPS')
+@section('title', 'Dashboard Saksi TPS')
 @section('role_key', 'kpps')
-@section('role_title', 'KPPS')
-@section('role_subtitle', 'Kelompok Penyelenggara Pemungutan Suara')
+@section('role_title', 'Saksi TPS')
+@section('role_subtitle', 'Saksi Tempat Pemungutan Suara')
 @section('role_active', 'dashboard')
 
 @section('role_content')
@@ -10,13 +10,6 @@
     $tps      = $viewTps ?? Auth::user()->tps;
     $aktifJenis = \App\Models\PemiluSetting::aktif();
     $totalPemiluAktif = count($aktifJenis);
-    $dokumenJenisAktif = array_map('strtoupper', $aktifJenis);
-    $uploaded = $tps
-        ? \App\Models\Dokumen::where('tps_id', $tps->id)->whereIn('jenis', $dokumenJenisAktif)->count()
-        : 0;
-    $terverif = $tps
-        ? \App\Models\Dokumen::where('tps_id', $tps->id)->whereIn('jenis', $dokumenJenisAktif)->where('status','terverifikasi')->count()
-        : 0;
     $totalRekap = $tps
         ? \App\Models\RekapHeader::where('tps_id', $tps->id)->whereIn('jenis', $aktifJenis)->count()
         : 0;
@@ -28,9 +21,9 @@
 @endphp
 
 <div class="mb-10">
-    <p class="admin-mono admin-muted-soft tracking-[.3em] text-xs mb-2">// KELOMPOK PENYELENGGARA PEMUNGUTAN SUARA</p>
-    <h1 class="admin-display text-5xl lg:text-6xl admin-text leading-tight">DASHBOARD KPPS</h1>
-    <p class="admin-muted text-lg max-w-2xl mt-2">Input dan laporan data pemungutan suara di TPS.</p>
+    <p class="admin-mono admin-muted-soft tracking-[.3em] text-xs mb-2">// SAKSI TPS</p>
+    <h1 class="admin-display text-5xl lg:text-6xl admin-text leading-tight">DASHBOARD SAKSI TPS</h1>
+    <p class="admin-muted text-lg max-w-2xl mt-2">Input dan pantau rekap suara di TPS yang ditugaskan.</p>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
@@ -43,19 +36,19 @@
     </div>
 
     <div class="admin-glass p-5 rounded-lg">
-        <span class="admin-display admin-muted tracking-widest text-[10px]">DOKUMEN TERVERIFIKASI</span>
+        <span class="admin-display admin-muted tracking-widest text-[10px]">JENIS PEMILIHAN AKTIF</span>
         <div class="mt-4 flex items-baseline gap-2">
-            <span class="admin-display text-4xl role-accent">{{ $terverif }}/{{ $totalPemiluAktif }}</span>
+            <span class="admin-display text-4xl role-accent">{{ $totalPemiluAktif }}</span>
         </div>
-        <p class="admin-mono admin-muted-soft text-[11px] uppercase mt-2">sudah terverifikasi</p>
+        <p class="admin-mono admin-muted-soft text-[11px] uppercase mt-2">target input rekap</p>
     </div>
 
     <div class="admin-glass p-5 rounded-lg">
-        <span class="admin-display admin-muted tracking-widest text-[10px]">DOKUMEN MASUK</span>
+        <span class="admin-display admin-muted tracking-widest text-[10px]">REKAP DIINPUT</span>
         <div class="mt-4 flex items-baseline gap-2">
-            <span class="admin-display text-4xl role-accent">{{ $uploaded }}/{{ $totalPemiluAktif }}</span>
+            <span class="admin-display text-4xl role-accent">{{ $totalRekap }}/{{ $totalPemiluAktif }}</span>
         </div>
-        <p class="admin-mono admin-muted-soft text-[11px] uppercase mt-2">sudah diupload</p>
+        <p class="admin-mono admin-muted-soft text-[11px] uppercase mt-2">sudah tersimpan</p>
     </div>
 
     <div class="admin-glass p-5 rounded-lg">

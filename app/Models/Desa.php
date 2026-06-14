@@ -11,6 +11,6 @@ class Desa extends Model
     public function kecamatan() { return $this->belongsTo(Kecamatan::class); }
     // Relasi TPS dalam desa.
     public function tps()       { return $this->hasMany(Tps::class); }
-    // Relasi user PPS di desa.
+    // Relasi user Kordes di desa.
     public function users()     { return $this->hasMany(User::class); }
 }

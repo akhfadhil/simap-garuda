@@ -92,20 +92,16 @@
     $menus = match ($roleKey) {
         'ppk' => [
             ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.ppk')],
-            ['key' => 'dokumen', 'label' => 'Rekap Dokumen', 'icon' => 'folder_open', 'route' => route('dokumen.ppk')],
-            ['key' => 'pps', 'label' => 'Data PPS', 'icon' => 'location_city', 'route' => route('ppk.data-pps')],
-            ['key' => 'upload', 'label' => 'Upload Dokumen', 'icon' => 'upload_file', 'route' => route('ppk.upload')],
+            ['key' => 'pps', 'label' => 'Data Kordes', 'icon' => 'location_city', 'route' => route('ppk.data-pps')],
             ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('ppk.rekap.index')],
         ],
         'pps' => [
             ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.pps')],
-            ['key' => 'verifikasi', 'label' => 'Verifikasi Dokumen', 'icon' => 'fact_check', 'route' => route('dokumen.pps')],
             ['key' => 'tps', 'label' => 'Data TPS', 'icon' => 'pin_drop', 'route' => route('pps.data-tps')],
             ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('pps.rekap.index')],
         ],
         default => [
             ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.kpps')],
-            ['key' => 'upload', 'label' => 'Upload Dokumen', 'icon' => 'upload_file', 'route' => route('dokumen.upload')],
             ['key' => 'rekap', 'label' => 'Isi Rekapitulasi', 'icon' => 'edit_document', 'route' => route('rekap.index')],
         ],
     };
@@ -118,10 +114,10 @@
     <div class="p-5 flex items-center justify-between border-b admin-border">
         <div class="flex items-center gap-3">
             <div class="role-accent-bg w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-                <img src="{{ asset('images/logo-kpu.png') }}" alt="SIMAP Logo" class="w-full h-full object-contain">
+                <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda Logo" class="w-full h-full object-contain">
             </div>
             <div>
-                <h1 class="admin-display role-accent text-2xl leading-none">SIMAP</h1>
+                <h1 class="admin-display role-accent text-2xl leading-none">SIMAP Garuda</h1>
                 <span class="admin-mono admin-muted-soft text-[10px] uppercase tracking-widest">{{ $roleTitle }}</span>
             </div>
         </div>
@@ -144,9 +140,9 @@
         <div class="p-6 flex flex-col gap-1">
             <div class="flex items-center gap-3 mb-2">
                 <div class="role-accent-bg w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-                    <img src="{{ asset('images/logo-kpu.png') }}" alt="SIMAP Logo" class="w-full h-full object-contain">
+                    <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda Logo" class="w-full h-full object-contain">
                 </div>
-                <h1 class="admin-display role-accent text-2xl leading-none">SIMAP</h1>
+                <h1 class="admin-display role-accent text-2xl leading-none">SIMAP Garuda</h1>
             </div>
             <div class="role-accent-bg px-2 py-1 w-max rounded-sm">
                 <span class="admin-display role-accent uppercase text-[10px] tracking-[.2em]">{{ $roleTitle }}</span>
@@ -182,11 +178,11 @@
                     <span class="material-symbols-outlined text-3xl">menu</span>
                 </label>
                 <div class="role-accent-bg md:hidden w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-                    <img src="{{ asset('images/logo-kpu.png') }}" alt="SIMAP" class="w-full h-full object-contain">
+                    <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda" class="w-full h-full object-contain">
                 </div>
                 <div class="hidden lg:block">
                     <p class="admin-mono admin-muted-soft text-[10px] uppercase tracking-[.24em]">Sistem Informasi</p>
-                    <p class="admin-text text-sm font-semibold leading-tight">Sistem Informasi Manajemen Arsip Pemilu</p>
+                    <p class="admin-text text-sm font-semibold leading-tight">Sistem Rekap dan Saksi Partai Garuda</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -230,7 +226,7 @@
             @yield('role_content')
             <footer class="pt-8 pb-2">
                 <p class="text-center admin-muted-soft text-[11px]">
-                    &copy; 2026 KPU Kabupaten Banyuwangi
+                    &copy; 2026 Partai Garuda
                 </p>
             </footer>
         </div>

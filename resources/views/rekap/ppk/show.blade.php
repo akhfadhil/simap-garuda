@@ -9,7 +9,7 @@
             ← Kembali
         </a>
         <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">
-            // PPK — {{ $kecamatan->nama }}
+            // KORCAM - {{ $kecamatan->nama }}
         </p>
         <h1 class="font-display text-4xl tracking-[2px] text-orange-400">
             {{ strtoupper(\App\Models\RekapHeader::JENIS_LABELS[$jenis]) }}

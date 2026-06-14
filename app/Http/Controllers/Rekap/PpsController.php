@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PpsController extends Controller
 {
-    // Menampilkan daftar rekap TPS dalam desa PPS.
+    // Menampilkan daftar rekap TPS dalam desa Kordes.
     public function index()
     {
         $desa = $this->activeDesa();

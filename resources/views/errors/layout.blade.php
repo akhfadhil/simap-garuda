@@ -22,8 +22,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMAP - {{ $statusCode }} {{ $statusTitle }}</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-kpu.png') }}">
+    <title>SIMAP Garuda - {{ $statusCode }} {{ $statusTitle }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-garuda.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <style>
@@ -316,11 +316,11 @@
         <header class="topbar">
             <div class="brand">
                 <div class="logo">
-                    <img src="{{ asset('images/logo-kpu.png') }}" alt="SIMAP Logo">
+                    <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda Logo">
                 </div>
                 <div>
                     <p class="eyebrow">Sistem Informasi</p>
-                    <p class="brand-title">SIMAP Kabupaten Banyuwangi</p>
+                    <p class="brand-title">SIMAP Garuda</p>
                 </div>
             </div>
             <span class="status-pill">HTTP {{ $statusCode }}</span>
@@ -357,7 +357,7 @@
         </main>
 
         <footer class="foot">
-            SIMAP &copy; {{ date('Y') }} - KPU Banyuwangi
+            SIMAP Garuda &copy; {{ date('Y') }} - Partai Garuda
         </footer>
     </div>
 </body>

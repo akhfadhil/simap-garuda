@@ -9,8 +9,8 @@ class Tps extends Model
 
     // Relasi desa pemilik TPS.
     public function desa()     { return $this->belongsTo(Desa::class); }
-    // Relasi dokumen yang diupload untuk TPS.
-    public function dokumens() { return $this->hasMany(Dokumen::class); }
-    // Relasi user KPPS di TPS.
+    // Relasi rekap yang diinput saksi TPS.
+    public function rekapHeaders() { return $this->hasMany(RekapHeader::class); }
+    // Relasi user Saksi TPS di TPS.
     public function users()    { return $this->hasMany(User::class); }
 }

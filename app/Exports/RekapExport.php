@@ -13,7 +13,7 @@ class RekapExport implements WithMultipleSheets
     protected $level;
     protected $wilayah;
     protected $desas;
-    protected $jenis; // jenis yang dipilih (untuk PPK & Admin)
+    protected $jenis; // jenis yang dipilih (untuk Korcam & Admin)
 
     public function __construct($rekaps, $master, $tpsList, $level, $wilayah, $desas = null, $jenis = null)
     {
@@ -65,7 +65,7 @@ class RekapExport implements WithMultipleSheets
                 );
             }
         } else {
-            // PPS: 1 sheet flat
+            // Kordes: 1 sheet flat
             $jenis = $this->jenis ?? 'ppwp';
             $sheets[] = new RekapSheetExport(
                 $jenis,

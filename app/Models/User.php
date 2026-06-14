@@ -45,8 +45,6 @@ class User extends Authenticatable
     {
         return match($this->role) {
             'admin' => '#E63946',
-            'komisioner' => '#2563EB',
-            'partai' => '#7C3AED',
             'ppk'   => '#F4A261',
             'pps'   => '#2EC4B6',
             'kpps'  => '#A8DADC',
@@ -54,16 +52,14 @@ class User extends Authenticatable
         };
     }
 
-    // Relasi kecamatan untuk user PPK.
+    // Relasi kecamatan untuk Korcam.
     public function kecamatan() 
     { 
         return $this->belongsTo(Kecamatan::class); 
     }
 
-    // Relasi desa untuk user PPS.
+    // Relasi desa untuk Kordes.
     public function desa()      { return $this->belongsTo(Desa::class); }
-    // Relasi TPS untuk user KPPS.
+    // Relasi TPS untuk Saksi TPS.
     public function tps()       { return $this->belongsTo(Tps::class); }
-    // Relasi partai untuk akun partai.
-    public function partai()    { return $this->belongsTo(RekapPartai::class, 'partai_id'); }
 }

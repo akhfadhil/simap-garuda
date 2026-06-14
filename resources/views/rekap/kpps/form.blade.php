@@ -14,7 +14,7 @@
         ← Kembali
     </a>
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">
-        // KPPS — {{ $tps->nama }} · {{ $tps->desa->nama }}
+        // SAKSI TPS - {{ $tps->nama }} / {{ $tps->desa->nama }}
     </p>
 
     <div class="flex items-center justify-between flex-wrap gap-3">
@@ -63,7 +63,7 @@
 </div>
 @elseif(!$canEditRekap)
 <div class="dark:bg-orange-950 bg-orange-50 border dark:border-orange-900 border-orange-200 px-5 py-3 mb-6 rounded-lg">
-    <p class="text-xs font-semibold text-orange-500">Mode lihat saja. Rekapitulasi data hanya bisa diubah oleh KPPS pemilik TPS.</p>
+    <p class="text-xs font-semibold text-orange-500">Mode lihat saja. Rekapitulasi data hanya bisa diubah oleh Saksi TPS pemilik TPS.</p>
 </div>
 @endif
 
@@ -349,7 +349,7 @@
 @else
 <div class="dark:bg-gray-800 bg-gray-50 rounded-xl border dark:border-gray-700 border-gray-200 p-4 text-center">
     <p class="text-sm dark:text-gray-400 text-gray-500">
-        {{ $isFinal ? 'Data sudah difinalisasi dan tidak bisa diubah.' : 'Mode lihat saja. Data hanya bisa diubah oleh KPPS.' }}
+        {{ $isFinal ? 'Data sudah difinalisasi dan tidak bisa diubah.' : 'Mode lihat saja. Data hanya bisa diubah oleh Saksi TPS.' }}
     </p>
 </div>
 @endif

@@ -31,6 +31,4 @@ class DatabaseSeeder extends Seeder
 
 // * * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1  # cron job di server
 
-// php artisan db:seed --class=PartaiSeeder  # seeder partai untuk dapil
-// php artisan backup:dokumen  # command untuk backup
-// BACKUP_DOKUMEN_PATH=E:\Backup\SIMAP  # ubah ini di .env jika ingin ubah path backup
+// php artisan db:seed --class=PartaiSeeder  # seeder referensi partai/caleg jika dibutuhkan

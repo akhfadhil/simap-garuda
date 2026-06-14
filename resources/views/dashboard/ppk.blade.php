@@ -1,8 +1,8 @@
 @extends('layouts.role-dashboard')
-@section('title', 'Dashboard PPK')
+@section('title', 'Dashboard Korcam')
 @section('role_key', 'ppk')
-@section('role_title', 'PPK')
-@section('role_subtitle', 'Panitia Pemilihan Kecamatan')
+@section('role_title', 'Korcam')
+@section('role_subtitle', 'Koordinator Kecamatan')
 @section('role_active', 'dashboard')
 
 @section('role_content')
@@ -15,14 +15,6 @@
     $aktifJenis   = \App\Models\PemiluSetting::aktif();
     $totalPemiluAktif = count($aktifJenis);
     $targetPemiluTps  = $totalTps * $totalPemiluAktif;
-    $dokumenJenisAktif = array_map('strtoupper', $aktifJenis);
-
-    $totalDokumenTerverifikasi = \App\Models\Dokumen::where('level', 'tps')
-                        ->whereIn('tps_id', $tpsIds)
-                        ->whereIn('jenis', $dokumenJenisAktif)
-                        ->where('status', 'terverifikasi')
-                        ->count();
-    $persenDokumen = $targetPemiluTps > 0 ? min(100, round(($totalDokumenTerverifikasi / $targetPemiluTps) * 100)) : 0;
 
     $totalRekapFinal = \App\Models\RekapHeader::select('tps_id')
                         ->where('status', 'final')
@@ -35,9 +27,9 @@
 @endphp
 
 <div class="mb-10">
-    <p class="admin-mono admin-muted-soft tracking-[.3em] text-xs mb-2">// PANITIA PEMILIHAN KECAMATAN</p>
-    <h1 class="admin-display text-5xl lg:text-6xl admin-text leading-tight">DASHBOARD PPK</h1>
-    <p class="admin-muted text-lg max-w-2xl mt-2">Rekap dan koordinasi dokumen pemilu tingkat kecamatan.</p>
+    <p class="admin-mono admin-muted-soft tracking-[.3em] text-xs mb-2">// KOORDINATOR KECAMATAN</p>
+    <h1 class="admin-display text-5xl lg:text-6xl admin-text leading-tight">DASHBOARD KORCAM</h1>
+    <p class="admin-muted text-lg max-w-2xl mt-2">Pantau progress input dan finalisasi rekap saksi di tingkat kecamatan.</p>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
@@ -59,15 +51,12 @@
 
     <div class="admin-glass p-5 rounded-lg">
         <div class="flex justify-between items-start mb-4">
-            <span class="admin-display admin-muted tracking-widest text-[10px]">DOKUMEN TERVERIFIKASI</span>
+            <span class="admin-display admin-muted tracking-widest text-[10px]">TARGET REKAP</span>
             <span class="admin-muted text-[10px] admin-mono">TPS x {{ $totalPemiluAktif }} AKTIF</span>
         </div>
         <div class="flex items-baseline gap-2">
-            <span class="admin-display text-4xl role-accent">{{ number_format($totalDokumenTerverifikasi) }}/{{ number_format($targetPemiluTps) }}</span>
-            <span class="admin-mono admin-muted-soft text-[11px] uppercase">{{ $persenDokumen }}%</span>
-        </div>
-        <div class="admin-surface-strong mt-6 h-1 w-full overflow-hidden rounded-full">
-            <div class="h-full" style="width:{{ $persenDokumen }}%; background: var(--role-accent)"></div>
+            <span class="admin-display text-4xl role-accent">{{ number_format($targetPemiluTps) }}</span>
+            <span class="admin-mono admin-muted-soft text-[11px] uppercase">baris rekap</span>
         </div>
     </div>
 

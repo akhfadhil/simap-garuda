@@ -46,7 +46,7 @@
     $totalFinal  = $rekaps->where('status','final')->count();
     $totalRekap  = $rekaps->count();
     $showDetail  = request()->boolean('detail');
-    $canUnlockRekap = Auth::user()->role === 'admin';
+    $canUnlockRekap = false;
     $detailBaseQuery = request()->except(['detail', 'detail_kecamatan_id', 'detail_desa_id']);
     $detailBaseUrl = route('admin.rekap.show', $jenis) . (count($detailBaseQuery) ? '?' . http_build_query($detailBaseQuery) : '');
 
@@ -87,7 +87,7 @@
             : collect($row['sum'])->sum(fn($f) => $stats[$f] ?? 0);
     };
 
-    $canFlagCells = Auth::user()->role === 'admin';
+    $canFlagCells = false;
     $rowKeyFor = fn($row) => isset($row['field']) && $row['field'] ? $row['field'] : 'sum:' . implode('+', $row['sum']);
     $totalPenggunaRowKey = 'sum:pengguna_dpt_lk+pengguna_dpt_pr+pengguna_dptb_lk+pengguna_dptb_pr+pengguna_dpk_lk+pengguna_dpk_pr';
     $mismatchRowKeys = [$totalPenggunaRowKey, 'ss_digunakan'];
@@ -110,7 +110,7 @@
                 ? 'opacity-100 bg-red-500 text-white border-red-500'
                 : 'opacity-0 group-hover:opacity-100 bg-white dark:bg-gray-900 text-red-500 border-red-400';
             $buttonTitle = $directFlagged ? 'Hapus tanda merah dari kabupaten' : 'Tandai merah dari kabupaten';
-            $button = '<form method="POST" action="' . e(route('admin.rekap.cell-flag', $jenis)) . '" data-flag-form class="absolute top-1 right-1 transition-opacity ' . ($directFlagged ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') . '">'
+            $button = '<form method="POST" action="#" data-flag-form class="absolute top-1 right-1 transition-opacity ' . ($directFlagged ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') . '">'
                 . csrf_field()
                 . '<input type="hidden" name="level" value="kecamatan">'
                 . '<input type="hidden" name="entity_id" value="' . e($kecamatan->id) . '">'
@@ -122,6 +122,8 @@
         return new \Illuminate\Support\HtmlString('<td class="' . e($classes) . '" data-flag-scope="kec" data-kec-id="' . e($kecamatan->id) . '" data-row-key="' . e($rowKey) . '" data-direct-flagged="' . ($directFlagged ? '1' : '0') . '" data-auto-flagged="' . ($autoFlagged ? '1' : '0') . '"><span>' . $content . '</span>' . $button . '</td>');
     };
     $isInlineEditableRow = function(string $rowKey) {
+        return false;
+
         $baseEditable = [
             'dpt_lk', 'dpt_pr',
             'pengguna_dpt_lk', 'pengguna_dpt_pr',
@@ -152,7 +154,7 @@
                 ? 'opacity-100 bg-red-500 text-white border-red-500'
                 : 'opacity-0 group-hover:opacity-100 bg-white dark:bg-gray-900 text-red-500 border-red-400';
             $buttonTitle = $flagged ? 'Hapus tanda merah' : 'Tandai merah';
-            $button = '<form method="POST" action="' . e(route('admin.rekap.cell-flag', $jenis)) . '" data-flag-form class="absolute top-1 right-1 transition-opacity ' . ($flagged ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') . '">'
+            $button = '<form method="POST" action="#" data-flag-form class="absolute top-1 right-1 transition-opacity ' . ($flagged ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') . '">'
                 . csrf_field()
                 . '<input type="hidden" name="level" value="tps">'
                 . '<input type="hidden" name="entity_id" value="' . e($tps->id) . '">'
@@ -731,7 +733,7 @@
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-[9px] px-2 py-1 rounded font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">Final</span>
                                 @if($canUnlockRekap)
-                                    <a href="{{ route('admin.rekap.edit-tps', [$jenis, $tps]) }}"
+                                    <a href="#"
                                        class="text-[9px] px-2 py-0.5 rounded font-semibold border border-red-400/40 text-red-400 hover:bg-red-400/10 transition whitespace-nowrap">
                                         Edit
                                     </a>
@@ -745,7 +747,7 @@
                             <div class="flex flex-col items-center gap-1">
                                 <span class="text-[9px] px-2 py-1 rounded font-semibold bg-orange-400/20 text-orange-400 border border-orange-400/40">Draft</span>
                                 @if($canUnlockRekap)
-                                    <a href="{{ route('admin.rekap.edit-tps', [$jenis, $tps]) }}"
+                                    <a href="#"
                                        class="text-[9px] px-2 py-0.5 rounded font-semibold border border-red-400/40 text-red-400 hover:bg-red-400/10 transition whitespace-nowrap">
                                         Edit
                                     </a>
@@ -782,8 +784,8 @@
                         class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
                     <option value="">— Pilih Level —</option>
                     <option value="tps">Tingkat TPS</option>
-                    <option value="desa">Tingkat Desa / PPS</option>
-                    <option value="kecamatan">Tingkat Kecamatan / PPK</option>
+                    <option value="desa">Tingkat Desa / Kordes</option>
+                    <option value="kecamatan">Tingkat Kecamatan / Korcam</option>
                     <option value="kabupaten">Tingkat Kabupaten</option>
                 </select>
             </div>
@@ -870,7 +872,7 @@
     const allTps   = @json(\App\Models\Tps::orderBy('nama')->get(['id','nama','desa_id']));
     const baseUrl  = '{{ route('admin.rekap.export', $jenis) }}';
     const exportDownloadBase = '{{ url('admin/rekap/export/download') }}';
-    const inlineUpdateUrl = '{{ route('admin.rekap.inline-update', $jenis) }}';
+    const inlineUpdateUrl = '';
     const csrfToken = '{{ csrf_token() }}';
     const flagClasses = ['bg-red-500/20', 'text-red-600', 'dark:bg-red-500/20', 'dark:text-red-200', 'ring-1', 'ring-inset', 'ring-red-400/60'];
     const totalPenggunaRowKey = 'sum:pengguna_dpt_lk+pengguna_dpt_pr+pengguna_dptb_lk+pengguna_dptb_pr+pengguna_dpk_lk+pengguna_dpk_pr';
@@ -1445,9 +1447,9 @@
     function openUnlockModal(tpsId, tpsNama) {
         if (!document.getElementById('unlock-form')) return;
         document.getElementById('unlock-label').textContent =
-            'Status rekap ' + tpsNama + ' akan dikembalikan ke Draft dan KPPS dapat mengedit kembali.';
+            'Status rekap ' + tpsNama + ' akan dikembalikan ke Draft dan Saksi TPS dapat mengedit kembali.';
         document.getElementById('unlock-form').action =
-            '{{ route("admin.rekap.unlock", $jenis) }}?tps_id=' + tpsId;
+            '';
         document.getElementById('modal-unlock').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }

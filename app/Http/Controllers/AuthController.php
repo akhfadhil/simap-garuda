@@ -10,19 +10,9 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard.' . Auth::user()->role);
+            return redirect()->route($this->dashboardRoute(Auth::user()->role));
         }
         return view('auth.login');
-    }
-
-    // Menampilkan halaman login khusus partai.
-    public function showPartaiLogin()
-    {
-        if (Auth::check()) {
-            return redirect()->route('dashboard.' . Auth::user()->role);
-        }
-
-        return view('auth.partai-login');
     }
 
     // Memproses login dan mengarahkan user ke dashboard sesuai role.
@@ -46,42 +36,20 @@ class AuthController extends Controller
                 'admin_view_tps_id',
             ]);
             $role = Auth::user()->role;
-            return redirect()->route('dashboard.' . $role);
+
+            if (!in_array($role, ['admin', 'ppk', 'pps', 'kpps'], true)) {
+                Auth::logout();
+
+                return back()
+                    ->withErrors(['username' => 'Role akun ini sudah tidak aktif di SIMAP Garuda.'])
+                    ->withInput();
+            }
+
+            return redirect()->route($this->dashboardRoute($role));
         }
 
         return back()
             ->withErrors(['username' => 'Username atau password salah.'])
-            ->withInput();
-    }
-
-    // Memproses login khusus akun partai.
-    public function loginPartai(Request $request)
-    {
-        $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
-
-        $credentials = [
-            'username' => trim($request->username),
-            'password' => trim($request->password),
-        ];
-
-        if (Auth::attempt($credentials, false) && Auth::user()->role === 'partai') {
-            $request->session()->regenerate();
-            $request->session()->forget([
-                'admin_view_kecamatan_id',
-                'admin_view_desa_id',
-                'admin_view_tps_id',
-            ]);
-
-            return redirect()->route('dashboard.partai');
-        }
-
-        Auth::logout();
-
-        return back()
-            ->withErrors(['username' => 'Akun partai atau password salah.'])
             ->withInput();
     }
 
@@ -92,5 +60,16 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('login');
+    }
+
+    private function dashboardRoute(string $role): string
+    {
+        return match ($role) {
+            'admin' => 'dashboard.admin',
+            'ppk' => 'dashboard.ppk',
+            'pps' => 'dashboard.pps',
+            'kpps' => 'dashboard.kpps',
+            default => 'login',
+        };
     }
 }

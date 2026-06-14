@@ -417,4 +417,3 @@ npm run build
 - `PROJECT.md` sudah dihapus karena duplikat dan lebih lama dari `SIMAP.md`.
 - Role `komisioner` dan `partai` bersifat read-only dan memakai sebagian route admin untuk baca data; aksi tulis tetap dipisahkan pada route/controller admin-only.
 - Manajemen pengguna dapat membuat akun admin/operator dan partai. Pastikan minimal satu akun admin/operator tetap tersedia untuk mencegah lockout.
-- Ada file contoh desain lokal yang belum menjadi bagian dokumentasi utama: `Contoh_design_grafik*.html`.

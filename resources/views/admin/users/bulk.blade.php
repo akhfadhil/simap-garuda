@@ -38,9 +38,9 @@
         <div>
             <label class="block text-[10px] font-semibold dark:text-gray-500 text-gray-400 uppercase tracking-wider mb-1.5">Role</label>
             <select name="role" onchange="this.form.submit()" class="{{ $inputClass }}">
-                <option value="kpps" {{ $role === 'kpps' ? 'selected' : '' }}>KPPS per TPS</option>
-                <option value="pps" {{ $role === 'pps' ? 'selected' : '' }}>PPS per Desa</option>
-                <option value="ppk" {{ $role === 'ppk' ? 'selected' : '' }}>PPK per Kecamatan</option>
+                <option value="kpps" {{ $role === 'kpps' ? 'selected' : '' }}>Saksi TPS per TPS</option>
+                <option value="pps" {{ $role === 'pps' ? 'selected' : '' }}>Kordes per Desa</option>
+                <option value="ppk" {{ $role === 'ppk' ? 'selected' : '' }}>Korcam per Kecamatan</option>
             </select>
         </div>
 

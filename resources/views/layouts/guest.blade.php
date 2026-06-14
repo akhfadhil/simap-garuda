@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMAP — Login</title>
+    <title>SIMAP Garuda - Login</title>
     <script>
         (function() {
             const saved  = localStorage.getItem('theme') || 'dark';
@@ -18,7 +18,7 @@
     @yield('content')
     <footer class="absolute bottom-4 inset-x-0 px-4">
         <p class="text-center text-[11px] dark:text-gray-600 text-gray-500">
-            &copy; 2026 KPU Kabupaten Banyuwangi
+            &copy; 2026 Partai Garuda
         </p>
     </footer>
 </body>
