@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Desa;
 use App\Models\Kecamatan;
 use App\Models\PemiluSetting;
+use App\Models\RekapPartai;
 use App\Models\Tps;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -126,6 +127,62 @@ class GarudaRoleAccessTest extends TestCase
                 ],
             ])
             ->assertStatus(410);
+    }
+
+    public function test_admin_can_only_create_garuda_party_master(): void
+    {
+        $this->actingAs($this->admin)
+            ->from(route('admin.setup.index'))
+            ->post(route('admin.setup.partai.store'), [
+                'jenis' => 'dpr_ri',
+                'partais' => [
+                    ['nomor_urut' => 1, 'nama_partai' => 'Partai Kompetitor'],
+                ],
+            ])
+            ->assertRedirect(route('admin.setup.index'))
+            ->assertSessionHasErrors('partais');
+
+        $this->assertDatabaseMissing('rekap_partais', [
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 1,
+            'nama_partai' => 'Partai Kompetitor',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.setup.partai.store'), [
+                'jenis' => 'dpr_ri',
+                'partais' => [
+                    ['nomor_urut' => 11, 'nama_partai' => 'Partai Garuda'],
+                ],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('rekap_partais', [
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 11,
+            'nama_partai' => 'Partai Garuda',
+        ]);
+    }
+
+    public function test_admin_cannot_add_caleg_to_non_garuda_party(): void
+    {
+        $competitor = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 1,
+            'nama_partai' => 'Partai Kompetitor',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.setup.caleg.store', $competitor), [
+                'nomor_urut' => 1,
+                'nama_caleg' => 'Caleg Kompetitor',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('rekap_calegs', [
+            'partai_id' => $competitor->id,
+            'nama_caleg' => 'Caleg Kompetitor',
+        ]);
     }
 
     private function user(string $role, array $extra = []): User

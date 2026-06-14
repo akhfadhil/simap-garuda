@@ -16,12 +16,13 @@ class SetupController extends Controller
     // Menampilkan halaman setup master data pemilu.
     public function index()
     {
-        $partaiDprRi = RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->orderBy('nomor_urut')->get();
-        $partaiProv = RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->orderBy('nomor_urut')->get();
+        $partaiDprRi = RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->orderBy('nomor_urut')->get();
+        $partaiProv = RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->orderBy('nomor_urut')->get();
         $dapils = \App\Models\Dapil::with('kecamatans')->orderBy('nama')->get();
         $kecamatans = \App\Models\Kecamatan::with('dapil')->orderBy('nama')->get();
         $partaiKab = RekapPartai::with('calegs', 'dapil')
             ->where('jenis', 'dprd_kab')
+            ->garuda()
             ->orderBy('dapil_id')
             ->orderBy('nomor_urut')
             ->get()
@@ -120,21 +121,37 @@ class SetupController extends Controller
                 ->withInput();
         }
 
-        foreach ($validRows as $row) {
-            RekapPartai::create([
-                'jenis' => $request->jenis,
-                'nomor_urut' => (int) $row['nomor_urut'],
-                'nama_partai' => $row['nama_partai'],
-                'dapil_id' => $request->jenis === 'dprd_kab' ? $request->dapil_id : null,
-            ]);
+        $invalidRows = $validRows->reject(fn ($row) => $this->isGarudaPartaiRow($row));
+
+        if ($invalidRows->isNotEmpty()) {
+            return back()
+                ->withErrors(['partais' => 'SIMAP Garuda hanya menerima Partai Garuda nomor urut '.config('party.historical_numbers.2024').'.'])
+                ->withInput();
         }
 
-        return back()->with('success', 'Partai berhasil ditambahkan.');
+        foreach ($validRows as $row) {
+            $dapilId = $request->jenis === 'dprd_kab' ? $request->dapil_id : null;
+
+            RekapPartai::updateOrCreate(
+                [
+                    'jenis' => $request->jenis,
+                    'nomor_urut' => (int) $row['nomor_urut'],
+                    'dapil_id' => $dapilId,
+                ],
+                ['nama_partai' => config('party.name')]
+            );
+        }
+
+        return back()->with('success', config('party.name').' berhasil disimpan.');
     }
 
     // Menghapus partai beserta calegnya.
     public function destroyPartai(RekapPartai $partai)
     {
+        if ($partai->isGaruda()) {
+            return back()->with('error', config('party.name').' adalah partai utama dan tidak bisa dihapus dari SIMAP Garuda.');
+        }
+
         $partai->delete();
 
         return back()->with('success', 'Partai dan caleg-calegnya dihapus.');
@@ -143,6 +160,8 @@ class SetupController extends Controller
     // Menyimpan caleg pada partai tertentu.
     public function storeCaleg(Request $request, RekapPartai $partai)
     {
+        abort_unless($partai->isGaruda(), 403, 'Caleg hanya bisa ditambahkan untuk '.config('party.name').'.');
+
         $request->validate(['nomor_urut' => 'required|integer', 'nama_caleg' => 'required|string|max:200']);
         $partai->calegs()->create($request->only('nomor_urut', 'nama_caleg'));
 
@@ -213,6 +232,22 @@ class SetupController extends Controller
     public function destroyBupati(int $calon)
     {
         abort(410, 'Rekap non-legislatif tidak dipakai di SIMAP Garuda.');
+    }
+
+    private function isGarudaPartaiRow(array $row): bool
+    {
+        $party = config('party');
+        $numbers = collect($party['historical_numbers'] ?? [])
+            ->map(fn ($number) => (int) $number)
+            ->filter()
+            ->unique();
+        $name = mb_strtolower($row['nama_partai']);
+
+        return $numbers->contains((int) $row['nomor_urut'])
+            && (
+                str_contains($name, mb_strtolower($party['short_name'] ?? 'Garuda'))
+                || str_contains($name, mb_strtolower($party['name'] ?? 'Partai Garuda'))
+            );
     }
 
     // Menyimpan beberapa paslon dari form batch.
