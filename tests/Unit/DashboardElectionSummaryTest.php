@@ -5,9 +5,11 @@ namespace Tests\Unit;
 use App\Models\Desa;
 use App\Models\Kecamatan;
 use App\Models\PemiluSetting;
+use App\Models\RekapCaleg;
+use App\Models\RekapCalegSuara;
 use App\Models\RekapHeader;
-use App\Models\RekapPpwpCalon;
-use App\Models\RekapPpwpSuara;
+use App\Models\RekapPartai;
+use App\Models\RekapPartaiSuara;
 use App\Models\Tps;
 use App\Models\User;
 use App\Services\DashboardElectionSummary;
@@ -19,7 +21,7 @@ class DashboardElectionSummaryTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_candidate_rows_include_percentage_from_entered_votes(): void
+    public function test_non_party_election_types_are_ignored_by_dashboard(): void
     {
         Cache::flush();
 
@@ -34,25 +36,56 @@ class DashboardElectionSummaryTest extends TestCase
         ]);
 
         PemiluSetting::create(['jenis' => 'ppwp', 'is_active' => true]);
-        $calonA = RekapPpwpCalon::create(['nomor_urut' => 1, 'nama_paslon' => 'Paslon A']);
-        $calonB = RekapPpwpCalon::create(['nomor_urut' => 2, 'nama_paslon' => 'Paslon B']);
-        $rekap = RekapHeader::create([
+        RekapHeader::create([
             'tps_id' => $tps->id,
             'jenis' => 'ppwp',
             'status' => 'final',
             'diinput_oleh' => $admin->id,
         ]);
 
-        RekapPpwpSuara::create(['rekap_id' => $rekap->id, 'calon_id' => $calonA->id, 'suara' => 30]);
-        RekapPpwpSuara::create(['rekap_id' => $rekap->id, 'calon_id' => $calonB->id, 'suara' => 70]);
+        $summary = app(DashboardElectionSummary::class)->forUser($admin);
+
+        $this->assertSame([], $summary['sections']);
+    }
+
+    public function test_legislative_dashboard_only_shows_garuda_calegs(): void
+    {
+        Cache::flush();
+
+        $kecamatan = Kecamatan::create(['nama' => 'Kecamatan A']);
+        $desa = Desa::create(['nama' => 'Desa A', 'kecamatan_id' => $kecamatan->id]);
+        $tps = Tps::create(['nama' => 'TPS 1', 'desa_id' => $desa->id]);
+        $admin = User::create([
+            'name' => 'Admin',
+            'username' => 'admin_garuda_test',
+            'role' => 'admin',
+            'password' => 'password',
+        ]);
+
+        PemiluSetting::create(['jenis' => 'dpr_ri', 'is_active' => true]);
+        $garuda = RekapPartai::create(['jenis' => 'dpr_ri', 'nomor_urut' => 11, 'nama_partai' => 'Partai Garuda']);
+        $competitor = RekapPartai::create(['jenis' => 'dpr_ri', 'nomor_urut' => 1, 'nama_partai' => 'Partai Kompetitor']);
+        $garudaCaleg = RekapCaleg::create(['partai_id' => $garuda->id, 'nomor_urut' => 1, 'nama_caleg' => 'Caleg Garuda']);
+        $competitorCaleg = RekapCaleg::create(['partai_id' => $competitor->id, 'nomor_urut' => 1, 'nama_caleg' => 'Caleg Kompetitor']);
+        $rekap = RekapHeader::create([
+            'tps_id' => $tps->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'final',
+            'diinput_oleh' => $admin->id,
+        ]);
+
+        RekapPartaiSuara::create(['rekap_id' => $rekap->id, 'partai_id' => $garuda->id, 'suara' => 20]);
+        RekapPartaiSuara::create(['rekap_id' => $rekap->id, 'partai_id' => $competitor->id, 'suara' => 200]);
+        RekapCalegSuara::create(['rekap_id' => $rekap->id, 'caleg_id' => $garudaCaleg->id, 'suara' => 30]);
+        RekapCalegSuara::create(['rekap_id' => $rekap->id, 'caleg_id' => $competitorCaleg->id, 'suara' => 300]);
 
         $summary = app(DashboardElectionSummary::class)->forUser($admin);
         $section = $summary['sections'][0];
-        $rows = collect($section['rows'])->keyBy('label');
+        $labels = collect($section['rows'])->pluck('label')->all();
 
-        $this->assertSame(100, $section['total_suara']);
-        $this->assertSame(70, $rows['Paslon B']['suara']);
-        $this->assertEquals(70.0, $rows['Paslon B']['persentase']);
-        $this->assertEquals(30.0, $rows['Paslon A']['persentase']);
+        $this->assertSame('DPR RI - Garuda', $section['title']);
+        $this->assertContains('Caleg Garuda No. 1', $labels);
+        $this->assertNotContains('Caleg Kompetitor No. 1', $labels);
+        $this->assertSame(30, $section['total_suara']);
     }
 }

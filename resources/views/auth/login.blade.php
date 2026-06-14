@@ -1,11 +1,12 @@
 @extends('layouts.guest')
 
 @section('content')
+@php($party = $party ?? config('party'))
 <div class="relative z-10 w-full max-w-md px-5">
     <div class="text-center mb-10">
-        <span class="inline-block bg-red-600 text-white text-[10px] tracking-[3px] px-3 py-1 mb-4 rounded font-semibold">Partai Garuda - 2026</span>
+        <span class="inline-block bg-red-600 text-white text-[10px] tracking-[3px] px-3 py-1 mb-4 rounded font-semibold">{{ $party['name'] }} - {{ $party['active_year'] }}</span>
         <h1 class="font-display text-6xl tracking-[4px] dark:text-white text-gray-900">SIM<span class="text-red-600">AP</span></h1>
-        <p class="text-[11px] dark:text-gray-500 text-gray-400 tracking-[2px] uppercase mt-2">Sistem Rekap dan Saksi Partai Garuda</p>
+        <p class="text-[11px] dark:text-gray-500 text-gray-400 tracking-[2px] uppercase mt-2">{{ $party['tagline'] }}</p>
     </div>
 
     <div class="dark:bg-gray-800 bg-white rounded-2xl border dark:border-gray-700 border-gray-200 p-9 shadow-xl">

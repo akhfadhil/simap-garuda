@@ -10,6 +10,7 @@ use App\Models\RekapHeader;
 use App\Models\RekapPartai;
 use App\Models\Tps;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -26,11 +27,13 @@ class DashboardElectionSummary
             foreach ($activeJenis as $jenis) {
                 if (in_array($jenis, ['ppwp', 'gubernur', 'bupati', 'dpd'], true)) {
                     $sections[] = $this->candidateSection($jenis, $scope);
+
                     continue;
                 }
 
                 if (in_array($jenis, ['dpr_ri', 'dprd_prov'], true)) {
                     $sections[] = $this->calegSection($jenis, $scope);
+
                     continue;
                 }
 
@@ -57,7 +60,7 @@ class DashboardElectionSummary
                 return [
                     'type' => 'tps',
                     'id' => $tps->id,
-                    'label' => $tps->nama . ' - ' . ($tps->desa?->nama ?? '-'),
+                    'label' => $tps->nama.' - '.($tps->desa?->nama ?? '-'),
                     'dapil_id' => $tps->desa?->kecamatan?->dapil_id,
                 ];
             }
@@ -70,7 +73,7 @@ class DashboardElectionSummary
                 return [
                     'type' => 'desa',
                     'id' => $desa->id,
-                    'label' => 'Desa ' . ($desa->nama ?? '-'),
+                    'label' => 'Desa '.($desa->nama ?? '-'),
                     'dapil_id' => $desa->kecamatan?->dapil_id,
                 ];
             }
@@ -83,7 +86,7 @@ class DashboardElectionSummary
                 return [
                     'type' => 'kecamatan',
                     'id' => $kecamatan->id,
-                    'label' => 'Kecamatan ' . ($kecamatan->nama ?? '-'),
+                    'label' => 'Kecamatan '.($kecamatan->nama ?? '-'),
                     'dapil_id' => $kecamatan->dapil_id,
                 ];
             }
@@ -93,7 +96,7 @@ class DashboardElectionSummary
             return [
                 'type' => 'kecamatan',
                 'id' => $user->kecamatan_id,
-                'label' => 'Kecamatan ' . ($user->kecamatan?->nama ?? '-'),
+                'label' => 'Kecamatan '.($user->kecamatan?->nama ?? '-'),
                 'dapil_id' => $user->kecamatan?->dapil_id,
             ];
         }
@@ -102,7 +105,7 @@ class DashboardElectionSummary
             return [
                 'type' => 'desa',
                 'id' => $user->desa_id,
-                'label' => 'Desa ' . ($user->desa?->nama ?? '-'),
+                'label' => 'Desa '.($user->desa?->nama ?? '-'),
                 'dapil_id' => $user->desa?->kecamatan?->dapil_id,
             ];
         }
@@ -111,7 +114,7 @@ class DashboardElectionSummary
             return [
                 'type' => 'tps',
                 'id' => $user->tps_id,
-                'label' => $user->tps?->nama . ' - ' . ($user->tps?->desa?->nama ?? '-'),
+                'label' => $user->tps?->nama.' - '.($user->tps?->desa?->nama ?? '-'),
                 'dapil_id' => $user->tps?->desa?->kecamatan?->dapil_id,
             ];
         }
@@ -129,26 +132,26 @@ class DashboardElectionSummary
         $config = $this->candidateConfig($jenis);
         $masters = DB::table($config['master'])
             ->orderBy('nomor_urut')
-            ->get(['id', 'nomor_urut', $config['label'] . ' as label']);
+            ->get(['id', 'nomor_urut', $config['label'].' as label']);
 
         $totals = $this->applyScope(
-                DB::table($config['table'] . ' as s')
-                    ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
-                    ->join('tps as t', 't.id', '=', 'h.tps_id')
-                    ->join('desas as d', 'd.id', '=', 't.desa_id')
-                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
-                    ->where('h.jenis', $jenis),
-                $scope
-            )
+            DB::table($config['table'].' as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->where('h.jenis', $jenis),
+            $scope
+        )
             ->select('s.calon_id', DB::raw('SUM(s.suara) as total_suara'))
             ->groupBy('s.calon_id')
             ->pluck('total_suara', 'calon_id');
 
         $allRows = $masters
-            ->map(fn($calon) => [
+            ->map(fn ($calon) => [
                 'rank' => 0,
                 'label' => $calon->label,
-                'meta' => 'No. ' . $calon->nomor_urut,
+                'meta' => 'No. '.$calon->nomor_urut,
                 'suara' => (int) ($totals[$calon->id] ?? 0),
             ])
             ->sortByDesc('suara')
@@ -160,6 +163,7 @@ class DashboardElectionSummary
             ->map(function ($row, $index) use ($totalSuara) {
                 $row['rank'] = $index + 1;
                 $row['persentase'] = $totalSuara > 0 ? round(($row['suara'] / $totalSuara) * 100, 2) : 0;
+
                 return $row;
             })
             ->toArray();
@@ -209,7 +213,8 @@ class DashboardElectionSummary
     {
         $partais = RekapPartai::query()
             ->where('jenis', $jenis)
-            ->when($jenis === 'dprd_kab' && $dapilId, fn($query) => $query->where('dapil_id', $dapilId))
+            ->when($jenis === 'dprd_kab' && $dapilId, fn ($query) => $query->where('dapil_id', $dapilId))
+            ->tap(fn ($query) => $this->onlyGarudaPartai($query))
             ->orderBy('nomor_urut')
             ->get(['id', 'nomor_urut', 'nama_partai']);
 
@@ -217,24 +222,24 @@ class DashboardElectionSummary
             return [
                 'jenis' => $jenis,
                 'title' => $this->partyTitle($jenis, $dapilName),
-                'subtitle' => '5 partai teratas',
+                'subtitle' => 'Data '.config('party.short_name').' belum tersedia',
                 'scope' => $scope['label'],
                 'rows' => [],
             ];
         }
 
-        $partaiIds = $partais->pluck('id')->map(fn($id) => (int) $id)->values()->all();
+        $partaiIds = $partais->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
         $totals = array_fill_keys($partaiIds, 0);
 
         $partaiRows = $this->applyScope(
-                DB::table('rekap_partai_suaras as s')
-                    ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
-                    ->join('tps as t', 't.id', '=', 'h.tps_id')
-                    ->join('desas as d', 'd.id', '=', 't.desa_id')
-                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
-                    ->where('h.jenis', $jenis),
-                $scope
-            )
+            DB::table('rekap_partai_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->where('h.jenis', $jenis),
+            $scope
+        )
             ->whereIn('s.partai_id', $partaiIds)
             ->select('s.partai_id', DB::raw('SUM(s.suara) as total_suara'))
             ->groupBy('s.partai_id')
@@ -245,15 +250,15 @@ class DashboardElectionSummary
         }
 
         $calegRows = $this->applyScope(
-                DB::table('rekap_caleg_suaras as s')
-                    ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
-                    ->join('tps as t', 't.id', '=', 'h.tps_id')
-                    ->join('desas as d', 'd.id', '=', 't.desa_id')
-                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
-                    ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
-                    ->where('h.jenis', $jenis),
-                $scope
-            )
+            DB::table('rekap_caleg_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
+                ->where('h.jenis', $jenis),
+            $scope
+        )
             ->whereIn('c.partai_id', $partaiIds)
             ->select('c.partai_id', DB::raw('SUM(s.suara) as total_suara'))
             ->groupBy('c.partai_id')
@@ -264,10 +269,10 @@ class DashboardElectionSummary
         }
 
         $allRows = $partais
-            ->map(fn($partai) => [
+            ->map(fn ($partai) => [
                 'rank' => 0,
                 'label' => $partai->nama_partai,
-                'meta' => 'No. ' . $partai->nomor_urut,
+                'meta' => 'No. '.$partai->nomor_urut,
                 'suara' => (int) ($totals[(int) $partai->id] ?? 0),
             ])
             ->sortByDesc('suara')
@@ -279,14 +284,15 @@ class DashboardElectionSummary
             ->map(function ($row, $index) use ($totalSuara) {
                 $row['rank'] = $index + 1;
                 $row['persentase'] = $totalSuara > 0 ? round(($row['suara'] / $totalSuara) * 100, 2) : 0;
+
                 return $row;
             })
             ->toArray();
 
         return [
             'jenis' => $jenis,
-            'title' => $this->partyTitle($jenis, $dapilName),
-            'subtitle' => '5 partai teratas',
+            'title' => $this->partyTitle($jenis, $dapilName).' - '.config('party.short_name'),
+            'subtitle' => 'Suara '.config('party.short_name'),
             'scope' => $scope['label'],
             'total_suara' => $totalSuara,
             'rows' => $rows,
@@ -296,12 +302,12 @@ class DashboardElectionSummary
     private function dprdKabSections(array $scope): array
     {
         $dapils = Dapil::query()
-            ->when($scope['dapil_id'], fn($query) => $query->where('id', $scope['dapil_id']))
+            ->when($scope['dapil_id'], fn ($query) => $query->where('id', $scope['dapil_id']))
             ->orderBy('nama')
             ->get(['id', 'nama']);
 
         return $dapils
-            ->map(fn($dapil) => $this->calegSection('dprd_kab', $scope, (int) $dapil->id, $dapil->nama))
+            ->map(fn ($dapil) => $this->calegSection('dprd_kab', $scope, (int) $dapil->id, $dapil->nama))
             ->toArray();
     }
 
@@ -309,21 +315,22 @@ class DashboardElectionSummary
     {
         $partais = RekapPartai::with('calegs')
             ->where('jenis', $jenis)
-            ->when($jenis === 'dprd_kab' && $dapilId, fn($query) => $query->where('dapil_id', $dapilId))
+            ->when($jenis === 'dprd_kab' && $dapilId, fn ($query) => $query->where('dapil_id', $dapilId))
+            ->tap(fn ($query) => $this->onlyGarudaPartai($query))
             ->orderBy('nomor_urut')
             ->get();
 
-        $calegs = $partais->flatMap(fn($partai) => $partai->calegs->map(fn($caleg) => [
+        $calegs = $partais->flatMap(fn ($partai) => $partai->calegs->map(fn ($caleg) => [
             'id' => (int) $caleg->id,
-            'label' => trim($caleg->nama_caleg . ' No. ' . $caleg->nomor_urut),
+            'label' => trim($caleg->nama_caleg.' No. '.$caleg->nomor_urut),
             'meta' => $partai->nama_partai,
         ]));
 
         if ($calegs->isEmpty()) {
             return [
                 'jenis' => $jenis,
-                'title' => $this->partyTitle($jenis, $dapilName),
-                'subtitle' => '5 caleg teratas',
+                'title' => $this->partyTitle($jenis, $dapilName).' - '.config('party.short_name'),
+                'subtitle' => 'Caleg '.config('party.short_name').' belum tersedia',
                 'scope' => $scope['label'],
                 'rows' => [],
             ];
@@ -331,21 +338,21 @@ class DashboardElectionSummary
 
         $calegIds = $calegs->pluck('id')->values()->all();
         $totals = $this->applyScope(
-                DB::table('rekap_caleg_suaras as s')
-                    ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
-                    ->join('tps as t', 't.id', '=', 'h.tps_id')
-                    ->join('desas as d', 'd.id', '=', 't.desa_id')
-                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
-                    ->where('h.jenis', $jenis),
-                $scope
-            )
+            DB::table('rekap_caleg_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->where('h.jenis', $jenis),
+            $scope
+        )
             ->whereIn('s.caleg_id', $calegIds)
             ->select('s.caleg_id', DB::raw('SUM(s.suara) as total_suara'))
             ->groupBy('s.caleg_id')
             ->pluck('total_suara', 'caleg_id');
 
         $allRows = $calegs
-            ->map(fn($caleg) => [
+            ->map(fn ($caleg) => [
                 'rank' => 0,
                 'label' => $caleg['label'],
                 'meta' => $caleg['meta'],
@@ -360,18 +367,39 @@ class DashboardElectionSummary
             ->map(function ($row, $index) use ($totalSuara) {
                 $row['rank'] = $index + 1;
                 $row['persentase'] = $totalSuara > 0 ? round(($row['suara'] / $totalSuara) * 100, 2) : 0;
+
                 return $row;
             })
             ->toArray();
 
         return [
             'jenis' => $jenis,
-            'title' => $this->partyTitle($jenis, $dapilName),
-            'subtitle' => '5 caleg teratas',
+            'title' => $this->partyTitle($jenis, $dapilName).' - '.config('party.short_name'),
+            'subtitle' => '5 caleg '.config('party.short_name').' teratas',
             'scope' => $scope['label'],
             'total_suara' => $totalSuara,
             'rows' => $rows,
         ];
+    }
+
+    private function onlyGarudaPartai(EloquentBuilder $query): EloquentBuilder
+    {
+        $party = config('party');
+        $numbers = collect($party['historical_numbers'] ?? [])
+            ->map(fn ($number) => (int) $number)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        return $query->where(function (EloquentBuilder $query) use ($party, $numbers) {
+            $query->where('nama_partai', 'like', '%'.($party['short_name'] ?? 'Garuda').'%')
+                ->orWhere('nama_partai', 'like', '%'.($party['name'] ?? 'Partai Garuda').'%');
+
+            if ($numbers) {
+                $query->orWhereIn('nomor_urut', $numbers);
+            }
+        });
     }
 
     private function applyScope(Builder $query, array $scope): Builder
@@ -397,7 +425,7 @@ class DashboardElectionSummary
     private function partyTitle(string $jenis, ?string $dapilName): string
     {
         if ($jenis === 'dprd_kab') {
-            return 'DPRD Kab - ' . ($dapilName ?: 'Dapil');
+            return 'DPRD Kab - '.($dapilName ?: 'Dapil');
         }
 
         return RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis);

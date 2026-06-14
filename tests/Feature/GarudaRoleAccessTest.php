@@ -45,7 +45,7 @@ class GarudaRoleAccessTest extends TestCase
         $this->desaB = Desa::create(['nama' => 'Desa B', 'kecamatan_id' => $this->kecamatanB->id]);
         $this->tpsA = Tps::create(['nama' => 'TPS A', 'desa_id' => $this->desaA->id]);
         $this->tpsB = Tps::create(['nama' => 'TPS B', 'desa_id' => $this->desaB->id]);
-        PemiluSetting::create(['jenis' => 'ppwp', 'is_active' => true]);
+        PemiluSetting::create(['jenis' => 'dpr_ri', 'is_active' => true]);
 
         $this->admin = $this->user('admin');
         $this->korcamA = $this->user('ppk', ['kecamatan_id' => $this->kecamatanA->id]);
@@ -113,11 +113,26 @@ class GarudaRoleAccessTest extends TestCase
         $this->assertFalse(\Route::has('admin.rekap.inline-update'));
     }
 
+    public function test_non_party_rekap_types_are_not_accessible(): void
+    {
+        $this->actingAs($this->saksiA)
+            ->get(route('rekap.form', 'ppwp'))
+            ->assertNotFound();
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.setup.ppwp.store'), [
+                'calons' => [
+                    ['nomor_urut' => 1, 'nama_paslon' => 'Paslon Legacy'],
+                ],
+            ])
+            ->assertStatus(410);
+    }
+
     private function user(string $role, array $extra = []): User
     {
         $defaults = [
             'name' => ucfirst($role),
-            'username' => $role . '_' . str()->random(6),
+            'username' => $role.'_'.str()->random(6),
             'password' => Hash::make('password'),
             'role' => $role,
         ];

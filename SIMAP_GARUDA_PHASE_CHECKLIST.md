@@ -34,10 +34,10 @@ Target Phase 1: fork SIMAP menjadi aplikasi mandiri untuk Partai Garuda, databas
 - [ ] URI dan nama route teknis masih memakai `ppk`, `pps`, `kpps`.
 - [ ] Kolom `users.partai_id` masih ada sebagai sisa schema lama, walau tidak dipakai di manajemen user.
 - [ ] Beberapa method controller koreksi internal admin masih ada, walau route publiknya sudah dilepas.
-- [ ] Setup pemilu masih luas dan masih memuat banyak jenis pemilihan; belum disederhanakan khusus kebutuhan Partai Garuda.
+- [x] Setup pemilu disederhanakan ke DPR RI, DPRD Provinsi, dan DPRD Kabupaten.
 - [ ] Dashboard masih memakai fondasi dashboard SIMAP dan belum fokus penuh pada performa Partai Garuda saja.
 - [ ] Master partai masih multi-partai; belum difilter/diubah menjadi konfigurasi Partai Garuda permanen dengan slug `garuda`.
-- [ ] Logo saat ini adalah placeholder lokal, belum asset resmi Partai Garuda.
+- [x] Logo Garuda sudah tersedia sebagai asset lokal dan dipakai lewat konfigurasi `config/party.php`.
 
 ## Keputusan Phase 1
 
@@ -57,14 +57,16 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 
 ### 1. Finalisasi Identitas Partai Garuda
 
-- [ ] Buat konfigurasi aplikasi untuk identitas Partai Garuda.
-- [ ] Simpan slug permanen `garuda`.
-- [ ] Simpan nomor urut historis 2024 sebagai metadata, bukan identitas utama.
-- [ ] Ganti placeholder logo dengan logo resmi.
-- [ ] Jadikan warna utama/aksen Partai Garuda sebagai konfigurasi UI.
+- [x] Buat konfigurasi aplikasi untuk identitas Partai Garuda.
+- [x] Simpan slug permanen `garuda`.
+- [x] Simpan nomor urut historis 2024 sebagai metadata, bukan identitas utama.
+- [x] Ganti placeholder logo dengan logo resmi.
+- [x] Jadikan warna utama/aksen Partai Garuda sebagai konfigurasi UI.
 
 ### 2. Rapikan Role Teknis
 
+- [ ] Bersihkan data pengguna database SIMAP Garuda agar hanya berisi akun operasional Garuda yang relevan.
+- [ ] Tambahkan field nomor telepon pengguna untuk Admin Partai, Korcam, Kordes, dan Saksi TPS.
 - [ ] Tentukan apakah DB role akan tetap kompatibel (`admin/ppk/pps/kpps`) atau dimigrasi penuh.
 - [ ] Jika dimigrasi penuh, ubah role menjadi `admin_partai`, `korcam`, `kordes`, `saksi_tps`.
 - [ ] Update middleware, route, controller, seeder, factory, dan test.
@@ -73,7 +75,9 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 
 ### 3. Sederhanakan Data Partai
 
-- [ ] Tentukan mode data legislatif: hanya Partai Garuda atau tetap menyimpan kompetitor untuk pembanding.
+- [x] Batasi jenis rekap aktif ke DPR RI, DPRD Provinsi, dan DPRD Kabupaten.
+- [x] Tambahkan migration pembersih rekap PPWP, DPD, Gubernur, dan Bupati.
+- [x] Tentukan mode data legislatif: single-party Partai Garuda saja.
 - [ ] Jika hanya Garuda, filter master `rekap_partais` ke slug/identitas Garuda.
 - [ ] Batasi input caleg hanya untuk Partai Garuda.
 - [ ] Batasi dashboard dan export agar fokus pada suara Partai Garuda dan calegnya.
@@ -82,8 +86,8 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 ### 4. Dashboard Khusus Partai
 
 - [ ] Buat kartu total suara Partai Garuda.
-- [ ] Buat ranking caleg Garuda.
-- [ ] Buat progres TPS masuk/final.
+- [x] Buat ranking caleg Garuda.
+- [x] Buat progres TPS masuk/final.
 - [ ] Buat wilayah kuat dan lemah per kecamatan/desa.
 - [ ] Buat daftar TPS belum masuk.
 - [ ] Buat daftar TPS bermasalah atau perlu dicek internal.
@@ -99,7 +103,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 
 ### 6. Import Data Fase Berikutnya
 
-- [ ] Tentukan format import awal: Excel/CSV atau JSON sanitasi dari SIMAP utama.
+- [ ] Tentukan format import awal khusus legislatif: Excel/CSV atau JSON sanitasi dari SIMAP utama.
 - [ ] Buat template import resmi.
 - [ ] Buat validasi nomor urut historis Garuda untuk data Pemilu 2024.
 - [ ] Pastikan import tidak konek runtime ke database SIMAP utama.
@@ -116,6 +120,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 
 ### 8. Bersihkan Sisa Legacy
 
+- [ ] Hapus cabang kode PPWP, DPD, Gubernur, dan Bupati yang sekarang sudah tidak reachable.
 - [ ] Hapus atau refactor method controller koreksi inline/unlock yang sudah tidak diroute.
 - [ ] Hapus kolom atau relasi user legacy yang tidak dipakai setelah audit aman.
 - [ ] Hapus view Laravel default yang tidak dipakai jika masih ada.
@@ -126,8 +131,34 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 
 1. Selesaikan commit Phase 1 cleanup dulu.
 2. Kerjakan Phase 2A: identitas Garuda + dashboard fokus Garuda.
-3. Kerjakan Phase 2B: role teknis dan URI publik.
-4. Kerjakan Phase 2C: single-party data guard.
-5. Kerjakan Phase 2D: import/export resmi.
+3. Kerjakan Phase 2C: single-party data guard.
+4. Kerjakan Phase 2D: dashboard dan export resmi khusus Garuda.
+5. Kerjakan Phase 2B: role teknis dan URI publik setelah model data stabil.
 6. Kerjakan Phase 2E: bersih-bersih legacy lanjutan dan test penuh.
 
+## Mapping ke PARTAI_PORTAL_BRAINSTORM.md
+
+Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` ke status SIMAP Garuda saat ini. Mapping ini dipakai sebagai audit agar roadmap brainstorming tidak terlewat, sementara struktur kerja utama tetap memakai Phase 1 dan Phase 2A-E di atas.
+
+| No | Tahapan Brainstorming | Status SIMAP Garuda |
+| --- | --- | --- |
+| 1 | Duplikasi/fork project SIMAP ke folder project baru | Selesai: project berjalan di folder `simap-garuda`. |
+| 2 | Tentukan nama project, nama database, dan identitas aplikasi partai | Selesai: `SIMAP Garuda`, database `simap_garuda`, identitas di `config/party.php`. |
+| 3 | Tentukan istilah role final | Sebagian selesai: UI memakai Admin Partai, Korcam, Kordes, Saksi TPS; nilai DB teknis masih `admin`, `ppk`, `pps`, `kpps`. |
+| 4 | Bersihkan role lama yang tidak diperlukan | Sebagian selesai: `komisioner` dan `partai` ditolak saat login dan ada migration pembersih; audit schema/kolom legacy masih tersisa. |
+| 5 | Sesuaikan middleware role dan redirect dashboard | Sebagian selesai: alur role partai berjalan dengan role teknis lama; migrasi penuh role/URI belum dilakukan. |
+| 6 | Sesuaikan menu sidebar/topbar agar hanya menampilkan fitur partai | Selesai untuk MVP: menu KPU/dokumen internal sudah dilepas dan branding Garuda dipakai. |
+| 7 | Pertahankan struktur wilayah kecamatan, desa, dan TPS | Selesai: struktur wilayah dipertahankan. |
+| 8 | Sesuaikan manajemen user agar mengikuti hierarchy partai | Selesai untuk MVP: manajemen user dibatasi ke Admin Partai, Korcam, Kordes, dan Saksi TPS. |
+| 9 | Tentukan apakah data diinput manual, import Excel/CSV, atau import JSON | Sebagian selesai: input manual dipakai dulu; import resmi legislatif belum dibuat. |
+| 10 | Buat dashboard awal khusus partai | Sebagian selesai: identitas, ranking caleg Garuda, dan progres TPS tersedia; kartu total suara Garuda, wilayah kuat/lemah, TPS belum masuk/bermasalah belum selesai. |
+| 11 | Sesuaikan grafik dan export agar fokus pada suara partai/caleg | Sebagian selesai: dashboard legislatif mulai fokus Garuda; chart default dan export khusus Garuda belum selesai. |
+| 12 | Jalankan test dasar login, akses role, scope wilayah, input/import data, agregasi, dan export | Sebagian selesai: test login legacy, akses role, scope wilayah, dan guard jenis rekap tersedia; coverage input, import, agregasi, chart, dan export perlu ditambah. |
+
+## Catatan Status Terbaru
+
+- Phase 2A identitas Garuda selesai: konfigurasi `config/party.php` sudah menjadi sumber identitas, logo, warna, label role, dan metadata nomor historis.
+- Rekap non-legislatif sudah dinonaktifkan dari aplikasi dan dibersihkan lewat migration `2026_06_14_000002_remove_non_party_rekap_data`.
+- Jenis rekap resmi SIMAP Garuda sekarang hanya `dpr_ri`, `dprd_prov`, dan `dprd_kab`.
+- Dashboard legislatif sudah menampilkan ranking caleg Garuda, tetapi kartu total suara, wilayah kuat/lemah, TPS belum masuk, TPS bermasalah, chart default Garuda, dan export khusus Garuda belum selesai.
+- Next step yang disepakati: single-party guard agar setup dan input tidak bisa membuat atau memakai partai selain Partai Garuda.

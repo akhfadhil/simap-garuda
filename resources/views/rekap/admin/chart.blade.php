@@ -1,14 +1,15 @@
+@php($party = $party ?? config('party'))
 <!DOCTYPE html>
 <html lang="id" class="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>SIMAP - Grafik & Statistik</title>
+    <title>{{ $party['app_name'] }} - Grafik & Statistik</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-garuda.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset($party['assets']['logo']) }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -524,7 +525,7 @@
     $defaultJenis = collect(\App\Models\RekapHeader::JENIS_LABELS)
         ->keys()
         ->first(fn ($key) => in_array($key, $aktifJenis));
-    $roleLabel = 'Admin Partai';
+    $roleLabel = $party['roles']['admin'];
     $homeRoute = route('dashboard.admin');
     $adminMenus = [
         ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin')],
@@ -534,7 +535,7 @@
         ['key' => 'desa', 'label' => 'Kelola Desa', 'icon' => 'location_city', 'route' => route('admin.desa.index')],
         ['key' => 'tps', 'label' => 'Kelola TPS', 'icon' => 'pin_drop', 'route' => route('admin.tps.index')],
         ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
-        ['key' => 'setup', 'label' => 'Setup Data Garuda', 'icon' => 'settings', 'route' => route('admin.setup.index')],
+        ['key' => 'setup', 'label' => 'Setup Data ' . $party['short_name'], 'icon' => 'settings', 'route' => route('admin.setup.index')],
     ];
 @endphp
 
@@ -544,7 +545,7 @@
     <div class="p-5 flex items-center justify-between border-b border-slate-200">
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center overflow-hidden">
-                <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda Logo" class="w-8 h-8 object-contain">
+                <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }} Logo" class="w-8 h-8 object-contain">
             </div>
             <div>
                 <p class="text-lg font-extrabold text-[var(--primary)] leading-none">SIMAP</p>
@@ -572,11 +573,11 @@
                 <span class="material-symbols-outlined text-3xl">menu</span>
             </label>
             <a href="{{ $homeRoute }}" class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda" class="w-8 h-8 object-contain">
+                <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }}" class="w-8 h-8 object-contain">
             </a>
             <div class="min-w-0">
                 <p class="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-semibold">Sistem Informasi</p>
-                <h1 class="text-lg font-extrabold text-[var(--primary)] truncate">SIMAP Garuda</h1>
+                <h1 class="text-lg font-extrabold text-[var(--primary)] truncate">{{ $party['app_name'] }}</h1>
             </div>
         </div>
 
@@ -599,7 +600,7 @@
         <div class="p-6 border-b border-slate-200">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-9 h-9 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center overflow-hidden">
-                    <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda Logo" class="w-8 h-8 object-contain">
+                    <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }} Logo" class="w-8 h-8 object-contain">
                 </div>
                 <p class="text-xl font-extrabold text-[var(--primary)] leading-none">SIMAP</p>
             </div>

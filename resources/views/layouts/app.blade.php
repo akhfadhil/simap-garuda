@@ -1,9 +1,10 @@
+@php($party = $party ?? config('party'))
 <!DOCTYPE html>
 <html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMAP Garuda - @yield('title', 'Dashboard')</title>
+    <title>{{ $party['app_name'] }} - @yield('title', 'Dashboard')</title>
     <script>
         (function() {
             const saved  = localStorage.getItem('theme') || 'dark';
@@ -12,7 +13,7 @@
         })();
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-garuda.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset($party['assets']['logo']) }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
     @stack('styles')
@@ -56,11 +57,11 @@
         {{-- Brand --}}
         <a href="{{ route('dashboard.' . Auth::user()->role) }}" class="flex items-center gap-3 flex-shrink-0">
             <div class="w-8 h-8 flex items-center justify-center rounded overflow-hidden">
-                <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda" class="w-full h-full object-contain">
+                <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }}" class="w-full h-full object-contain">
             </div>
             <div class="hidden sm:block">
-                <p class="font-display text-lg leading-none dark:text-white text-gray-900 tracking-wide">SIMAP Garuda</p>
-                <p class="text-[9px] dark:text-gray-500 text-gray-400 tracking-widest uppercase">Sistem Rekap dan Saksi Partai Garuda</p>
+                <p class="font-display text-lg leading-none dark:text-white text-gray-900 tracking-wide">{{ $party['app_name'] }}</p>
+                <p class="text-[9px] dark:text-gray-500 text-gray-400 tracking-widest uppercase">{{ $party['tagline'] }}</p>
             </div>
         </a>
 
@@ -138,7 +139,7 @@
 </main>
 <footer class="max-w-7xl mx-auto px-4 lg:px-8 pb-6">
     <p class="text-center text-[11px] dark:text-gray-600 text-gray-500">
-        &copy; 2026 Partai Garuda
+        &copy; {{ $party['copyright_year'] }} {{ $party['name'] }}
     </p>
 </footer>
 @endif

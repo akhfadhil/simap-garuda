@@ -1,0 +1,41 @@
+<?php
+
+return [
+    'slug' => 'garuda',
+    'name' => 'Partai Garuda',
+    'short_name' => 'Garuda',
+    'app_name' => env('APP_NAME', 'SIMAP Garuda'),
+    'tagline' => 'Sistem Rekap dan Saksi Partai Garuda',
+    'active_year' => 2026,
+    'copyright_year' => 2026,
+
+    'historical_numbers' => [
+        2024 => 11,
+    ],
+
+    'election_types' => [
+        'dpr_ri',
+        'dprd_prov',
+        'dprd_kab',
+    ],
+
+    'assets' => [
+        'logo' => 'images/logo-garuda.png',
+    ],
+
+    'colors' => [
+        'primary' => '#E63946',
+        'primary_dark' => '#BB152C',
+        'primary_soft' => 'rgba(230, 57, 70, .1)',
+        'korcam' => '#F4A261',
+        'kordes' => '#2EC4B6',
+        'saksi_tps' => '#7DD3FC',
+    ],
+
+    'roles' => [
+        'admin' => 'Admin Partai',
+        'ppk' => 'Korcam',
+        'pps' => 'Kordes',
+        'kpps' => 'Saksi TPS',
+    ],
+];

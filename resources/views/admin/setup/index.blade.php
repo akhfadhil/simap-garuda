@@ -1,12 +1,13 @@
 @extends('layouts.admin')
-@section('title', 'Setup Data Garuda')
+@section('title', 'Setup Data ' . config('party.short_name'))
 @section('admin_active', 'setup')
 
 @section('admin_content')
+@php($party = $party ?? config('party'))
 <div class="mb-8">
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// Admin — Setup</p>
-    <h1 class="font-display text-4xl tracking-[2px] admin-text">SETUP DATA GARUDA</h1>
-    <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Kelola jenis pemilihan aktif, dapil, caleg, dan referensi rekap Partai Garuda.</p>
+    <h1 class="font-display text-4xl tracking-[2px] admin-text">SETUP DATA {{ strtoupper($party['short_name']) }}</h1>
+    <p class="dark:text-gray-400 text-gray-500 text-sm mt-1">Kelola jenis pemilihan aktif, dapil, caleg, dan referensi rekap {{ $party['name'] }}.</p>
 </div>
 
 @if(session('success'))
@@ -23,7 +24,7 @@
 
 {{-- TAB NAVIGATION --}}
 <div class="flex gap-1 mb-6 dark:bg-gray-900 bg-gray-100 p-1 rounded-xl w-fit">
-    @foreach(['ppwp'=>'PPWP','gubernur'=>'Gubernur','bupati'=>'Bupati','dpd'=>'DPD','dpr_ri'=>'DPR RI','dprd_prov'=>'DPRD Prov','dprd_kab'=>'DPRD Kab'] as $tab => $label)
+    @foreach(['dpr_ri'=>'DPR RI','dprd_prov'=>'DPRD Prov','dprd_kab'=>'DPRD Kab'] as $tab => $label)
     <button onclick="switchTab('{{ $tab }}')" id="tab-{{ $tab }}"
             class="px-4 py-2 text-xs font-semibold rounded-lg transition tab-btn"
             data-tab="{{ $tab }}">
@@ -42,10 +43,6 @@
         @csrf
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-5">
             @foreach([
-                'ppwp'      => 'Presiden & Wakil Presiden',
-                'gubernur'  => 'Gubernur & Wakil Gubernur',
-                'bupati'    => 'Bupati & Wakil Bupati',
-                'dpd'       => 'DPD',
                 'dpr_ri'    => 'DPR RI',
                 'dprd_prov' => 'DPRD Provinsi',
                 'dprd_kab'  => 'DPRD Kabupaten',
@@ -65,7 +62,7 @@
 </div>
 
 {{-- ══ TAB PPWP ══ --}}
-<div id="panel-ppwp" class="tab-panel">
+<div id="panel-ppwp" class="tab-panel hidden">
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div class="lg:col-span-2 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
             <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Paslon</p>
@@ -555,7 +552,7 @@
 
 @push('scripts')
 <script>
-const tabs = ['ppwp','gubernur','bupati','dpd','dpr_ri','dprd_prov','dprd_kab'];
+const tabs = ['dpr_ri','dprd_prov','dprd_kab'];
 
 function addPaslonFields(button) {
     const form = button.closest('form');
@@ -701,8 +698,8 @@ if (firstDapilBtn) {
 }
 
 // Restore tab dari localStorage
-const savedTab = localStorage.getItem('setup_tab') || 'ppwp';
-switchTab(savedTab);
+const savedTab = localStorage.getItem('setup_tab');
+switchTab(tabs.includes(savedTab) ? savedTab : 'dpr_ri');
 
 document.querySelectorAll('.paslon-extra-rows').forEach((container) => {
     const addButton = container.nextElementSibling;

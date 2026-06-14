@@ -1,4 +1,5 @@
 @php
+    $party = $party ?? config('party');
     $statusCode = $code ?? '500';
     $statusTitle = $title ?? 'Terjadi Kesalahan';
     $statusMessage = $message ?? 'Permintaan tidak dapat diproses saat ini.';
@@ -22,8 +23,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMAP Garuda - {{ $statusCode }} {{ $statusTitle }}</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo-garuda.png') }}">
+    <title>{{ $party['app_name'] }} - {{ $statusCode }} {{ $statusTitle }}</title>
+    <link rel="icon" type="image/png" href="{{ asset($party['assets']['logo']) }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <style>
@@ -316,11 +317,11 @@
         <header class="topbar">
             <div class="brand">
                 <div class="logo">
-                    <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda Logo">
+                    <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }} Logo">
                 </div>
                 <div>
                     <p class="eyebrow">Sistem Informasi</p>
-                    <p class="brand-title">SIMAP Garuda</p>
+                    <p class="brand-title">{{ $party['app_name'] }}</p>
                 </div>
             </div>
             <span class="status-pill">HTTP {{ $statusCode }}</span>
@@ -357,7 +358,7 @@
         </main>
 
         <footer class="foot">
-            SIMAP Garuda &copy; {{ date('Y') }} - Partai Garuda
+            {{ $party['app_name'] }} &copy; {{ date('Y') }} - {{ $party['name'] }}
         </footer>
     </div>
 </body>

@@ -40,6 +40,7 @@ class PpsController extends Controller
     // Memastikan jenis pemilihan sedang aktif.
     private function cekAktif(string $jenis): void
     {
+        abort_unless(array_key_exists($jenis, RekapHeader::JENIS_LABELS), 404);
         abort_if(! in_array($jenis, \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
     }
 

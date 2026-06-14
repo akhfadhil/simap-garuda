@@ -3,14 +3,13 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class PemiluSettingSeeder extends Seeder
 {
-
     public function run(): void
     {
-        $jenis = ['ppwp','gubernur','bupati','dpd','dpr_ri','dprd_prov','dprd_kab'];
+        $jenis = \App\Models\RekapHeader::LEGISLATIVE_TYPES;
+
         foreach ($jenis as $j) {
             \App\Models\PemiluSetting::updateOrCreate(
                 ['jenis' => $j],
@@ -18,5 +17,4 @@ class PemiluSettingSeeder extends Seeder
             );
         }
     }
-
-    }
+}

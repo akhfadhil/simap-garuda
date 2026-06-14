@@ -100,9 +100,10 @@
 
 @section('content')
 @php
+    $party = $party ?? config('party');
     $adminActive = trim($__env->yieldContent('admin_active', ''));
-    $roleLabel = 'Admin Partai';
-    $userRoleLabel = 'Admin Partai Garuda';
+    $roleLabel = $party['roles']['admin'];
+    $userRoleLabel = $party['roles']['admin'] . ' ' . $party['short_name'];
     $menus = [
         ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin')],
         ['key' => 'users', 'label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
@@ -111,7 +112,7 @@
         ['key' => 'desa', 'label' => 'Kelola Desa', 'icon' => 'location_city', 'route' => route('admin.desa.index')],
         ['key' => 'tps', 'label' => 'Kelola TPS', 'icon' => 'pin_drop', 'route' => route('admin.tps.index')],
         ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
-        ['key' => 'setup', 'label' => 'Setup Data Garuda', 'icon' => 'settings', 'route' => route('admin.setup.index')],
+        ['key' => 'setup', 'label' => 'Setup Data ' . $party['short_name'], 'icon' => 'settings', 'route' => route('admin.setup.index')],
     ];
 @endphp
 
@@ -122,10 +123,10 @@
     <div class="p-5 flex items-center justify-between border-b admin-border">
         <div class="flex items-center gap-3">
             <div class="admin-primary-bg w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-                <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda Logo" class="w-full h-full object-contain">
+                <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }} Logo" class="w-full h-full object-contain">
             </div>
             <div>
-                <h1 class="admin-display admin-primary text-2xl leading-none">SIMAP Garuda</h1>
+                <h1 class="admin-display admin-primary text-2xl leading-none">{{ $party['app_name'] }}</h1>
                 <span class="admin-mono admin-muted-soft text-[10px] uppercase tracking-widest">{{ $roleLabel }}</span>
             </div>
         </div>
@@ -149,9 +150,9 @@
         <div class="p-6 flex flex-col gap-1">
             <div class="flex items-center gap-3 mb-2">
                 <div class="admin-primary-bg w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-                    <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda Logo" class="w-full h-full object-contain">
+                    <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }} Logo" class="w-full h-full object-contain">
                 </div>
-                <h1 class="admin-display admin-primary text-2xl leading-none">SIMAP Garuda</h1>
+                <h1 class="admin-display admin-primary text-2xl leading-none">{{ $party['app_name'] }}</h1>
             </div>
             <div class="admin-primary-bg px-2 py-1 w-max rounded-sm">
                 <span class="admin-display admin-primary uppercase text-[10px] tracking-[.2em]">{{ $roleLabel }}</span>
@@ -189,11 +190,11 @@
                     <span class="material-symbols-outlined text-3xl">menu</span>
                 </label>
                 <div class="admin-primary-bg md:hidden w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
-                    <img src="{{ asset('images/logo-garuda.png') }}" alt="SIMAP Garuda" class="w-full h-full object-contain">
+                    <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }}" class="w-full h-full object-contain">
                 </div>
                 <div class="hidden lg:block">
                     <p class="admin-mono admin-muted-soft text-[10px] uppercase tracking-[.24em]">Sistem Informasi</p>
-                    <p class="admin-text text-sm font-semibold leading-tight">Sistem Rekap dan Saksi Partai Garuda</p>
+                    <p class="admin-text text-sm font-semibold leading-tight">{{ $party['tagline'] }}</p>
                 </div>
             </div>
 
@@ -223,7 +224,7 @@
             @yield('admin_content')
             <footer class="pt-8 pb-2">
                 <p class="text-center admin-muted-soft text-[11px]">
-                    &copy; 2026 Partai Garuda
+                    &copy; {{ $party['copyright_year'] }} {{ $party['name'] }}
                 </p>
             </footer>
         </div>

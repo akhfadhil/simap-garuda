@@ -41,7 +41,7 @@ class AuthController extends Controller
                 Auth::logout();
 
                 return back()
-                    ->withErrors(['username' => 'Role akun ini sudah tidak aktif di SIMAP Garuda.'])
+                    ->withErrors(['username' => 'Role akun ini sudah tidak aktif di '.config('party.app_name').'.'])
                     ->withInput();
             }
 

@@ -19,7 +19,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class KppsController extends Controller
 {
-    const JENIS = ['ppwp', 'gubernur', 'bupati', 'dpd', 'dpr_ri', 'dprd_prov', 'dprd_kab'];
+    const JENIS = RekapHeader::LEGISLATIVE_TYPES;
 
     // Menampilkan daftar rekap milik TPS user.
     public function index()
@@ -34,6 +34,7 @@ class KppsController extends Controller
     // Memastikan jenis pemilihan sedang aktif.
     private function cekAktif(string $jenis): void
     {
+        abort_unless(in_array($jenis, self::JENIS, true), 404);
         $aktif = \App\Models\PemiluSetting::aktif();
         abort_if(! in_array($jenis, $aktif), 403, 'Jenis pemilu ini tidak aktif.');
     }
