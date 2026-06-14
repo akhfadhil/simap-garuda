@@ -99,6 +99,9 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Batasi form Saksi TPS agar hanya menerima suara Partai Garuda dan caleg Garuda.
 - [x] Set field administratif lama ke `0` saat simpan rekap TPS agar schema lama tetap kompatibel.
 - [ ] Bersihkan tampilan agregasi Kordes/Korcam/Admin dari field administratif KPU yang tidak relevan untuk partai.
+  - [x] Kordes: rekap desa hanya menampilkan suara Garuda, caleg Garuda, total Garuda, dan status TPS.
+  - [ ] Korcam: bersihkan rekap kecamatan dan detail desa.
+  - [ ] Admin: bersihkan rekap kabupaten dan detail wilayah.
 - [ ] Bersihkan export laporan dari field suara tidak sah, DPT, surat suara, dan disabilitas.
 - [ ] Tambahkan status internal: draft, perlu dicek, final.
 - [ ] Tambahkan catatan internal partai untuk TPS bermasalah jika diperlukan.
@@ -169,4 +172,4 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Import command legacy sudah dihapus; data suara SIMAP Garuda hanya masuk lewat form manual Saksi TPS.
 - Form input Saksi TPS sudah disederhanakan: hanya suara Partai Garuda dan caleg Garuda yang diisi; data DPT, surat suara, disabilitas, serta suara tidak sah tidak lagi diminta dari saksi.
 - Dashboard legislatif sudah menampilkan ranking caleg Garuda, tetapi kartu total suara, wilayah kuat/lemah, TPS belum masuk, TPS bermasalah, chart default Garuda, dan export khusus Garuda belum selesai.
-- Next step: bersihkan tampilan agregasi dan export agar tidak lagi membawa field administratif KPU yang tidak relevan untuk SIMAP Garuda.
+- Next step: bersihkan tampilan Korcam, lalu Admin, lalu export agar tidak lagi membawa field administratif KPU yang tidak relevan untuk SIMAP Garuda.
