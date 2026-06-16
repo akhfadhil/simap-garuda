@@ -91,7 +91,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Buat progres TPS masuk/final.
 - [x] Buat wilayah kuat dan lemah per kecamatan/desa.
 - [x] Buat daftar TPS belum masuk.
-- [ ] Buat daftar TPS bermasalah atau perlu dicek internal.
+- [x] Buat daftar TPS bermasalah atau perlu dicek internal.
 - [x] Sesuaikan chart agar default menampilkan Garuda, bukan ranking semua partai.
 
 ### 5. Validasi Input Manual TPS
@@ -122,8 +122,8 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 
 - [x] Buat export ringkasan Garuda per kabupaten/kecamatan/desa.
 - [x] Buat export caleg Garuda.
-- [ ] Buat export TPS belum masuk.
-- [ ] Buat export TPS bermasalah.
+- [x] Buat export TPS belum masuk.
+- [x] Buat export TPS bermasalah.
 - [x] Pastikan export tidak membawa data internal SIMAP utama yang tidak relevan.
 
 ### 8. Bersihkan Sisa Legacy
@@ -176,4 +176,5 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Export rekap TPS/desa/kecamatan/kabupaten sudah dibersihkan agar hanya membawa suara Partai Garuda, suara caleg Garuda, total Garuda, dan status input TPS.
 - Dashboard legislatif sudah menampilkan kartu total suara Garuda, ranking caleg Garuda, progres TPS, daftar TPS belum masuk, serta wilayah kuat/lemah.
 - Status internal `perlu_dicek` dan catatan internal TPS sudah tersedia untuk koreksi Admin Partai.
-- Next step: lanjut dashboard/export TPS bermasalah dan export TPS belum masuk.
+- Dashboard sudah menampilkan kartu dan daftar TPS perlu dicek internal, plus export TPS belum masuk dan TPS perlu dicek untuk Admin Partai.
+- Next step: lanjut penentuan kebijakan finalisasi dan penambahan test input/update/finalisasi/scope wilayah.

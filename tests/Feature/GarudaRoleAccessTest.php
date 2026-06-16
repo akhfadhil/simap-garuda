@@ -423,6 +423,27 @@ class GarudaRoleAccessTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_download_missing_and_review_tps_exports(): void
+    {
+        RekapHeader::create([
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'perlu_dicek',
+            'catatan_internal' => 'C1 perlu dicocokkan.',
+            'diinput_oleh' => $this->admin->id,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.rekap.export.missing-tps'))
+            ->assertOk()
+            ->assertDownload('TPS_Belum_Masuk.xlsx');
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.rekap.export.review-tps'))
+            ->assertOk()
+            ->assertDownload('TPS_Perlu_Dicek.xlsx');
+    }
+
     private function user(string $role, array $extra = []): User
     {
         $defaults = [

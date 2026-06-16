@@ -197,6 +197,8 @@ class DashboardElectionSummary
 
         $totalTps = (clone $tpsQuery)->count('t.id');
         $missingTps = collect();
+        $reviewTps = collect();
+        $reviewTpsCount = 0;
         $inputTps = 0;
         $totalSuara = 0;
         $regions = [
@@ -238,6 +240,37 @@ class DashboardElectionSummary
                     'meta' => 'Kec. '.$row->kecamatan,
                 ]);
 
+            $reviewTpsQuery = $this->applyScope(
+                DB::table('rekap_headers as h')
+                    ->join('tps as t', 't.id', '=', 'h.tps_id')
+                    ->join('desas as d', 'd.id', '=', 't.desa_id')
+                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                    ->whereIn('h.jenis', $jenisList)
+                    ->where('h.status', 'perlu_dicek'),
+                $scope
+            );
+            $reviewTpsCount = (clone $reviewTpsQuery)->count('h.id');
+            $reviewTps = $reviewTpsQuery
+                ->orderByDesc('h.updated_at')
+                ->orderBy('k.nama')
+                ->orderBy('d.nama')
+                ->orderBy('t.nama')
+                ->limit(5)
+                ->get([
+                    't.id',
+                    't.nama as tps',
+                    'd.nama as desa',
+                    'k.nama as kecamatan',
+                    'h.jenis',
+                    'h.catatan_internal',
+                ])
+                ->map(fn ($row) => [
+                    'id' => (int) $row->id,
+                    'label' => $row->tps.' - '.$row->desa,
+                    'meta' => (RekapHeader::JENIS_LABELS[$row->jenis] ?? strtoupper($row->jenis)).' | Kec. '.$row->kecamatan,
+                    'note' => $row->catatan_internal,
+                ]);
+
             $totalSuara = $this->totalGarudaSuara($jenisList, $scope);
             $regions = $this->regionPerformance($jenisList, $scope);
         }
@@ -248,6 +281,8 @@ class DashboardElectionSummary
             'input_tps' => $inputTps,
             'missing_tps_count' => max(0, $totalTps - $inputTps),
             'missing_tps' => $missingTps->toArray(),
+            'review_tps_count' => $reviewTpsCount,
+            'review_tps' => $reviewTps->toArray(),
             'active_jenis_count' => count($jenisList),
             'regions' => $regions,
         ];
@@ -664,7 +699,7 @@ class DashboardElectionSummary
     private function cacheParts(User $user, array $scope, array $activeJenis): array
     {
         return [
-            'version' => 6,
+            'version' => 7,
             'user_role' => $user->role,
             'scope' => $scope,
             'active' => $activeJenis,

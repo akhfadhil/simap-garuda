@@ -6,13 +6,17 @@
         'input_tps' => 0,
         'missing_tps_count' => 0,
         'missing_tps' => [],
+        'review_tps_count' => 0,
+        'review_tps' => [],
         'regions' => ['label' => null, 'strong' => [], 'weak' => []],
     ];
     $sections = collect($summary['sections'] ?? []);
     $missingTps = collect($overview['missing_tps'] ?? []);
+    $reviewTps = collect($overview['review_tps'] ?? []);
     $regions = $overview['regions'] ?? ['label' => null, 'strong' => [], 'weak' => []];
     $strongRegions = collect($regions['strong'] ?? []);
     $weakRegions = collect($regions['weak'] ?? []);
+    $canExportTpsReports = auth()->user()?->role === 'admin';
 @endphp
 
 <section class="mb-12">
@@ -24,7 +28,7 @@
         <p class="admin-mono admin-muted-soft text-[11px] uppercase">{{ $summary['scope_label'] ?? '-' }}</p>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 mb-5">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5 mb-5">
         <div class="admin-glass rounded-lg p-5">
             <p class="admin-mono admin-muted-soft text-[10px] uppercase tracking-[.2em]">Total Suara Garuda</p>
             <p class="admin-display admin-text text-4xl leading-none mt-2">{{ number_format($overview['total_suara_garuda'] ?? 0) }}</p>
@@ -39,6 +43,21 @@
             <p class="admin-mono admin-muted-soft text-[10px] uppercase tracking-[.2em]">TPS Belum Masuk</p>
             <p class="admin-display role-accent text-4xl leading-none mt-2">{{ number_format($overview['missing_tps_count'] ?? 0) }}</p>
             <p class="admin-muted text-xs mt-2">Prioritas follow up struktur lapangan.</p>
+            @if($canExportTpsReports)
+                <a href="{{ route('admin.rekap.export.missing-tps') }}" class="admin-mono role-accent inline-flex items-center gap-1 text-[10px] font-bold uppercase mt-3">
+                    Export <span class="material-symbols-outlined text-sm">download</span>
+                </a>
+            @endif
+        </div>
+        <div class="admin-glass rounded-lg p-5">
+            <p class="admin-mono admin-muted-soft text-[10px] uppercase tracking-[.2em]">TPS Perlu Dicek</p>
+            <p class="admin-display role-accent text-4xl leading-none mt-2">{{ number_format($overview['review_tps_count'] ?? 0) }}</p>
+            <p class="admin-muted text-xs mt-2">TPS bermasalah yang butuh koreksi internal.</p>
+            @if($canExportTpsReports)
+                <a href="{{ route('admin.rekap.export.review-tps') }}" class="admin-mono role-accent inline-flex items-center gap-1 text-[10px] font-bold uppercase mt-3">
+                    Export <span class="material-symbols-outlined text-sm">download</span>
+                </a>
+            @endif
         </div>
         <div class="admin-glass rounded-lg p-5">
             <p class="admin-mono admin-muted-soft text-[10px] uppercase tracking-[.2em]">Jenis Aktif</p>
@@ -61,6 +80,29 @@
                     <div class="admin-surface-strong rounded-md px-3 py-2.5">
                         <p class="admin-text text-sm font-semibold truncate">{{ $tps['label'] }}</p>
                         <p class="admin-mono admin-muted-soft text-[10px] uppercase truncate">{{ $tps['meta'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    @if($reviewTps->isNotEmpty())
+        <div class="admin-glass rounded-lg p-5 mb-5">
+            <div class="mb-4 flex items-center justify-between gap-4">
+                <div>
+                    <p class="admin-display admin-text text-2xl leading-none uppercase">TPS Perlu Dicek</p>
+                    <p class="admin-mono admin-muted-soft text-[10px] uppercase mt-1">5 koreksi internal terbaru</p>
+                </div>
+                <span class="material-symbols-outlined role-accent text-xl">report</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-2">
+                @foreach($reviewTps as $tps)
+                    <div class="admin-surface-strong rounded-md px-3 py-2.5">
+                        <p class="admin-text text-sm font-semibold truncate">{{ $tps['label'] }}</p>
+                        <p class="admin-mono admin-muted-soft text-[10px] uppercase truncate">{{ $tps['meta'] }}</p>
+                        @if(!empty($tps['note']))
+                            <p class="admin-muted text-xs mt-1 line-clamp-2">{{ $tps['note'] }}</p>
+                        @endif
                     </div>
                 @endforeach
             </div>

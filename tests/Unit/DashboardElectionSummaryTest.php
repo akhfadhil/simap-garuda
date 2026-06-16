@@ -80,7 +80,8 @@ class DashboardElectionSummaryTest extends TestCase
         $rekapB = RekapHeader::create([
             'tps_id' => $tpsB->id,
             'jenis' => 'dpr_ri',
-            'status' => 'final',
+            'status' => 'perlu_dicek',
+            'catatan_internal' => 'C1 perlu dicocokkan',
             'diinput_oleh' => $admin->id,
         ]);
 
@@ -105,6 +106,9 @@ class DashboardElectionSummaryTest extends TestCase
         $this->assertSame(2, $overview['input_tps']);
         $this->assertSame(1, $overview['missing_tps_count']);
         $this->assertSame('TPS 2 - Desa A', $overview['missing_tps'][0]['label']);
+        $this->assertSame(1, $overview['review_tps_count']);
+        $this->assertSame('TPS 3 - Desa B', $overview['review_tps'][0]['label']);
+        $this->assertSame('C1 perlu dicocokkan', $overview['review_tps'][0]['note']);
         $this->assertSame('Kecamatan', $overview['regions']['label']);
         $this->assertSame('Kecamatan A', $overview['regions']['strong'][0]['label']);
         $this->assertSame(50, $overview['regions']['strong'][0]['suara']);

@@ -104,6 +104,8 @@ Route::middleware('auth')->group(function () {
         Route::get('chart', [App\Http\Controllers\Rekap\AdminController::class, 'chartPage'])->name('chart');
         Route::get('chart/data', [App\Http\Controllers\Rekap\AdminController::class, 'chartData'])->name('chart.data');
         Route::get('export/download', [App\Http\Controllers\Rekap\AdminController::class, 'exportDownload'])->name('export.download');
+        Route::get('export/tps-belum-masuk', [App\Http\Controllers\Rekap\AdminController::class, 'exportMissingTps'])->name('export.missing-tps');
+        Route::get('export/tps-perlu-dicek', [App\Http\Controllers\Rekap\AdminController::class, 'exportReviewTps'])->name('export.review-tps');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\AdminController::class, 'export'])->name('export');
         Route::get('{jenis}', [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');
     });

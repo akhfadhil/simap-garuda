@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Rekap;
 
+use App\Exports\TpsStatusReportExport;
 use App\Http\Controllers\Controller;
 use App\Models\Dapil;
 use App\Models\Kecamatan;
+use App\Models\PemiluSetting;
 use App\Models\RekapCellFlag;
 use App\Models\RekapHeader;
 use App\Models\Tps;
@@ -12,6 +14,7 @@ use App\Services\RekapAdminCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdminController extends Controller
 {
@@ -344,6 +347,89 @@ class AdminController extends Controller
         );
     }
 
+    public function exportMissingTps()
+    {
+        $jenisList = $this->activeLegislativeJenis();
+        $rows = [];
+
+        if ($jenisList) {
+            $rows = Tps::query()
+                ->join('desas as d', 'd.id', '=', 'tps.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->whereNotExists(function ($query) use ($jenisList) {
+                    $query->selectRaw('1')
+                        ->from('rekap_headers as h')
+                        ->whereColumn('h.tps_id', 'tps.id')
+                        ->whereIn('h.jenis', $jenisList);
+                })
+                ->orderBy('k.nama')
+                ->orderBy('d.nama')
+                ->orderBy('tps.nama')
+                ->get([
+                    'tps.nama as tps',
+                    'd.nama as desa',
+                    'k.nama as kecamatan',
+                ])
+                ->map(fn ($row) => [
+                    $row->kecamatan,
+                    $row->desa,
+                    $row->tps,
+                    collect($jenisList)->map(fn ($jenis) => RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis))->implode(', '),
+                ])
+                ->toArray();
+        }
+
+        return Excel::download(
+            new TpsStatusReportExport(
+                'TPS Belum Masuk',
+                ['Kecamatan', 'Desa', 'TPS', 'Pemilihan Aktif'],
+                $rows
+            ),
+            'TPS_Belum_Masuk.xlsx'
+        );
+    }
+
+    public function exportReviewTps()
+    {
+        $jenisList = $this->activeLegislativeJenis();
+        $rows = RekapHeader::query()
+            ->join('tps as t', 't.id', '=', 'rekap_headers.tps_id')
+            ->join('desas as d', 'd.id', '=', 't.desa_id')
+            ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+            ->whereIn('rekap_headers.jenis', $jenisList)
+            ->where('rekap_headers.status', 'perlu_dicek')
+            ->orderByDesc('rekap_headers.updated_at')
+            ->orderBy('k.nama')
+            ->orderBy('d.nama')
+            ->orderBy('t.nama')
+            ->get([
+                'rekap_headers.jenis',
+                'rekap_headers.status',
+                'rekap_headers.catatan_internal',
+                't.nama as tps',
+                'd.nama as desa',
+                'k.nama as kecamatan',
+            ])
+            ->map(fn ($row) => [
+                RekapHeader::JENIS_LABELS[$row->jenis] ?? strtoupper($row->jenis),
+                $row->kecamatan,
+                $row->desa,
+                $row->tps,
+                'Perlu Dicek',
+                $row->catatan_internal,
+            ])
+            ->toArray();
+
+        return Excel::download(
+            new TpsStatusReportExport(
+                'TPS Perlu Dicek',
+                ['Jenis', 'Kecamatan', 'Desa', 'TPS', 'Status', 'Catatan Internal'],
+                $rows
+            ),
+            'TPS_Perlu_Dicek.xlsx'
+        );
+    }
+
     // Mengambil master data sesuai jenis pemilihan dan dapil.
     private function getMaster(string $jenis, ?int $dapilId = null): array
     {
@@ -372,6 +458,14 @@ class AdminController extends Controller
         }
 
         return ['partais' => $partais->orderBy('nomor_urut')->get()];
+    }
+
+    private function activeLegislativeJenis(): array
+    {
+        return collect(PemiluSetting::aktif())
+            ->filter(fn ($jenis) => in_array($jenis, RekapHeader::LEGISLATIVE_TYPES, true))
+            ->values()
+            ->all();
     }
 
     // Mengambil nomor partai untuk akun partai pada jenis legislatif.
