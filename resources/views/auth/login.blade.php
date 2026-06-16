@@ -4,8 +4,11 @@
 @php($party = $party ?? config('party'))
 <div class="relative z-10 w-full max-w-md px-5">
     <div class="text-center mb-10">
+        <div class="mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-2xl border border-red-500/20 bg-white p-3 shadow-xl shadow-red-950/10 dark:bg-gray-900">
+            <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }} Logo" class="h-full w-full object-contain">
+        </div>
         <span class="inline-block bg-red-600 text-white text-[10px] tracking-[3px] px-3 py-1 mb-4 rounded font-semibold">{{ $party['name'] }} - {{ $party['active_year'] }}</span>
-        <h1 class="font-display text-6xl tracking-[4px] dark:text-white text-gray-900">SIM<span class="text-red-600">AP</span></h1>
+        <h1 class="font-display text-5xl tracking-[4px] dark:text-white text-gray-900">{{ $party['app_name'] }}</h1>
         <p class="text-[11px] dark:text-gray-500 text-gray-400 tracking-[2px] uppercase mt-2">{{ $party['tagline'] }}</p>
     </div>
 

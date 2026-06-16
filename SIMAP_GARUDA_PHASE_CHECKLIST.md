@@ -62,6 +62,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Simpan nomor urut historis 2024 sebagai metadata, bukan identitas utama.
 - [x] Ganti placeholder logo dengan logo resmi.
 - [x] Jadikan warna utama/aksen Partai Garuda sebagai konfigurasi UI.
+- [x] Tambahkan logo Garuda dan nama aplikasi dari konfigurasi ke halaman login.
 
 ### 2. Rapikan Role Teknis
 
@@ -165,6 +166,7 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 ## Catatan Status Terbaru
 
 - Phase 2A identitas Garuda selesai: konfigurasi `config/party.php` sudah menjadi sumber identitas, logo, warna, label role, dan metadata nomor historis.
+- Halaman login sudah menampilkan logo Garuda dan nama aplikasi dari konfigurasi agar identitas Partai Garuda terlihat sejak layar pertama.
 - Rekap non-legislatif sudah dinonaktifkan dari aplikasi dan dibersihkan lewat migration `2026_06_14_000002_remove_non_party_rekap_data`.
 - Jenis rekap resmi SIMAP Garuda sekarang hanya `dpr_ri`, `dprd_prov`, dan `dprd_kab`.
 - Single-party guard tahap pertama selesai: setup hanya menampilkan master Partai Garuda, admin tidak bisa menambah partai selain Garuda, dan caleg tidak bisa ditambahkan ke partai kompetitor.
