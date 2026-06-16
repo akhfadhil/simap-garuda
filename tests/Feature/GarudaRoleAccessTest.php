@@ -125,6 +125,22 @@ class GarudaRoleAccessTest extends TestCase
             ->assertNotFound();
 
         $this->actingAs($this->admin)
+            ->get(route('admin.rekap.show', 'ppwp'))
+            ->assertNotFound();
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.rekap.export', 'ppwp'))
+            ->assertNotFound();
+
+        $this->actingAs($this->admin)
+            ->getJson(route('admin.rekap.chart.data', ['jenis' => 'ppwp']))
+            ->assertNotFound();
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.rekap.export.download', ['jenis' => 'ppwp', 'level' => 'kabupaten']))
+            ->assertSessionHasErrors('jenis');
+
+        $this->actingAs($this->admin)
             ->post(route('admin.setup.ppwp.store'), [
                 'calons' => [
                     ['nomor_urut' => 1, 'nama_paslon' => 'Paslon Legacy'],

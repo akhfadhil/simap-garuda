@@ -90,13 +90,8 @@ class AdminController extends Controller
 
         $tpsIds = $kecamatans->flatMap(fn ($kecamatan) => $kecamatan->desas->flatMap(fn ($desa) => $desa->tps->pluck('id')));
         $detailTpsIds = $detailKecamatans->flatMap(fn ($kecamatan) => $kecamatan->desas->flatMap(fn ($desa) => $desa->tps->pluck('id')));
-        $relations = match ($jenis) {
-            'ppwp' => ['ppwpSuaras.calon'],
-            'gubernur' => ['gubernurSuaras.calon'],
-            'bupati' => ['bupatiSuaras.calon'],
-            'dpd' => ['dpdSuaras.calon'],
-            default => ['partaiSuaras.partai', 'calegSuaras.caleg'],
-        };
+        abort_unless(in_array($jenis, RekapHeader::LEGISLATIVE_TYPES, true), 404);
+        $relations = ['partaiSuaras.partai', 'calegSuaras.caleg'];
         $rekaps = RekapHeader::query()
             ->whereIn('tps_id', $tpsIds)
             ->where('jenis', $jenis)
@@ -325,15 +320,15 @@ class AdminController extends Controller
 
         $tpsIds = $desas->flatMap(fn ($d) => $d->tps->pluck('id'));
 
-        $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+        abort_unless(in_array($jenis, RekapHeader::LEGISLATIVE_TYPES, true), 404);
+
+        $rekaps = \App\Models\RekapHeader::with(['partaiSuaras', 'calegSuaras'])
             ->whereIn('tps_id', $tpsIds)
             ->where('jenis', $jenis)
             ->get();
 
         $tpsList = $desas->flatMap(fn ($d) => $d->tps)->values();
         $master = $this->getAllMaster();
-        $masterJenis = $master[$jenis] ?? [];
-
         $wilayah = $kecId
             ? 'Kec. '.\App\Models\Kecamatan::find($kecId)?->nama
             : 'Semua Kecamatan';
@@ -433,19 +428,6 @@ class AdminController extends Controller
     // Mengambil master data sesuai jenis pemilihan dan dapil.
     private function getMaster(string $jenis, ?int $dapilId = null): array
     {
-        if ($jenis === 'ppwp') {
-            return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'gubernur') {
-            return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'bupati') {
-            return ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'dpd') {
-            return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
-        }
-
         $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis)->garuda();
         $partaiNomor = $this->partaiScopeNomor($jenis);
 
@@ -519,31 +501,6 @@ class AdminController extends Controller
                 'suaraSah' => [],
             ];
 
-            $candidateTables = [
-                'ppwp' => 'rekap_ppwp_suaras',
-                'gubernur' => 'rekap_gubernur_suaras',
-                'bupati' => 'rekap_bupati_suaras',
-                'dpd' => 'rekap_dpd_suaras',
-            ];
-
-            if (isset($candidateTables[$jenis])) {
-                $rows = $this->baseSuaraAggregateQuery($candidateTables[$jenis], $jenis, $dapilId)
-                    ->select('k.id as kecamatan_id', 's.calon_id', DB::raw('SUM(s.suara) as total_suara'))
-                    ->groupBy('k.id', 's.calon_id')
-                    ->get();
-
-                foreach ($rows as $row) {
-                    $kecamatanId = (int) $row->kecamatan_id;
-                    $calonId = (int) $row->calon_id;
-                    $total = (int) $row->total_suara;
-
-                    $result['calons'][$kecamatanId][$calonId] = $total;
-                    $result['suaraSah'][$kecamatanId] = ($result['suaraSah'][$kecamatanId] ?? 0) + $total;
-                }
-
-                return $result;
-            }
-
             $partaiRows = $this->baseSuaraAggregateQuery('rekap_partai_suaras', $jenis, $dapilId)
                 ->join('rekap_partais as p', 'p.id', '=', 's.partai_id')
                 ->where('p.jenis', $jenis)
@@ -612,10 +569,6 @@ class AdminController extends Controller
         $partaiNomorDprdKab = $this->partaiScopeNomor('dprd_kab');
 
         return [
-            'ppwp' => ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
-            'gubernur' => ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
-            'bupati' => ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
-            'dpd' => ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->when($partaiNomorDprRi, fn ($q) => $q->where('nomor_urut', $partaiNomorDprRi))->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->when($partaiNomorDprdProv, fn ($q) => $q->where('nomor_urut', $partaiNomorDprdProv))->orderBy('nomor_urut')->get()],
             'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->garuda()->when($partaiNomorDprdKab, fn ($q) => $q->where('nomor_urut', $partaiNomorDprdKab))->orderBy('nomor_urut')->get()],
@@ -634,7 +587,7 @@ class AdminController extends Controller
     public function exportDownload(Request $request)
     {
         $request->validate([
-            'jenis' => 'required|in:'.implode(',', array_keys(\App\Models\RekapHeader::JENIS_LABELS)),
+            'jenis' => 'required|in:'.implode(',', \App\Models\RekapHeader::LEGISLATIVE_TYPES),
             'level' => 'required|in:tps,desa,kecamatan,kabupaten',
         ]);
 
@@ -645,7 +598,7 @@ class AdminController extends Controller
         switch ($level) {
             case 'tps':
                 $tps = \App\Models\Tps::with('desa.kecamatan')->findOrFail($request->tps_id);
-                $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+                $rekaps = \App\Models\RekapHeader::with(['partaiSuaras', 'calegSuaras'])
                     ->where('tps_id', $tps->id)->where('jenis', $jenis)->get();
                 $tpsList = collect([$tps]);
                 $master = $this->getAllMaster();
@@ -658,7 +611,7 @@ class AdminController extends Controller
             case 'desa':
                 $desa = \App\Models\Desa::with('tps', 'kecamatan')->findOrFail($request->desa_id);
                 $tpsIds = $desa->tps->pluck('id');
-                $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+                $rekaps = \App\Models\RekapHeader::with(['partaiSuaras', 'calegSuaras'])
                     ->whereIn('tps_id', $tpsIds)->where('jenis', $jenis)->get();
                 $tpsList = $desa->tps;
                 $master = $this->getAllMaster();
@@ -672,7 +625,7 @@ class AdminController extends Controller
                 $kecamatan = \App\Models\Kecamatan::findOrFail($request->kecamatan_id);
                 $desas = \App\Models\Desa::with('tps')->where('kecamatan_id', $kecamatan->id)->get();
                 $tpsIds = $desas->flatMap(fn ($d) => $d->tps->pluck('id'));
-                $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+                $rekaps = \App\Models\RekapHeader::with(['partaiSuaras', 'calegSuaras'])
                     ->whereIn('tps_id', $tpsIds)->where('jenis', $jenis)->get();
                 $tpsList = $desas->flatMap(fn ($d) => $d->tps)->values();
                 $master = $this->getAllMaster();
@@ -687,7 +640,7 @@ class AdminController extends Controller
             case 'kabupaten':
                 $desas = \App\Models\Desa::with('tps')->get();
                 $tpsIds = $desas->flatMap(fn ($d) => $d->tps->pluck('id'));
-                $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+                $rekaps = \App\Models\RekapHeader::with(['partaiSuaras', 'calegSuaras'])
                     ->whereIn('tps_id', $tpsIds)->where('jenis', $jenis)->get();
                 $tpsList = $desas->flatMap(fn ($d) => $d->tps)->values();
                 $master = $this->getAllMaster();
@@ -728,234 +681,9 @@ class AdminController extends Controller
         $dapilId = $request->dapil_id;
         $activeDapilId = $jenis === 'dprd_kab' && $dapilId ? (int) $dapilId : null;
 
-        if (in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'], true)) {
-            return $this->chartLegislatifData($jenis, $level, $kecId, $desaId, $tpsId, $dapilId, $activeDapilId);
-        }
+        abort_unless(in_array($jenis, RekapHeader::LEGISLATIVE_TYPES, true), 404);
 
-        if (in_array($jenis, ['ppwp', 'dpd', 'gubernur', 'bupati'], true)) {
-            return $this->chartCalonData($jenis, $level, $kecId, $desaId, $tpsId, $dapilId);
-        }
-
-        $tpsQuery = Tps::query();
-        if ($tpsId) {
-            $tpsQuery->where('id', $tpsId);
-        } elseif ($desaId) {
-            $tpsQuery->where('desa_id', $desaId);
-        } elseif ($kecId) {
-            $tpsQuery->whereHas('desa', fn ($q) => $q->where('kecamatan_id', $kecId));
-        } elseif ($dapilId) {
-            $tpsQuery->whereHas('desa.kecamatan', fn ($q) => $q->where('dapil_id', $dapilId));
-        }
-        $tpsIds = $tpsQuery->pluck('id');
-
-        $rekaps = \App\Models\RekapHeader::with(['ppwpSuaras.calon', 'gubernurSuaras.calon', 'bupatiSuaras.calon', 'dpdSuaras.calon', 'partaiSuaras', 'calegSuaras'])
-            ->whereIn('tps_id', $tpsIds)
-            ->where('jenis', $jenis)
-            ->get();
-
-        $data = [];
-
-        if ($level === 'kabupaten') {
-            $kecamatans = Kecamatan::with(['desas.tps'])->orderBy('nama')->get();
-            foreach ($kecamatans as $kec) {
-                $kecTpsIds = $kec->desas->flatMap(fn ($d) => $d->tps->pluck('id'))->toArray();
-                $data[] = [
-                    'label' => $kec->nama,
-                    'suara' => $this->buildSuaraData($rekaps->whereIn('tps_id', $kecTpsIds), $jenis, $activeDapilId),
-                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $kecTpsIds), count($kecTpsIds)),
-                ];
-            }
-        } elseif ($level === 'dapil' && $dapilId) {
-            $kecamatans = Kecamatan::with(['desas.tps'])->where('dapil_id', $dapilId)->orderBy('nama')->get();
-            foreach ($kecamatans as $kec) {
-                $kecTpsIds = $kec->desas->flatMap(fn ($d) => $d->tps->pluck('id'))->toArray();
-                $data[] = [
-                    'label' => $kec->nama,
-                    'suara' => $this->buildSuaraData($rekaps->whereIn('tps_id', $kecTpsIds), $jenis, $activeDapilId),
-                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $kecTpsIds), count($kecTpsIds)),
-                ];
-            }
-        } elseif ($level === 'kecamatan' && $kecId) {
-            $desas = \App\Models\Desa::where('kecamatan_id', $kecId)->with('tps')->orderBy('nama')->get();
-            foreach ($desas as $desa) {
-                $desaTpsIds = $desa->tps->pluck('id')->toArray();
-                $data[] = [
-                    'label' => $desa->nama,
-                    'suara' => $this->buildSuaraData($rekaps->whereIn('tps_id', $desaTpsIds), $jenis, $activeDapilId),
-                    'partisipasi' => $this->buildPartisipasiData($rekaps->whereIn('tps_id', $desaTpsIds), count($desaTpsIds)),
-                ];
-            }
-        } elseif ($level === 'desa' && $desaId) {
-            $tpsList = \App\Models\Tps::where('desa_id', $desaId)->orderBy('nama')->get();
-            foreach ($tpsList as $tps) {
-                $r = $rekaps->where('tps_id', $tps->id)->first();
-                $data[] = [
-                    'label' => $tps->nama,
-                    'suara' => $this->buildSuaraData($r ? collect([$r]) : collect(), $jenis, $activeDapilId),
-                    'partisipasi' => $this->buildPartisipasiData($r ? collect([$r]) : collect(), 1),
-                ];
-            }
-        } elseif ($level === 'tps' && $tpsId) {
-            $tps = Tps::find($tpsId);
-            $r = $rekaps->where('tps_id', $tpsId)->first();
-            $data[] = [
-                'label' => $tps->nama,
-                'suara' => $this->buildSuaraData($r ? collect([$r]) : collect(), $jenis, $activeDapilId),
-                'partisipasi' => $this->buildPartisipasiData($r ? collect([$r]) : collect(), 1),
-            ];
-        }
-
-        $master = $this->getMaster($jenis, $activeDapilId);
-        $labels = [];
-        $searchMeta = [];
-        if (in_array($jenis, ['ppwp', 'dpd', 'gubernur', 'bupati'])) {
-            $labels = $master['calons']->map(fn ($c) => in_array($jenis, ['ppwp', 'gubernur', 'bupati']) ? $c->nama_paslon : $c->nama_calon)->toArray();
-            $searchMeta = $labels;
-        } else {
-            $labels = $master['partais']->map(fn ($p) => $p->nama_partai)->toArray();
-            $searchMeta = $master['partais']->map(function ($partai) {
-                return trim($partai->nama_partai.' '.$partai->calegs->pluck('nama_caleg')->implode(' '));
-            })->toArray();
-        }
-
-        return response()->json([
-            'type' => in_array($jenis, ['ppwp', 'dpd']) ? 'pie' : 'bar',
-            'jenis' => $jenis,
-            'labels' => $labels,
-            'search_meta' => $searchMeta,
-            'candidate_rank' => $this->buildCandidateRanking($rekaps, $jenis, $activeDapilId),
-            'data' => $data,
-        ]);
-    }
-
-    // Mengambil data chart untuk pemilihan berbasis calon/paslon.
-    private function chartCalonData(string $jenis, string $level, $kecId, $desaId, $tpsId, $dapilId)
-    {
-        return response()->json(RekapAdminCache::rememberChart([
-            'version' => 1,
-            'jenis' => $jenis,
-            'level' => $level,
-            'kecamatan_id' => $kecId,
-            'desa_id' => $desaId,
-            'tps_id' => $tpsId,
-            'dapil_id' => $dapilId,
-        ], function () use ($jenis, $level, $kecId, $desaId, $tpsId, $dapilId) {
-            $config = $this->chartCalonConfig($jenis);
-            $master = $this->getMaster($jenis);
-            $calons = $master['calons'];
-            $labels = $calons->map(fn ($calon) => $calon->{$config['label']})->toArray();
-            $calonIds = $calons->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
-            $calonIndex = array_flip($calonIds);
-            $groups = $this->chartGroupRows($level, $kecId, $desaId, $tpsId, $dapilId);
-            $groupExpr = $this->chartGroupExpression($level);
-
-            $suaraByGroup = [];
-            foreach ($groups as $group) {
-                $suaraByGroup[(int) $group['id']] = array_fill(0, count($calonIds), 0);
-            }
-
-            if ($groups->isNotEmpty() && count($calonIds) > 0) {
-                $suaraRows = $this->applyChartScope(
-                    DB::table($config['table'].' as s')
-                        ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
-                        ->join('tps as t', 't.id', '=', 'h.tps_id')
-                        ->join('desas as d', 'd.id', '=', 't.desa_id')
-                        ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id'),
-                    $jenis,
-                    $kecId,
-                    $desaId,
-                    $tpsId,
-                    $dapilId
-                )
-                    ->whereIn('s.calon_id', $calonIds)
-                    ->selectRaw($groupExpr.' as group_id, s.calon_id, SUM(s.suara) as total_suara')
-                    ->groupBy(DB::raw($groupExpr), 's.calon_id')
-                    ->get();
-
-                foreach ($suaraRows as $row) {
-                    $groupId = (int) $row->group_id;
-                    $calonId = (int) $row->calon_id;
-                    if (isset($suaraByGroup[$groupId], $calonIndex[$calonId])) {
-                        $suaraByGroup[$groupId][$calonIndex[$calonId]] = (int) $row->total_suara;
-                    }
-                }
-            }
-
-            $partisipasiRows = $this->applyChartScope(
-                DB::table('rekap_headers as h')
-                    ->join('tps as t', 't.id', '=', 'h.tps_id')
-                    ->join('desas as d', 'd.id', '=', 't.desa_id')
-                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id'),
-                $jenis,
-                $kecId,
-                $desaId,
-                $tpsId,
-                $dapilId
-            )
-                ->selectRaw($groupExpr.' as group_id')
-                ->selectRaw('SUM(COALESCE(h.dpt_lk, 0)) as dpt_lk')
-                ->selectRaw('SUM(COALESCE(h.dpt_pr, 0)) as dpt_pr')
-                ->selectRaw('SUM(COALESCE(h.pengguna_dpt_lk, 0) + COALESCE(h.pengguna_dpt_pr, 0) + COALESCE(h.pengguna_dptb_lk, 0) + COALESCE(h.pengguna_dptb_pr, 0) + COALESCE(h.pengguna_dpk_lk, 0) + COALESCE(h.pengguna_dpk_pr, 0)) as hadir')
-                ->selectRaw('COUNT(DISTINCT h.tps_id) as tps_masuk')
-                ->groupBy(DB::raw($groupExpr))
-                ->get()
-                ->keyBy(fn ($row) => (int) $row->group_id);
-
-            $data = $groups->map(function ($group) use ($suaraByGroup, $partisipasiRows) {
-                $groupId = (int) $group['id'];
-                $partisipasi = $partisipasiRows->get($groupId);
-                $dptLk = (int) ($partisipasi->dpt_lk ?? 0);
-                $dptPr = (int) ($partisipasi->dpt_pr ?? 0);
-
-                return [
-                    'label' => $group['label'],
-                    'suara' => $suaraByGroup[$groupId] ?? [],
-                    'partisipasi' => [
-                        'dpt' => $dptLk + $dptPr,
-                        'dpt_lk' => $dptLk,
-                        'dpt_pr' => $dptPr,
-                        'hadir' => (int) ($partisipasi->hadir ?? 0),
-                        'tps_masuk' => (int) ($partisipasi->tps_masuk ?? 0),
-                        'tps_total' => (int) $group['tps_total'],
-                    ],
-                ];
-            })->values()->toArray();
-
-            $candidateTotals = array_fill(0, count($labels), 0);
-            foreach ($data as $row) {
-                foreach ($row['suara'] as $index => $suara) {
-                    $candidateTotals[$index] = ($candidateTotals[$index] ?? 0) + (int) $suara;
-                }
-            }
-
-            return [
-                'type' => in_array($jenis, ['ppwp', 'dpd'], true) ? 'pie' : 'bar',
-                'jenis' => $jenis,
-                'labels' => $labels,
-                'search_meta' => $labels,
-                'candidate_rank' => collect($labels)
-                    ->map(fn ($label, $index) => [
-                        'label' => $label,
-                        'meta' => '',
-                        'suara' => (int) ($candidateTotals[$index] ?? 0),
-                    ])
-                    ->sortByDesc('suara')
-                    ->values()
-                    ->toArray(),
-                'data' => $data,
-            ];
-        }));
-    }
-
-    // Mengambil konfigurasi tabel suara calon/paslon.
-    private function chartCalonConfig(string $jenis): array
-    {
-        return match ($jenis) {
-            'ppwp' => ['table' => 'rekap_ppwp_suaras', 'label' => 'nama_paslon'],
-            'gubernur' => ['table' => 'rekap_gubernur_suaras', 'label' => 'nama_paslon'],
-            'bupati' => ['table' => 'rekap_bupati_suaras', 'label' => 'nama_paslon'],
-            'dpd' => ['table' => 'rekap_dpd_suaras', 'label' => 'nama_calon'],
-        };
+        return $this->chartLegislatifData($jenis, $level, $kecId, $desaId, $tpsId, $dapilId, $activeDapilId);
     }
 
     // Mengambil data chart untuk pemilihan legislatif.
@@ -1267,26 +995,13 @@ class AdminController extends Controller
     // Membentuk data suara untuk chart fallback.
     private function buildSuaraData($rekaps, string $jenis, ?int $dapilId = null): array
     {
-        if (in_array($jenis, ['ppwp', 'dpd', 'gubernur', 'bupati'])) {
-            $master = $this->getMaster($jenis, $dapilId);
+        $master = $this->getMaster($jenis, $dapilId);
 
-            return $master['calons']->map(function ($calon) use ($rekaps, $jenis) {
-                return $rekaps->sum(fn ($r) => match ($jenis) {
-                    'ppwp' => $r->ppwpSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                    'gubernur' => $r->gubernurSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                    'bupati' => $r->bupatiSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                    'dpd' => $r->dpdSuaras->firstWhere('calon_id', $calon->id)?->suara ?? 0,
-                });
-            })->toArray();
-        } else {
-            $master = $this->getMaster($jenis, $dapilId);
-
-            return $master['partais']->map(function ($partai) use ($rekaps) {
-                return $rekaps->sum(fn ($r) => ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) +
-                    $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara')
-                );
-            })->toArray();
-        }
+        return $master['partais']->map(function ($partai) use ($rekaps) {
+            return $rekaps->sum(fn ($r) => ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) +
+                $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara')
+            );
+        })->toArray();
     }
 
     // Menghitung data partisipasi dari rekap.
@@ -1308,7 +1023,7 @@ class AdminController extends Controller
     public function editTps(Request $request, string $jenis, Tps $tps)
     {
         abort_if($request->user()?->role !== 'admin', 403);
-        abort_unless(array_key_exists($jenis, RekapHeader::JENIS_LABELS), 404);
+        abort_unless(in_array($jenis, RekapHeader::LEGISLATIVE_TYPES, true), 404);
 
         $returnUrl = url()->previous();
         if (! str_starts_with($returnUrl, url('/'))) {
@@ -1329,7 +1044,7 @@ class AdminController extends Controller
     public function inlineUpdate(Request $request, string $jenis)
     {
         abort_if($request->user()?->role !== 'admin', 403);
-        abort_unless(array_key_exists($jenis, RekapHeader::JENIS_LABELS), 404);
+        abort_unless(in_array($jenis, RekapHeader::LEGISLATIVE_TYPES, true), 404);
 
         $data = $request->validate([
             'changes' => ['required', 'array', 'min:1'],
@@ -1397,16 +1112,7 @@ class AdminController extends Controller
         }
 
         if (str_starts_with($rowKey, 'calon:')) {
-            $calonId = (int) substr($rowKey, strlen('calon:'));
-            match ($jenis) {
-                'ppwp' => $rekap->ppwpSuaras()->updateOrCreate(['calon_id' => $calonId], ['suara' => $value]),
-                'gubernur' => $rekap->gubernurSuaras()->updateOrCreate(['calon_id' => $calonId], ['suara' => $value]),
-                'bupati' => $rekap->bupatiSuaras()->updateOrCreate(['calon_id' => $calonId], ['suara' => $value]),
-                'dpd' => $rekap->dpdSuaras()->updateOrCreate(['calon_id' => $calonId], ['suara' => $value]),
-                default => abort(422, 'Baris calon tidak valid untuk jenis pemilihan ini.'),
-            };
-
-            return;
+            abort(422, 'Baris calon tidak valid untuk SIMAP Garuda.');
         }
 
         if (str_starts_with($rowKey, 'partai:') && in_array($jenis, ['dpr_ri', 'dprd_prov', 'dprd_kab'], true)) {
