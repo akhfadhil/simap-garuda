@@ -116,6 +116,7 @@ class GarudaRoleAccessTest extends TestCase
         $this->assertFalse(\Route::has('dokumen.upload'));
         $this->assertFalse(\Route::has('admin.rekap.unlock'));
         $this->assertFalse(\Route::has('admin.rekap.inline-update'));
+        $this->assertFalse(view()->exists('welcome'));
     }
 
     public function test_non_party_rekap_types_are_not_accessible(): void
