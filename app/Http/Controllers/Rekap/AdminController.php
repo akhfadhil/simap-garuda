@@ -870,7 +870,7 @@ class AdminController extends Controller
         $partaiNomor = $this->partaiScopeNomor($jenis);
 
         return response()->json(RekapAdminCache::rememberChart([
-            'version' => 2,
+            'version' => 3,
             'jenis' => $jenis,
             'level' => $level,
             'kecamatan_id' => $kecId,
@@ -882,14 +882,15 @@ class AdminController extends Controller
         ], function () use ($jenis, $level, $kecId, $desaId, $tpsId, $dapilId, $activeDapilId) {
             $master = $this->getMaster($jenis, $activeDapilId);
             $partais = $master['partais'];
-            $labels = $partais->map(fn ($p) => $p->nama_partai)->toArray();
-            $searchMeta = $partais->map(function ($partai) {
-                return trim($partai->nama_partai.' '.$partai->calegs->pluck('nama_caleg')->implode(' '));
-            })->toArray();
+            $labels = ['Total Suara '.config('party.short_name')];
+            $searchMeta = [
+                $partais
+                    ->map(fn ($partai) => trim($partai->nama_partai.' '.$partai->calegs->pluck('nama_caleg')->implode(' ')))
+                    ->implode(' '),
+            ];
 
             $groups = $this->chartGroupRows($level, $kecId, $desaId, $tpsId, $dapilId);
             $partaiIds = $partais->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
-            $partaiIndex = array_flip($partaiIds);
             $groupExpr = $this->chartGroupExpression($level);
             $calegs = $partais
                 ->flatMap(fn ($partai) => $partai->calegs->map(fn ($caleg) => [
@@ -900,7 +901,7 @@ class AdminController extends Controller
 
             $suaraByGroup = [];
             foreach ($groups as $group) {
-                $suaraByGroup[(int) $group['id']] = array_fill(0, count($partaiIds), 0);
+                $suaraByGroup[(int) $group['id']] = [0];
             }
             $groupIndex = array_flip($groups->pluck('id')->map(fn ($id) => (int) $id)->values()->all());
             $suaraByCaleg = array_fill_keys($calegs->pluck('id')->values()->all(), 0);
@@ -926,15 +927,14 @@ class AdminController extends Controller
                     ->where('p.jenis', $jenis)
                     ->when($jenis === 'dprd_kab' && $activeDapilId, fn ($query) => $query->where('p.dapil_id', $activeDapilId))
                     ->whereIn('s.partai_id', $partaiIds)
-                    ->selectRaw($groupExpr.' as group_id, s.partai_id, SUM(s.suara) as total_suara')
-                    ->groupBy(DB::raw($groupExpr), 's.partai_id')
+                    ->selectRaw($groupExpr.' as group_id, SUM(s.suara) as total_suara')
+                    ->groupBy(DB::raw($groupExpr))
                     ->get();
 
                 foreach ($partaiRows as $row) {
                     $groupId = (int) $row->group_id;
-                    $partaiId = (int) $row->partai_id;
-                    if (isset($suaraByGroup[$groupId], $partaiIndex[$partaiId])) {
-                        $suaraByGroup[$groupId][$partaiIndex[$partaiId]] += (int) $row->total_suara;
+                    if (isset($suaraByGroup[$groupId])) {
+                        $suaraByGroup[$groupId][0] += (int) $row->total_suara;
                     }
                 }
 
@@ -955,17 +955,16 @@ class AdminController extends Controller
                     ->where('p.jenis', $jenis)
                     ->when($jenis === 'dprd_kab' && $activeDapilId, fn ($query) => $query->where('p.dapil_id', $activeDapilId))
                     ->whereIn('p.id', $partaiIds)
-                    ->selectRaw($groupExpr.' as group_id, p.id as partai_id, s.caleg_id, SUM(s.suara) as total_suara')
-                    ->groupBy(DB::raw($groupExpr), 'p.id', 's.caleg_id')
+                    ->selectRaw($groupExpr.' as group_id, s.caleg_id, SUM(s.suara) as total_suara')
+                    ->groupBy(DB::raw($groupExpr), 's.caleg_id')
                     ->get();
 
                 foreach ($calegRows as $row) {
                     $groupId = (int) $row->group_id;
-                    $partaiId = (int) $row->partai_id;
                     $calegId = (int) $row->caleg_id;
                     $total = (int) $row->total_suara;
-                    if (isset($suaraByGroup[$groupId], $partaiIndex[$partaiId])) {
-                        $suaraByGroup[$groupId][$partaiIndex[$partaiId]] += $total;
+                    if (isset($suaraByGroup[$groupId])) {
+                        $suaraByGroup[$groupId][0] += $total;
                     }
                     if (array_key_exists($calegId, $suaraByCaleg)) {
                         $suaraByCaleg[$calegId] += $total;

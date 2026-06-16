@@ -92,7 +92,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Buat wilayah kuat dan lemah per kecamatan/desa.
 - [x] Buat daftar TPS belum masuk.
 - [ ] Buat daftar TPS bermasalah atau perlu dicek internal.
-- [ ] Sesuaikan chart agar default menampilkan Garuda, bukan ranking semua partai.
+- [x] Sesuaikan chart agar default menampilkan Garuda, bukan ranking semua partai.
 
 ### 5. Validasi Input Manual TPS
 
@@ -160,7 +160,7 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 | 8 | Sesuaikan manajemen user agar mengikuti hierarchy partai | Selesai untuk MVP: manajemen user dibatasi ke Admin Partai, Korcam, Kordes, dan Saksi TPS. |
 | 9 | Tentukan apakah data diinput manual, import Excel/CSV, atau import JSON | Selesai: SIMAP Garuda hanya memakai input manual lewat form Saksi TPS; import command dihapus. |
 | 10 | Buat dashboard awal khusus partai | Sebagian selesai: identitas, kartu total suara Garuda, ranking caleg Garuda, progres TPS, TPS belum masuk, dan wilayah kuat/lemah tersedia; TPS bermasalah belum selesai. |
-| 11 | Sesuaikan grafik dan export agar fokus pada suara partai/caleg | Sebagian selesai: dashboard legislatif dan export rekap sudah fokus Garuda; chart default dan export TPS belum masuk/bermasalah belum selesai. |
+| 11 | Sesuaikan grafik dan export agar fokus pada suara partai/caleg | Sebagian selesai: dashboard legislatif, chart default Garuda, dan export rekap sudah fokus Garuda; export TPS belum masuk/bermasalah belum selesai. |
 | 12 | Jalankan test dasar login, akses role, scope wilayah, input/import data, agregasi, dan export | Sebagian selesai: test login legacy, akses role, scope wilayah, guard jenis rekap, guard input Garuda, dan export Garuda tersedia; coverage validasi input manual lanjutan, agregasi, dan chart perlu ditambah. |
 
 ## Catatan Status Terbaru
@@ -175,4 +175,4 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Form input Saksi TPS sudah disederhanakan: hanya suara Partai Garuda dan caleg Garuda yang diisi; data DPT, surat suara, disabilitas, serta suara tidak sah tidak lagi diminta dari saksi.
 - Export rekap TPS/desa/kecamatan/kabupaten sudah dibersihkan agar hanya membawa suara Partai Garuda, suara caleg Garuda, total Garuda, dan status input TPS.
 - Dashboard legislatif sudah menampilkan kartu total suara Garuda, ranking caleg Garuda, progres TPS, daftar TPS belum masuk, serta wilayah kuat/lemah.
-- Next step: lanjut dashboard khusus partai untuk TPS bermasalah dan chart default Garuda.
+- Next step: lanjut status internal TPS bermasalah dan export TPS belum masuk/bermasalah.

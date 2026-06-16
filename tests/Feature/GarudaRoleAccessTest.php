@@ -300,6 +300,73 @@ class GarudaRoleAccessTest extends TestCase
         $this->assertStringNotContainsString('Tidak Sah', $content);
     }
 
+    public function test_admin_chart_defaults_to_garuda_total_and_calegs(): void
+    {
+        $garuda = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 11,
+            'nama_partai' => 'Partai Garuda',
+        ]);
+        $competitor = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 1,
+            'nama_partai' => 'Partai Kompetitor',
+        ]);
+        $garudaCaleg = RekapCaleg::create([
+            'partai_id' => $garuda->id,
+            'nomor_urut' => 1,
+            'nama_caleg' => 'Caleg Garuda',
+        ]);
+        $competitorCaleg = RekapCaleg::create([
+            'partai_id' => $competitor->id,
+            'nomor_urut' => 1,
+            'nama_caleg' => 'Caleg Kompetitor',
+        ]);
+        $rekap = RekapHeader::create([
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'final',
+            'diinput_oleh' => $this->saksiA->id,
+        ]);
+        RekapPartaiSuara::create([
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 20,
+        ]);
+        RekapPartaiSuara::create([
+            'rekap_id' => $rekap->id,
+            'partai_id' => $competitor->id,
+            'suara' => 200,
+        ]);
+        RekapCalegSuara::create([
+            'rekap_id' => $rekap->id,
+            'caleg_id' => $garudaCaleg->id,
+            'suara' => 30,
+        ]);
+        RekapCalegSuara::create([
+            'rekap_id' => $rekap->id,
+            'caleg_id' => $competitorCaleg->id,
+            'suara' => 300,
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->getJson(route('admin.rekap.chart.data', [
+                'jenis' => 'dpr_ri',
+                'level' => 'kabupaten',
+            ]));
+
+        $response->assertOk()
+            ->assertJsonPath('labels.0', 'Total Suara Garuda')
+            ->assertJsonPath('data.0.suara.0', 50)
+            ->assertJsonMissing(['label' => 'Caleg Kompetitor'])
+            ->assertJsonMissing(['meta' => 'Partai Kompetitor']);
+
+        $payload = $response->json();
+        $this->assertSame(['Total Suara Garuda'], $payload['labels']);
+        $this->assertSame('Caleg Garuda', $payload['candidate_rank'][0]['label']);
+        $this->assertSame(30, $payload['candidate_rank'][0]['suara']);
+    }
+
     private function user(string $role, array $extra = []): User
     {
         $defaults = [
