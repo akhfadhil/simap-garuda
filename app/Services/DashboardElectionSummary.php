@@ -23,6 +23,7 @@ class DashboardElectionSummary
 
         return RekapAdminCache::rememberDashboardSummary($this->cacheParts($user, $scope, $activeJenis), function () use ($activeJenis, $scope) {
             $sections = [];
+            $overview = $this->overview($activeJenis, $scope);
 
             foreach ($activeJenis as $jenis) {
                 if (in_array($jenis, ['ppwp', 'gubernur', 'bupati', 'dpd'], true)) {
@@ -46,6 +47,7 @@ class DashboardElectionSummary
 
             return [
                 'scope_label' => $scope['label'],
+                'overview' => $overview,
                 'sections' => array_values(array_filter($sections)),
             ];
         });
@@ -177,6 +179,124 @@ class DashboardElectionSummary
             'total_suara' => $totalSuara,
             'rows' => $rows,
         ];
+    }
+
+    private function overview(array $activeJenis, array $scope): array
+    {
+        $jenisList = collect($activeJenis)
+            ->filter(fn ($jenis) => in_array($jenis, RekapHeader::LEGISLATIVE_TYPES, true))
+            ->values()
+            ->all();
+
+        $tpsQuery = $this->applyScope(
+            DB::table('tps as t')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id'),
+            $scope
+        );
+
+        $totalTps = (clone $tpsQuery)->count('t.id');
+        $missingTps = collect();
+        $inputTps = 0;
+        $totalSuara = 0;
+
+        if ($jenisList) {
+            $inputTps = (clone $tpsQuery)
+                ->whereExists(function ($query) use ($jenisList) {
+                    $query->selectRaw('1')
+                        ->from('rekap_headers as h')
+                        ->whereColumn('h.tps_id', 't.id')
+                        ->whereIn('h.jenis', $jenisList);
+                })
+                ->count('t.id');
+
+            $missingTps = (clone $tpsQuery)
+                ->whereNotExists(function ($query) use ($jenisList) {
+                    $query->selectRaw('1')
+                        ->from('rekap_headers as h')
+                        ->whereColumn('h.tps_id', 't.id')
+                        ->whereIn('h.jenis', $jenisList);
+                })
+                ->orderBy('k.nama')
+                ->orderBy('d.nama')
+                ->orderBy('t.nama')
+                ->limit(5)
+                ->get([
+                    't.id',
+                    't.nama as tps',
+                    'd.nama as desa',
+                    'k.nama as kecamatan',
+                ])
+                ->map(fn ($row) => [
+                    'id' => (int) $row->id,
+                    'label' => $row->tps.' - '.$row->desa,
+                    'meta' => 'Kec. '.$row->kecamatan,
+                ]);
+
+            $totalSuara = $this->totalGarudaSuara($jenisList, $scope);
+        }
+
+        return [
+            'total_suara_garuda' => $totalSuara,
+            'total_tps' => $totalTps,
+            'input_tps' => $inputTps,
+            'missing_tps_count' => max(0, $totalTps - $inputTps),
+            'missing_tps' => $missingTps->toArray(),
+            'active_jenis_count' => count($jenisList),
+        ];
+    }
+
+    private function totalGarudaSuara(array $jenisList, array $scope): int
+    {
+        $party = config('party');
+        $numbers = collect($party['historical_numbers'] ?? [])
+            ->map(fn ($number) => (int) $number)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $partaiQuery = $this->applyScope(
+            DB::table('rekap_partai_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->join('rekap_partais as p', 'p.id', '=', 's.partai_id')
+                ->whereIn('h.jenis', $jenisList)
+                ->where(function ($query) use ($party, $numbers) {
+                    $query->where('p.nama_partai', 'like', '%'.($party['short_name'] ?? 'Garuda').'%')
+                        ->orWhere('p.nama_partai', 'like', '%'.($party['name'] ?? 'Partai Garuda').'%');
+
+                    if ($numbers) {
+                        $query->orWhereIn('p.nomor_urut', $numbers);
+                    }
+                }),
+            $scope
+        );
+
+        $calegQuery = $this->applyScope(
+            DB::table('rekap_caleg_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
+                ->join('rekap_partais as p', 'p.id', '=', 'c.partai_id')
+                ->whereIn('h.jenis', $jenisList)
+                ->where(function ($query) use ($party, $numbers) {
+                    $query->where('p.nama_partai', 'like', '%'.($party['short_name'] ?? 'Garuda').'%')
+                        ->orWhere('p.nama_partai', 'like', '%'.($party['name'] ?? 'Partai Garuda').'%');
+
+                    if ($numbers) {
+                        $query->orWhereIn('p.nomor_urut', $numbers);
+                    }
+                }),
+            $scope
+        );
+
+        return (int) (clone $partaiQuery)->sum('s.suara')
+            + (int) (clone $calegQuery)->sum('s.suara');
     }
 
     private function canAccessKecamatan(User $user, Kecamatan $kecamatan): bool
@@ -434,7 +554,7 @@ class DashboardElectionSummary
     private function cacheParts(User $user, array $scope, array $activeJenis): array
     {
         return [
-            'version' => 4,
+            'version' => 5,
             'user_role' => $user->role,
             'scope' => $scope,
             'active' => $activeJenis,

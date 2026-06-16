@@ -55,6 +55,7 @@ class DashboardElectionSummaryTest extends TestCase
         $kecamatan = Kecamatan::create(['nama' => 'Kecamatan A']);
         $desa = Desa::create(['nama' => 'Desa A', 'kecamatan_id' => $kecamatan->id]);
         $tps = Tps::create(['nama' => 'TPS 1', 'desa_id' => $desa->id]);
+        Tps::create(['nama' => 'TPS 2', 'desa_id' => $desa->id]);
         $admin = User::create([
             'name' => 'Admin',
             'username' => 'admin_garuda_test',
@@ -81,11 +82,17 @@ class DashboardElectionSummaryTest extends TestCase
 
         $summary = app(DashboardElectionSummary::class)->forUser($admin);
         $section = $summary['sections'][0];
+        $overview = $summary['overview'];
         $labels = collect($section['rows'])->pluck('label')->all();
 
         $this->assertSame('DPR RI - Garuda', $section['title']);
         $this->assertContains('Caleg Garuda No. 1', $labels);
         $this->assertNotContains('Caleg Kompetitor No. 1', $labels);
         $this->assertSame(30, $section['total_suara']);
+        $this->assertSame(50, $overview['total_suara_garuda']);
+        $this->assertSame(2, $overview['total_tps']);
+        $this->assertSame(1, $overview['input_tps']);
+        $this->assertSame(1, $overview['missing_tps_count']);
+        $this->assertSame('TPS 2 - Desa A', $overview['missing_tps'][0]['label']);
     }
 }
