@@ -524,6 +524,192 @@ class GarudaRoleAccessTest extends TestCase
         ]);
     }
 
+    public function test_saksi_can_update_own_draft_rekap_without_duplicate_rows(): void
+    {
+        $garuda = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 11,
+            'nama_partai' => 'Partai Garuda',
+        ]);
+        $rekap = RekapHeader::create([
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'draft',
+            'diinput_oleh' => $this->saksiA->id,
+        ]);
+        RekapPartaiSuara::create([
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 10,
+        ]);
+
+        $this->actingAs($this->saksiA)
+            ->post(route('rekap.store', 'dpr_ri'), [
+                'suara_partai' => [
+                    $garuda->id => 35,
+                ],
+            ])
+            ->assertRedirect(route('rekap.index'));
+
+        $this->assertSame(1, RekapHeader::where('tps_id', $this->tpsA->id)->where('jenis', 'dpr_ri')->count());
+        $this->assertSame(1, RekapPartaiSuara::where('rekap_id', $rekap->id)->where('partai_id', $garuda->id)->count());
+        $this->assertDatabaseHas('rekap_partai_suaras', [
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 35,
+        ]);
+    }
+
+    public function test_kordes_and_korcam_can_update_existing_draft_rekap_inside_scope(): void
+    {
+        $garuda = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 11,
+            'nama_partai' => 'Partai Garuda',
+        ]);
+        $rekap = RekapHeader::create([
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'draft',
+            'diinput_oleh' => $this->saksiA->id,
+        ]);
+        RekapPartaiSuara::create([
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 10,
+        ]);
+
+        $this->actingAs($this->kordesA)
+            ->withSession(['admin_view_tps_id' => $this->tpsA->id])
+            ->post(route('rekap.store', 'dpr_ri'), [
+                'suara_partai' => [
+                    $garuda->id => 45,
+                ],
+            ])
+            ->assertRedirect(route('rekap.index'));
+
+        $this->assertDatabaseHas('rekap_partai_suaras', [
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 45,
+        ]);
+
+        $this->actingAs($this->korcamA)
+            ->withSession(['admin_view_tps_id' => $this->tpsA->id])
+            ->post(route('rekap.store', 'dpr_ri'), [
+                'suara_partai' => [
+                    $garuda->id => 55,
+                ],
+            ])
+            ->assertRedirect(route('rekap.index'));
+
+        $this->assertSame(1, RekapHeader::where('tps_id', $this->tpsA->id)->where('jenis', 'dpr_ri')->count());
+        $this->assertDatabaseHas('rekap_headers', [
+            'id' => $rekap->id,
+            'status' => 'draft',
+            'diinput_oleh' => $this->korcamA->id,
+        ]);
+        $this->assertDatabaseHas('rekap_partai_suaras', [
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 55,
+        ]);
+    }
+
+    public function test_admin_can_update_internal_status_without_erasing_existing_suara(): void
+    {
+        $garuda = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 11,
+            'nama_partai' => 'Partai Garuda',
+        ]);
+        $rekap = RekapHeader::create([
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'draft',
+            'diinput_oleh' => $this->saksiA->id,
+        ]);
+        RekapPartaiSuara::create([
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 25,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->withSession([
+                'admin_view_tps_id' => $this->tpsA->id,
+                'admin_rekap_return_url' => route('admin.rekap.show', 'dpr_ri'),
+            ])
+            ->post(route('rekap.store', 'dpr_ri'), [
+                'status_internal' => 'perlu_dicek',
+                'catatan_internal' => 'Cek ulang angka suara partai.',
+            ])
+            ->assertRedirect(route('admin.rekap.show', 'dpr_ri'));
+
+        $this->assertDatabaseHas('rekap_headers', [
+            'id' => $rekap->id,
+            'status' => 'perlu_dicek',
+            'catatan_internal' => 'Cek ulang angka suara partai.',
+        ]);
+        $this->assertDatabaseHas('rekap_partai_suaras', [
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 25,
+        ]);
+    }
+
+    public function test_final_rekap_cannot_be_changed_by_non_admin_editors(): void
+    {
+        $garuda = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 11,
+            'nama_partai' => 'Partai Garuda',
+        ]);
+        $rekap = RekapHeader::create([
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'final',
+            'diinput_oleh' => $this->saksiA->id,
+            'difinalisasi_at' => now(),
+        ]);
+        RekapPartaiSuara::create([
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 40,
+        ]);
+
+        $this->actingAs($this->saksiA)
+            ->from(route('rekap.form', 'dpr_ri'))
+            ->post(route('rekap.store', 'dpr_ri'), [
+                'suara_partai' => [
+                    $garuda->id => 90,
+                ],
+            ])
+            ->assertRedirect(route('rekap.form', 'dpr_ri'))
+            ->assertSessionHas('error');
+
+        $this->actingAs($this->kordesA)
+            ->withSession(['admin_view_tps_id' => $this->tpsA->id])
+            ->from(route('rekap.form', 'dpr_ri'))
+            ->post(route('rekap.store', 'dpr_ri'), [
+                'suara_partai' => [
+                    $garuda->id => 91,
+                ],
+            ])
+            ->assertRedirect(route('rekap.form', 'dpr_ri'))
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('rekap_headers', [
+            'id' => $rekap->id,
+            'status' => 'final',
+        ]);
+        $this->assertDatabaseHas('rekap_partai_suaras', [
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 40,
+        ]);
+    }
+
     public function test_admin_can_download_missing_and_review_tps_exports(): void
     {
         RekapHeader::create([

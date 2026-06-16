@@ -110,7 +110,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Izinkan Korcam menginput dan mengedit suara TPS di dalam kecamatan yang menjadi scope-nya.
 - [x] Pastikan Admin Partai tetap bisa koreksi/input TPS lintas wilayah.
 - [x] Tentukan aturan finalisasi baru untuk Saksi TPS, Kordes, Korcam, dan Admin Partai.
-- [ ] Tambahkan test untuk input, update, finalisasi, dan scope wilayah.
+- [x] Tambahkan test untuk input, update, finalisasi, dan scope wilayah.
 
 ### 6. Kebijakan Input Data
 
@@ -183,4 +183,5 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Dashboard sudah menampilkan kartu dan daftar TPS perlu dicek internal, plus export TPS belum masuk dan TPS perlu dicek untuk Admin Partai.
 - Kebijakan input berikutnya berubah: Kordes dan Korcam perlu bisa ikut input/edit suara TPS sesuai scope wilayah, tidak hanya Saksi TPS dan Admin Partai.
 - Akses edit suara TPS sudah diperluas: Saksi TPS, Kordes, dan Korcam bisa input/finalisasi sesuai scope; Admin Partai bisa koreksi lintas wilayah lewat mode status internal.
-- Next step: lengkapi test update rekap existing dan lanjut bersih-bersih legacy route/method PPWP/DPD/Pilkada yang sudah tidak reachable.
+- Test input, update draft, finalisasi, proteksi final non-admin, dan scope wilayah sudah diperluas untuk Saksi TPS, Kordes, Korcam, dan Admin Partai.
+- Next step: lanjut bersih-bersih legacy route/method PPWP/DPD/Pilkada yang sudah tidak reachable.
