@@ -18,7 +18,7 @@ class RekapHeader extends Model
         'pengguna_dpk_lk', 'pengguna_dpk_pr',
         'ss_diterima', 'ss_digunakan', 'ss_rusak', 'ss_sisa',
         'disabilitas_lk', 'disabilitas_pr',
-        'suara_tidak_sah', 'status', 'diinput_oleh', 'difinalisasi_at',
+        'suara_tidak_sah', 'status', 'catatan_internal', 'diinput_oleh', 'difinalisasi_at',
     ];
 
     protected $casts = ['difinalisasi_at' => 'datetime'];

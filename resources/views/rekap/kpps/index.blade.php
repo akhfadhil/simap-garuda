@@ -33,6 +33,7 @@
 @php
     $rekap = $rekaps[$jenis] ?? null;
     $isDraft = $rekap && $rekap->status === 'draft';
+    $isReview = $rekap && $rekap->status === 'perlu_dicek';
     $isFinal = $rekap && $rekap->status === 'final';
 @endphp
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
@@ -44,6 +45,8 @@
                     Difinalisasi {{ $rekap->difinalisasi_at->diffForHumans() }}
                 @elseif($isDraft)
                     Tersimpan - belum difinalisasi
+                @elseif($isReview)
+                    Perlu dicek internal
                 @else
                     Belum diisi
                 @endif
@@ -53,6 +56,8 @@
             <span class="text-[9px] tracking-widest uppercase px-2 py-1 rounded font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">Final</span>
         @elseif($isDraft)
             <span class="text-[9px] tracking-widest uppercase px-2 py-1 rounded font-semibold bg-orange-400/20 text-orange-400 border border-orange-400/40">Draft</span>
+        @elseif($isReview)
+            <span class="text-[9px] tracking-widest uppercase px-2 py-1 rounded font-semibold bg-red-500/20 text-red-400 border border-red-500/40">Perlu Dicek</span>
         @else
             <span class="text-[9px] tracking-widest uppercase px-2 py-1 rounded font-semibold bg-gray-500/20 dark:text-gray-400 text-gray-500 border border-gray-400/30">Kosong</span>
         @endif
@@ -66,7 +71,9 @@
         </div>
         <div class="flex justify-between text-[11px] dark:text-gray-500 text-gray-400">
             <span>Status data</span>
-            <span class="font-semibold dark:text-gray-300 text-gray-600">{{ $isFinal ? 'Final' : 'Draft' }}</span>
+            <span class="font-semibold dark:text-gray-300 text-gray-600">
+                {{ $isFinal ? 'Final' : ($isReview ? 'Perlu Dicek' : 'Draft') }}
+            </span>
         </div>
     </div>
     @endif

@@ -10,6 +10,11 @@
     $canEditRekap = Auth::user()->role === 'kpps' || $isAdminRekapEdit;
     $isFinal = $rekap && $rekap->status === 'final';
     $readOnly = !$canEditRekap || ($isFinal && !$isAdminRekapEdit);
+    $statusLabels = [
+        'draft' => 'Draft',
+        'perlu_dicek' => 'Perlu Dicek',
+        'final' => 'Final',
+    ];
 @endphp
 
 <div class="mb-6">
@@ -26,6 +31,18 @@
             {{ strtoupper(\App\Models\RekapHeader::JENIS_LABELS[$jenis]) }}
         </h1>
         <div class="flex items-center gap-2">
+            @if($rekap)
+            @php
+                $statusClass = match($rekap->status) {
+                    'final' => 'bg-teal-500/20 text-teal-400 border-teal-500/40',
+                    'perlu_dicek' => 'bg-red-500/20 text-red-400 border-red-500/40',
+                    default => 'bg-orange-400/20 text-orange-400 border-orange-400/40',
+                };
+            @endphp
+            <span class="px-4 py-1.5 rounded-lg text-xs font-semibold border {{ $statusClass }}">
+                {{ $statusLabels[$rekap->status] ?? ucfirst($rekap->status) }}
+            </span>
+            @endif
             @if($rekap && $rekap->status === 'final')
             <span class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-teal-500/20 text-teal-400 border border-teal-500/40">
                 Sudah Difinalisasi
@@ -59,6 +76,38 @@
 
 <form method="POST" action="{{ route('rekap.store', $jenis) }}" id="rekap-form">
 @csrf
+
+@if($isAdminRekapEdit)
+<div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
+    <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
+        <p class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider">Status Internal Partai</p>
+    </div>
+    <div class="p-6 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-4">
+        <div>
+            <label for="status_internal" class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Status</label>
+            <select id="status_internal" name="status_internal"
+                    class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-3 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
+                @foreach($statusLabels as $statusValue => $statusLabel)
+                    <option value="{{ $statusValue }}" {{ old('status_internal', $rekap->status ?? 'draft') === $statusValue ? 'selected' : '' }}>
+                        {{ $statusLabel }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label for="catatan_internal" class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Catatan Internal</label>
+            <textarea id="catatan_internal" name="catatan_internal" rows="3"
+                      placeholder="Contoh: angka caleg nomor 2 perlu dikonfirmasi ulang ke saksi."
+                      class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-3 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">{{ old('catatan_internal', $rekap->catatan_internal ?? '') }}</textarea>
+        </div>
+    </div>
+</div>
+@elseif($rekap?->catatan_internal)
+<div class="dark:bg-red-950 bg-red-50 border dark:border-red-900 border-red-200 px-5 py-3 mb-6 rounded-lg">
+    <p class="text-xs font-semibold text-red-500 uppercase tracking-wider mb-1">Catatan Internal</p>
+    <p class="text-sm dark:text-red-100 text-red-700">{{ $rekap->catatan_internal }}</p>
+</div>
+@endif
 
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
     <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">

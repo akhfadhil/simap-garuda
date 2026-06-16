@@ -104,8 +104,8 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
   - [x] Korcam: rekap kecamatan dan detail desa hanya menampilkan suara Garuda, caleg Garuda, total Garuda, dan status TPS.
   - [x] Admin: rekap kabupaten dan detail wilayah hanya menampilkan suara Garuda, caleg Garuda, total Garuda, dan status TPS.
 - [x] Bersihkan export laporan dari field suara tidak sah, DPT, surat suara, dan disabilitas.
-- [ ] Tambahkan status internal: draft, perlu dicek, final.
-- [ ] Tambahkan catatan internal partai untuk TPS bermasalah jika diperlukan.
+- [x] Tambahkan status internal: draft, perlu dicek, final.
+- [x] Tambahkan catatan internal partai untuk TPS bermasalah jika diperlukan.
 - [ ] Tentukan siapa yang boleh finalisasi: Saksi TPS saja atau juga Kordes/Korcam/Admin Partai.
 - [ ] Tambahkan test untuk input, update, finalisasi, dan scope wilayah.
 
@@ -116,7 +116,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Hapus command import Excel legacy dari project.
 - [x] Hapus file contoh import Excel legacy dari folder command.
 - [x] Perkuat validasi form manual untuk suara Partai Garuda dan caleg Garuda karena form adalah satu-satunya jalur input data.
-- [ ] Tambahkan validasi lanjutan untuk status internal dan catatan koreksi TPS.
+- [x] Tambahkan validasi lanjutan untuk status internal dan catatan koreksi TPS.
 
 ### 7. Export Laporan Partai
 
@@ -175,4 +175,5 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Form input Saksi TPS sudah disederhanakan: hanya suara Partai Garuda dan caleg Garuda yang diisi; data DPT, surat suara, disabilitas, serta suara tidak sah tidak lagi diminta dari saksi.
 - Export rekap TPS/desa/kecamatan/kabupaten sudah dibersihkan agar hanya membawa suara Partai Garuda, suara caleg Garuda, total Garuda, dan status input TPS.
 - Dashboard legislatif sudah menampilkan kartu total suara Garuda, ranking caleg Garuda, progres TPS, daftar TPS belum masuk, serta wilayah kuat/lemah.
-- Next step: lanjut status internal TPS bermasalah dan export TPS belum masuk/bermasalah.
+- Status internal `perlu_dicek` dan catatan internal TPS sudah tersedia untuk koreksi Admin Partai.
+- Next step: lanjut dashboard/export TPS bermasalah dan export TPS belum masuk.

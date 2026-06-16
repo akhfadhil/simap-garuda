@@ -68,6 +68,8 @@ class KppsController extends Controller
             'suara_caleg' => ['nullable', 'array'],
             'suara_caleg.*' => ['nullable', 'integer', 'min:0'],
             'finalisasi' => ['nullable', 'in:1'],
+            'status_internal' => [$isAdminEdit ? 'required' : 'prohibited', 'string', 'in:draft,perlu_dicek,final'],
+            'catatan_internal' => [$isAdminEdit ? 'nullable' : 'prohibited', 'string', 'max:2000'],
         ]);
         $this->guardGarudaSuaraPayload($request, $jenis, $tps);
 
@@ -77,9 +79,7 @@ class KppsController extends Controller
         }
 
         DB::transaction(function () use ($request, $jenis, $tps, $existing, $isAdminEdit) {
-            $status = request('finalisasi') == '1'
-                ? 'final'
-                : (($isAdminEdit && $existing?->status === 'final') ? 'final' : 'draft');
+            $status = $this->resolveStatus($request, $existing, $isAdminEdit);
             $headerData = [
                 'dpt_lk' => 0,
                 'dpt_pr' => 0,
@@ -100,7 +100,12 @@ class KppsController extends Controller
 
             $rekap = RekapHeader::updateOrCreate(
                 ['tps_id' => $tps->id, 'jenis' => $jenis],
-                array_merge($headerData, ['diinput_oleh' => Auth::id(), 'status' => $status])
+                array_merge($headerData, [
+                    'diinput_oleh' => Auth::id(),
+                    'status' => $status,
+                    'catatan_internal' => $isAdminEdit ? $request->input('catatan_internal') : ($existing?->catatan_internal),
+                    'difinalisasi_at' => $status === 'final' ? ($existing?->difinalisasi_at ?? now()) : null,
+                ])
             );
 
             if ($jenis === 'ppwp') {
@@ -347,6 +352,19 @@ class KppsController extends Controller
             403,
             'Input rekap hanya boleh untuk Partai Garuda dan calegnya.'
         );
+    }
+
+    private function resolveStatus(Request $request, ?RekapHeader $existing, bool $isAdminEdit): string
+    {
+        if ($request->input('finalisasi') === '1') {
+            return 'final';
+        }
+
+        if ($isAdminEdit) {
+            return $request->input('status_internal', $existing?->status ?? 'draft');
+        }
+
+        return 'draft';
     }
 
     private function activeTps(): Tps

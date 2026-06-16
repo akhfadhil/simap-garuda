@@ -367,6 +367,62 @@ class GarudaRoleAccessTest extends TestCase
         $this->assertSame(30, $payload['candidate_rank'][0]['suara']);
     }
 
+    public function test_admin_can_mark_rekap_as_perlu_dicek_with_internal_note(): void
+    {
+        $garuda = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 11,
+            'nama_partai' => 'Partai Garuda',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->withSession([
+                'admin_view_tps_id' => $this->tpsA->id,
+                'admin_rekap_return_url' => route('admin.rekap.show', 'dpr_ri'),
+            ])
+            ->post(route('rekap.store', 'dpr_ri'), [
+                'suara_partai' => [
+                    $garuda->id => 77,
+                ],
+                'status_internal' => 'perlu_dicek',
+                'catatan_internal' => 'Foto C1 perlu dicocokkan ulang.',
+            ])
+            ->assertRedirect(route('admin.rekap.show', 'dpr_ri'));
+
+        $this->assertDatabaseHas('rekap_headers', [
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'perlu_dicek',
+            'catatan_internal' => 'Foto C1 perlu dicocokkan ulang.',
+        ]);
+    }
+
+    public function test_saksi_cannot_set_internal_review_status(): void
+    {
+        $garuda = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 11,
+            'nama_partai' => 'Partai Garuda',
+        ]);
+
+        $this->actingAs($this->saksiA)
+            ->from(route('rekap.form', 'dpr_ri'))
+            ->post(route('rekap.store', 'dpr_ri'), [
+                'suara_partai' => [
+                    $garuda->id => 77,
+                ],
+                'status_internal' => 'perlu_dicek',
+            ])
+            ->assertRedirect(route('rekap.form', 'dpr_ri'))
+            ->assertSessionHasErrors('status_internal');
+
+        $this->assertDatabaseMissing('rekap_headers', [
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'perlu_dicek',
+        ]);
+    }
+
     private function user(string $role, array $extra = []): User
     {
         $defaults = [
