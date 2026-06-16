@@ -5,7 +5,11 @@ namespace Tests\Feature;
 use App\Models\Desa;
 use App\Models\Kecamatan;
 use App\Models\PemiluSetting;
+use App\Models\RekapCaleg;
+use App\Models\RekapCalegSuara;
+use App\Models\RekapHeader;
 use App\Models\RekapPartai;
+use App\Models\RekapPartaiSuara;
 use App\Models\Tps;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -240,6 +244,62 @@ class GarudaRoleAccessTest extends TestCase
         ]);
     }
 
+    public function test_garuda_rekap_sheet_export_omits_legacy_kpu_fields(): void
+    {
+        [$master, $rekaps] = $this->createGarudaRekapForExport();
+
+        $export = new \App\Exports\RekapSheetExport(
+            'dpr_ri',
+            'DPR RI',
+            $rekaps,
+            $master,
+            collect([$this->tpsA, $this->tpsB]),
+            'pps',
+            'Desa A'
+        );
+
+        $content = $this->flattenExportRows($export->array());
+
+        $this->assertStringContainsString('Partai Garuda', $content);
+        $this->assertStringContainsString('Caleg Garuda', $content);
+        $this->assertStringContainsString('Total Suara Garuda', $content);
+        $this->assertStringContainsString('Status', $content);
+        $this->assertStringContainsString('Final', $content);
+        $this->assertStringContainsString('Kosong', $content);
+        $this->assertStringNotContainsString('DPT', $content);
+        $this->assertStringNotContainsString('Pengguna Hak Pilih', $content);
+        $this->assertStringNotContainsString('Surat Suara', $content);
+        $this->assertStringNotContainsString('Disabilitas', $content);
+        $this->assertStringNotContainsString('Tidak Sah', $content);
+    }
+
+    public function test_garuda_total_export_omits_legacy_kpu_fields(): void
+    {
+        [$master, $rekaps] = $this->createGarudaRekapForExport();
+
+        $export = new \App\Exports\RekapTotalSheetExport(
+            'dpr_ri',
+            'Rekap_DPR RI',
+            $rekaps,
+            $master['dpr_ri'],
+            collect([$this->desaA, $this->desaB]),
+            'ppk',
+            'Kecamatan A'
+        );
+
+        $content = $this->flattenExportRows($export->array());
+
+        $this->assertStringContainsString('Partai Garuda', $content);
+        $this->assertStringContainsString('Caleg Garuda', $content);
+        $this->assertStringContainsString('Total Suara Garuda', $content);
+        $this->assertStringContainsString('1/1 final, 1 masuk', $content);
+        $this->assertStringNotContainsString('DPT', $content);
+        $this->assertStringNotContainsString('Pengguna Hak Pilih', $content);
+        $this->assertStringNotContainsString('Surat Suara', $content);
+        $this->assertStringNotContainsString('Disabilitas', $content);
+        $this->assertStringNotContainsString('Tidak Sah', $content);
+    }
+
     private function user(string $role, array $extra = []): User
     {
         $defaults = [
@@ -250,5 +310,55 @@ class GarudaRoleAccessTest extends TestCase
         ];
 
         return User::create(array_merge($defaults, $extra));
+    }
+
+    private function createGarudaRekapForExport(): array
+    {
+        $garuda = RekapPartai::create([
+            'jenis' => 'dpr_ri',
+            'nomor_urut' => 11,
+            'nama_partai' => 'Partai Garuda',
+        ]);
+        $caleg = RekapCaleg::create([
+            'partai_id' => $garuda->id,
+            'nomor_urut' => 1,
+            'nama_caleg' => 'Caleg Garuda',
+        ]);
+        $rekap = RekapHeader::create([
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'final',
+            'dpt_lk' => 10,
+            'dpt_pr' => 11,
+            'pengguna_dpt_lk' => 8,
+            'pengguna_dpt_pr' => 9,
+            'ss_diterima' => 30,
+            'disabilitas_lk' => 1,
+            'suara_tidak_sah' => 2,
+            'diinput_oleh' => $this->saksiA->id,
+        ]);
+        RekapPartaiSuara::create([
+            'rekap_id' => $rekap->id,
+            'partai_id' => $garuda->id,
+            'suara' => 20,
+        ]);
+        RekapCalegSuara::create([
+            'rekap_id' => $rekap->id,
+            'caleg_id' => $caleg->id,
+            'suara' => 15,
+        ]);
+
+        return [
+            ['dpr_ri' => ['partais' => RekapPartai::with('calegs')->whereKey($garuda->id)->get()]],
+            RekapHeader::with(['partaiSuaras', 'calegSuaras'])->whereKey($rekap->id)->get(),
+        ];
+    }
+
+    private function flattenExportRows(array $rows): string
+    {
+        return collect($rows)
+            ->flatten()
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->implode(' | ');
     }
 }
