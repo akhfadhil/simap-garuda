@@ -199,6 +199,11 @@ class DashboardElectionSummary
         $missingTps = collect();
         $inputTps = 0;
         $totalSuara = 0;
+        $regions = [
+            'label' => null,
+            'strong' => [],
+            'weak' => [],
+        ];
 
         if ($jenisList) {
             $inputTps = (clone $tpsQuery)
@@ -234,6 +239,7 @@ class DashboardElectionSummary
                 ]);
 
             $totalSuara = $this->totalGarudaSuara($jenisList, $scope);
+            $regions = $this->regionPerformance($jenisList, $scope);
         }
 
         return [
@@ -243,10 +249,106 @@ class DashboardElectionSummary
             'missing_tps_count' => max(0, $totalTps - $inputTps),
             'missing_tps' => $missingTps->toArray(),
             'active_jenis_count' => count($jenisList),
+            'regions' => $regions,
+        ];
+    }
+
+    private function regionPerformance(array $jenisList, array $scope): array
+    {
+        $config = match ($scope['type']) {
+            'kabupaten' => [
+                'label' => 'Kecamatan',
+                'id' => 'k.id',
+                'name' => 'k.nama',
+                'query' => DB::table('kecamatans as k'),
+            ],
+            'kecamatan' => [
+                'label' => 'Desa',
+                'id' => 'd.id',
+                'name' => 'd.nama',
+                'query' => DB::table('desas as d')
+                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                    ->where('k.id', $scope['id']),
+            ],
+            'desa' => [
+                'label' => 'TPS',
+                'id' => 't.id',
+                'name' => 't.nama',
+                'query' => DB::table('tps as t')
+                    ->join('desas as d', 'd.id', '=', 't.desa_id')
+                    ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                    ->where('d.id', $scope['id']),
+            ],
+            default => null,
+        };
+
+        if (! $config) {
+            return [
+                'label' => null,
+                'strong' => [],
+                'weak' => [],
+            ];
+        }
+
+        $regions = $config['query']
+            ->orderByRaw($config['name'])
+            ->get([
+                DB::raw($config['id'].' as id'),
+                DB::raw($config['name'].' as label'),
+            ]);
+
+        if ($regions->isEmpty()) {
+            return [
+                'label' => $config['label'],
+                'strong' => [],
+                'weak' => [],
+            ];
+        }
+
+        $partaiTotals = $this->garudaPartaiSuaraQuery($jenisList, $scope)
+            ->selectRaw($config['id'].' as region_id, SUM(s.suara) as total_suara')
+            ->groupBy('region_id')
+            ->pluck('total_suara', 'region_id');
+
+        $calegTotals = $this->garudaCalegSuaraQuery($jenisList, $scope)
+            ->selectRaw($config['id'].' as region_id, SUM(s.suara) as total_suara')
+            ->groupBy('region_id')
+            ->pluck('total_suara', 'region_id');
+
+        $rows = $regions
+            ->map(function ($region) use ($partaiTotals, $calegTotals) {
+                $id = (int) $region->id;
+
+                return [
+                    'id' => $id,
+                    'label' => $region->label,
+                    'suara' => (int) ($partaiTotals[$id] ?? 0) + (int) ($calegTotals[$id] ?? 0),
+                ];
+            })
+            ->values();
+
+        return [
+            'label' => $config['label'],
+            'strong' => $rows
+                ->sortByDesc('suara')
+                ->take(3)
+                ->values()
+                ->toArray(),
+            'weak' => $rows
+                ->sortBy('suara')
+                ->take(3)
+                ->values()
+                ->toArray(),
         ];
     }
 
     private function totalGarudaSuara(array $jenisList, array $scope): int
+    {
+        return (int) $this->garudaPartaiSuaraQuery($jenisList, $scope)->sum('s.suara')
+            + (int) $this->garudaCalegSuaraQuery($jenisList, $scope)->sum('s.suara');
+    }
+
+    private function garudaPartaiSuaraQuery(array $jenisList, array $scope): Builder
     {
         $party = config('party');
         $numbers = collect($party['historical_numbers'] ?? [])
@@ -256,7 +358,7 @@ class DashboardElectionSummary
             ->values()
             ->all();
 
-        $partaiQuery = $this->applyScope(
+        return $this->applyScope(
             DB::table('rekap_partai_suaras as s')
                 ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
                 ->join('tps as t', 't.id', '=', 'h.tps_id')
@@ -274,8 +376,19 @@ class DashboardElectionSummary
                 }),
             $scope
         );
+    }
 
-        $calegQuery = $this->applyScope(
+    private function garudaCalegSuaraQuery(array $jenisList, array $scope): Builder
+    {
+        $party = config('party');
+        $numbers = collect($party['historical_numbers'] ?? [])
+            ->map(fn ($number) => (int) $number)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        return $this->applyScope(
             DB::table('rekap_caleg_suaras as s')
                 ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
                 ->join('tps as t', 't.id', '=', 'h.tps_id')
@@ -294,9 +407,6 @@ class DashboardElectionSummary
                 }),
             $scope
         );
-
-        return (int) (clone $partaiQuery)->sum('s.suara')
-            + (int) (clone $calegQuery)->sum('s.suara');
     }
 
     private function canAccessKecamatan(User $user, Kecamatan $kecamatan): bool
@@ -554,7 +664,7 @@ class DashboardElectionSummary
     private function cacheParts(User $user, array $scope, array $activeJenis): array
     {
         return [
-            'version' => 5,
+            'version' => 6,
             'user_role' => $user->role,
             'scope' => $scope,
             'active' => $activeJenis,

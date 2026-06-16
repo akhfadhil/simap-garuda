@@ -56,6 +56,9 @@ class DashboardElectionSummaryTest extends TestCase
         $desa = Desa::create(['nama' => 'Desa A', 'kecamatan_id' => $kecamatan->id]);
         $tps = Tps::create(['nama' => 'TPS 1', 'desa_id' => $desa->id]);
         Tps::create(['nama' => 'TPS 2', 'desa_id' => $desa->id]);
+        $kecamatanB = Kecamatan::create(['nama' => 'Kecamatan B']);
+        $desaB = Desa::create(['nama' => 'Desa B', 'kecamatan_id' => $kecamatanB->id]);
+        $tpsB = Tps::create(['nama' => 'TPS 3', 'desa_id' => $desaB->id]);
         $admin = User::create([
             'name' => 'Admin',
             'username' => 'admin_garuda_test',
@@ -74,11 +77,19 @@ class DashboardElectionSummaryTest extends TestCase
             'status' => 'final',
             'diinput_oleh' => $admin->id,
         ]);
+        $rekapB = RekapHeader::create([
+            'tps_id' => $tpsB->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'final',
+            'diinput_oleh' => $admin->id,
+        ]);
 
         RekapPartaiSuara::create(['rekap_id' => $rekap->id, 'partai_id' => $garuda->id, 'suara' => 20]);
         RekapPartaiSuara::create(['rekap_id' => $rekap->id, 'partai_id' => $competitor->id, 'suara' => 200]);
         RekapCalegSuara::create(['rekap_id' => $rekap->id, 'caleg_id' => $garudaCaleg->id, 'suara' => 30]);
         RekapCalegSuara::create(['rekap_id' => $rekap->id, 'caleg_id' => $competitorCaleg->id, 'suara' => 300]);
+        RekapPartaiSuara::create(['rekap_id' => $rekapB->id, 'partai_id' => $garuda->id, 'suara' => 5]);
+        RekapCalegSuara::create(['rekap_id' => $rekapB->id, 'caleg_id' => $garudaCaleg->id, 'suara' => 3]);
 
         $summary = app(DashboardElectionSummary::class)->forUser($admin);
         $section = $summary['sections'][0];
@@ -88,11 +99,16 @@ class DashboardElectionSummaryTest extends TestCase
         $this->assertSame('DPR RI - Garuda', $section['title']);
         $this->assertContains('Caleg Garuda No. 1', $labels);
         $this->assertNotContains('Caleg Kompetitor No. 1', $labels);
-        $this->assertSame(30, $section['total_suara']);
-        $this->assertSame(50, $overview['total_suara_garuda']);
-        $this->assertSame(2, $overview['total_tps']);
-        $this->assertSame(1, $overview['input_tps']);
+        $this->assertSame(33, $section['total_suara']);
+        $this->assertSame(58, $overview['total_suara_garuda']);
+        $this->assertSame(3, $overview['total_tps']);
+        $this->assertSame(2, $overview['input_tps']);
         $this->assertSame(1, $overview['missing_tps_count']);
         $this->assertSame('TPS 2 - Desa A', $overview['missing_tps'][0]['label']);
+        $this->assertSame('Kecamatan', $overview['regions']['label']);
+        $this->assertSame('Kecamatan A', $overview['regions']['strong'][0]['label']);
+        $this->assertSame(50, $overview['regions']['strong'][0]['suara']);
+        $this->assertSame('Kecamatan B', $overview['regions']['weak'][0]['label']);
+        $this->assertSame(8, $overview['regions']['weak'][0]['suara']);
     }
 }

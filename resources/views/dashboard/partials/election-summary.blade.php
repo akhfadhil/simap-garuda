@@ -6,9 +6,13 @@
         'input_tps' => 0,
         'missing_tps_count' => 0,
         'missing_tps' => [],
+        'regions' => ['label' => null, 'strong' => [], 'weak' => []],
     ];
     $sections = collect($summary['sections'] ?? []);
     $missingTps = collect($overview['missing_tps'] ?? []);
+    $regions = $overview['regions'] ?? ['label' => null, 'strong' => [], 'weak' => []];
+    $strongRegions = collect($regions['strong'] ?? []);
+    $weakRegions = collect($regions['weak'] ?? []);
 @endphp
 
 <section class="mb-12">
@@ -59,6 +63,49 @@
                         <p class="admin-mono admin-muted-soft text-[10px] uppercase truncate">{{ $tps['meta'] }}</p>
                     </div>
                 @endforeach
+            </div>
+        </div>
+    @endif
+
+    @if(($regions['label'] ?? null) && ($strongRegions->isNotEmpty() || $weakRegions->isNotEmpty()))
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+            <div class="admin-glass rounded-lg p-5">
+                <div class="mb-4 flex items-center justify-between gap-4">
+                    <div>
+                        <p class="admin-display admin-text text-2xl leading-none uppercase">{{ $regions['label'] }} Kuat</p>
+                        <p class="admin-mono admin-muted-soft text-[10px] uppercase mt-1">3 suara Garuda tertinggi</p>
+                    </div>
+                    <span class="material-symbols-outlined role-accent text-xl">trending_up</span>
+                </div>
+                <div class="space-y-2">
+                    @forelse($strongRegions as $region)
+                        <div class="flex items-center justify-between gap-3 admin-surface-strong rounded-md px-3 py-2.5">
+                            <p class="admin-text text-sm font-semibold truncate">{{ $region['label'] }}</p>
+                            <p class="admin-mono text-xs font-bold text-gray-950 dark:text-white whitespace-nowrap">{{ number_format($region['suara']) }}</p>
+                        </div>
+                    @empty
+                        <p class="admin-muted text-sm">Belum ada data wilayah kuat.</p>
+                    @endforelse
+                </div>
+            </div>
+            <div class="admin-glass rounded-lg p-5">
+                <div class="mb-4 flex items-center justify-between gap-4">
+                    <div>
+                        <p class="admin-display admin-text text-2xl leading-none uppercase">{{ $regions['label'] }} Lemah</p>
+                        <p class="admin-mono admin-muted-soft text-[10px] uppercase mt-1">3 suara Garuda terendah</p>
+                    </div>
+                    <span class="material-symbols-outlined role-accent text-xl">trending_down</span>
+                </div>
+                <div class="space-y-2">
+                    @forelse($weakRegions as $region)
+                        <div class="flex items-center justify-between gap-3 admin-surface-strong rounded-md px-3 py-2.5">
+                            <p class="admin-text text-sm font-semibold truncate">{{ $region['label'] }}</p>
+                            <p class="admin-mono text-xs font-bold text-gray-950 dark:text-white whitespace-nowrap">{{ number_format($region['suara']) }}</p>
+                        </div>
+                    @empty
+                        <p class="admin-muted text-sm">Belum ada data wilayah lemah.</p>
+                    @endforelse
+                </div>
             </div>
         </div>
     @endif
