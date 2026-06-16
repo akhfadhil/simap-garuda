@@ -136,7 +136,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
   - [x] Bersihkan cabang non-legislatif dari alur input TPS, rekap Kordes, rekap Korcam, auto export, dan dashboard summary.
   - [x] Bersihkan sisa cabang non-legislatif di Admin rekap chart/export.
   - [x] Bersihkan setup legacy PPWP/DPD/Pilkada.
-- [ ] Hapus atau refactor method controller koreksi inline/unlock yang sudah tidak diroute.
+- [x] Hapus atau refactor method controller koreksi inline/unlock yang sudah tidak diroute.
 - [ ] Hapus kolom atau relasi user legacy yang tidak dipakai setelah audit aman.
 - [ ] Hapus view Laravel default yang tidak dipakai jika masih ada.
 - [x] Hapus command import lama yang masih terlalu spesifik SIMAP utama.
@@ -190,4 +190,5 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Cabang non-legislatif sudah dibersihkan dari alur runtime input TPS, rekap Kordes/Korcam, auto export, dan dashboard summary.
 - Cabang non-legislatif sudah dibersihkan dari Admin rekap chart/export; endpoint admin rekap sekarang hanya menerima jenis legislatif aktif.
 - Setup legacy PPWP/DPD/Pilkada sudah dihapus dari halaman setup, route, dan controller.
-- Next step: hapus atau refactor method controller koreksi inline/unlock yang sudah tidak diroute.
+- Method koreksi admin yang tidak diroute (`editTps`, `inlineUpdate`, `applyInlineRekapChange`, dan `unlock`) sudah dihapus dari Admin rekap controller.
+- Next step: audit ulang string dan route legacy sebelum commit cleanup berikutnya.
