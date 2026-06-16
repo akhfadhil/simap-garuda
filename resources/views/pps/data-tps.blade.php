@@ -82,7 +82,7 @@
 
     <a href="{{ route('pps.view-tps', $tps) }}"
        class="px-4 py-2 rounded-lg text-xs font-semibold border border-teal-400 text-teal-400 hover:bg-teal-400 hover:text-white transition">
-        Lihat Saksi TPS
+        Kelola Rekap TPS
     </a>
 </div>
 @empty

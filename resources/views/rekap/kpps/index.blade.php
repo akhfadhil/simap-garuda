@@ -25,7 +25,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 @php
     $aktifJenis = \App\Models\PemiluSetting::aktif();
-    $canEditRekap = Auth::user()->role === 'kpps';
+    $canEditRekap = in_array(Auth::user()->role, ['kpps', 'pps', 'ppk', 'admin'], true);
 @endphp
 
 @foreach(\App\Models\RekapHeader::JENIS_LABELS as $jenis => $label)

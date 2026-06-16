@@ -57,7 +57,7 @@ class KppsController extends Controller
         $user = Auth::user();
         $isAdminEdit = $user->role === 'admin';
 
-        abort_unless(in_array($user->role, ['kpps', 'admin'], true), 403, 'Akses ditolak.');
+        abort_unless(in_array($user->role, ['kpps', 'pps', 'ppk', 'admin'], true), 403, 'Akses ditolak.');
 
         $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
@@ -160,7 +160,7 @@ class KppsController extends Controller
 
     public function finalisasi(string $jenis)
     {
-        abort_if(Auth::user()->role !== 'kpps', 403, 'Akses ditolak.');
+        abort_unless(in_array(Auth::user()->role, ['kpps', 'pps', 'ppk'], true), 403, 'Akses ditolak.');
         $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
 

@@ -77,7 +77,7 @@
 
     <a href="{{ route('ppk.view-pps', $desa) }}"
        class="px-4 py-2 rounded-lg text-xs font-semibold border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white transition">
-        Lihat Kordes
+        Kelola Desa
     </a>
 </div>
 @empty

@@ -106,13 +106,17 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Bersihkan export laporan dari field suara tidak sah, DPT, surat suara, dan disabilitas.
 - [x] Tambahkan status internal: draft, perlu dicek, final.
 - [x] Tambahkan catatan internal partai untuk TPS bermasalah jika diperlukan.
-- [ ] Tentukan siapa yang boleh finalisasi: Saksi TPS saja atau juga Kordes/Korcam/Admin Partai.
+- [x] Izinkan Kordes menginput dan mengedit suara TPS di dalam desa yang menjadi scope-nya.
+- [x] Izinkan Korcam menginput dan mengedit suara TPS di dalam kecamatan yang menjadi scope-nya.
+- [x] Pastikan Admin Partai tetap bisa koreksi/input TPS lintas wilayah.
+- [x] Tentukan aturan finalisasi baru untuk Saksi TPS, Kordes, Korcam, dan Admin Partai.
 - [ ] Tambahkan test untuk input, update, finalisasi, dan scope wilayah.
 
 ### 6. Kebijakan Input Data
 
 - [x] Putuskan SIMAP Garuda tidak memakai import command.
 - [x] Tetapkan input suara hanya melalui form manual Saksi TPS.
+- [x] Perluas jalur input manual agar Kordes dan Korcam bisa ikut mengisi/mengoreksi suara TPS sesuai scope wilayah.
 - [x] Hapus command import Excel legacy dari project.
 - [x] Hapus file contoh import Excel legacy dari folder command.
 - [x] Perkuat validasi form manual untuk suara Partai Garuda dan caleg Garuda karena form adalah satu-satunya jalur input data.
@@ -159,8 +163,8 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 | 7 | Pertahankan struktur wilayah kecamatan, desa, dan TPS | Selesai: struktur wilayah dipertahankan. |
 | 8 | Sesuaikan manajemen user agar mengikuti hierarchy partai | Selesai untuk MVP: manajemen user dibatasi ke Admin Partai, Korcam, Kordes, dan Saksi TPS. |
 | 9 | Tentukan apakah data diinput manual, import Excel/CSV, atau import JSON | Selesai: SIMAP Garuda hanya memakai input manual lewat form Saksi TPS; import command dihapus. |
-| 10 | Buat dashboard awal khusus partai | Sebagian selesai: identitas, kartu total suara Garuda, ranking caleg Garuda, progres TPS, TPS belum masuk, dan wilayah kuat/lemah tersedia; TPS bermasalah belum selesai. |
-| 11 | Sesuaikan grafik dan export agar fokus pada suara partai/caleg | Sebagian selesai: dashboard legislatif, chart default Garuda, dan export rekap sudah fokus Garuda; export TPS belum masuk/bermasalah belum selesai. |
+| 10 | Buat dashboard awal khusus partai | Selesai untuk kebutuhan Phase 2 saat ini: identitas, kartu total suara Garuda, ranking caleg Garuda, progres TPS, TPS belum masuk, wilayah kuat/lemah, dan TPS perlu dicek tersedia. |
+| 11 | Sesuaikan grafik dan export agar fokus pada suara partai/caleg | Selesai untuk kebutuhan Phase 2 saat ini: dashboard legislatif, chart default Garuda, export rekap Garuda, export TPS belum masuk, dan export TPS perlu dicek tersedia. |
 | 12 | Jalankan test dasar login, akses role, scope wilayah, input/import data, agregasi, dan export | Sebagian selesai: test login legacy, akses role, scope wilayah, guard jenis rekap, guard input Garuda, dan export Garuda tersedia; coverage validasi input manual lanjutan, agregasi, dan chart perlu ditambah. |
 
 ## Catatan Status Terbaru
@@ -177,4 +181,6 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Dashboard legislatif sudah menampilkan kartu total suara Garuda, ranking caleg Garuda, progres TPS, daftar TPS belum masuk, serta wilayah kuat/lemah.
 - Status internal `perlu_dicek` dan catatan internal TPS sudah tersedia untuk koreksi Admin Partai.
 - Dashboard sudah menampilkan kartu dan daftar TPS perlu dicek internal, plus export TPS belum masuk dan TPS perlu dicek untuk Admin Partai.
-- Next step: lanjut penentuan kebijakan finalisasi dan penambahan test input/update/finalisasi/scope wilayah.
+- Kebijakan input berikutnya berubah: Kordes dan Korcam perlu bisa ikut input/edit suara TPS sesuai scope wilayah, tidak hanya Saksi TPS dan Admin Partai.
+- Akses edit suara TPS sudah diperluas: Saksi TPS, Kordes, dan Korcam bisa input/finalisasi sesuai scope; Admin Partai bisa koreksi lintas wilayah lewat mode status internal.
+- Next step: lengkapi test update rekap existing dan lanjut bersih-bersih legacy route/method PPWP/DPD/Pilkada yang sudah tidak reachable.
