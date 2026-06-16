@@ -26,12 +26,6 @@ class DashboardElectionSummary
             $overview = $this->overview($activeJenis, $scope);
 
             foreach ($activeJenis as $jenis) {
-                if (in_array($jenis, ['ppwp', 'gubernur', 'bupati', 'dpd'], true)) {
-                    $sections[] = $this->candidateSection($jenis, $scope);
-
-                    continue;
-                }
-
                 if (in_array($jenis, ['dpr_ri', 'dprd_prov'], true)) {
                     $sections[] = $this->calegSection($jenis, $scope);
 
@@ -126,58 +120,6 @@ class DashboardElectionSummary
             'id' => null,
             'label' => 'Kabupaten Banyuwangi',
             'dapil_id' => null,
-        ];
-    }
-
-    private function candidateSection(string $jenis, array $scope): array
-    {
-        $config = $this->candidateConfig($jenis);
-        $masters = DB::table($config['master'])
-            ->orderBy('nomor_urut')
-            ->get(['id', 'nomor_urut', $config['label'].' as label']);
-
-        $totals = $this->applyScope(
-            DB::table($config['table'].' as s')
-                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
-                ->join('tps as t', 't.id', '=', 'h.tps_id')
-                ->join('desas as d', 'd.id', '=', 't.desa_id')
-                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
-                ->where('h.jenis', $jenis),
-            $scope
-        )
-            ->select('s.calon_id', DB::raw('SUM(s.suara) as total_suara'))
-            ->groupBy('s.calon_id')
-            ->pluck('total_suara', 'calon_id');
-
-        $allRows = $masters
-            ->map(fn ($calon) => [
-                'rank' => 0,
-                'label' => $calon->label,
-                'meta' => 'No. '.$calon->nomor_urut,
-                'suara' => (int) ($totals[$calon->id] ?? 0),
-            ])
-            ->sortByDesc('suara')
-            ->values();
-        $totalSuara = $allRows->sum('suara');
-        $rows = $allRows
-            ->take($jenis === 'dpd' ? 5 : $masters->count())
-            ->values()
-            ->map(function ($row, $index) use ($totalSuara) {
-                $row['rank'] = $index + 1;
-                $row['persentase'] = $totalSuara > 0 ? round(($row['suara'] / $totalSuara) * 100, 2) : 0;
-
-                return $row;
-            })
-            ->toArray();
-
-        return [
-            'jenis' => $jenis,
-            'title' => RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis),
-            'subtitle' => $jenis === 'dpd' ? '5 calon teratas' : 'Semua paslon',
-            'display' => $jenis === 'dpd' ? 'top' : 'all',
-            'scope' => $scope['label'],
-            'total_suara' => $totalSuara,
-            'rows' => $rows,
         ];
     }
 
@@ -674,16 +616,6 @@ class DashboardElectionSummary
             'desa' => $query->where('d.id', $scope['id']),
             'tps' => $query->where('t.id', $scope['id']),
             default => $query,
-        };
-    }
-
-    private function candidateConfig(string $jenis): array
-    {
-        return match ($jenis) {
-            'ppwp' => ['table' => 'rekap_ppwp_suaras', 'master' => 'rekap_ppwp_calons', 'label' => 'nama_paslon'],
-            'gubernur' => ['table' => 'rekap_gubernur_suaras', 'master' => 'rekap_gubernur_calons', 'label' => 'nama_paslon'],
-            'bupati' => ['table' => 'rekap_bupati_suaras', 'master' => 'rekap_bupati_calons', 'label' => 'nama_paslon'],
-            'dpd' => ['table' => 'rekap_dpd_suaras', 'master' => 'rekap_dpd_calons', 'label' => 'nama_calon'],
         };
     }
 

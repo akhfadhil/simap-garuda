@@ -40,7 +40,7 @@ class PpsController extends Controller
     // Memastikan jenis pemilihan sedang aktif.
     private function cekAktif(string $jenis): void
     {
-        abort_unless(array_key_exists($jenis, RekapHeader::JENIS_LABELS), 404);
+        abort_unless(in_array($jenis, RekapHeader::LEGISLATIVE_TYPES, true), 404);
         abort_if(! in_array($jenis, \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
     }
 
@@ -50,13 +50,7 @@ class PpsController extends Controller
         $this->cekAktif($jenis);
         $desa = $this->activeDesa();
         $tpsIds = $desa->tps->pluck('id');
-        $relations = match ($jenis) {
-            'ppwp' => ['tps', 'ppwpSuaras.calon'],
-            'gubernur' => ['tps', 'gubernurSuaras.calon'],
-            'bupati' => ['tps', 'bupatiSuaras.calon'],
-            'dpd' => ['tps', 'dpdSuaras.calon'],
-            default => ['tps', 'partaiSuaras.partai', 'calegSuaras.caleg'],
-        };
+        $relations = ['tps', 'partaiSuaras.partai', 'calegSuaras.caleg'];
         $rekaps = RekapHeader::with($relations)
             ->whereIn('tps_id', $tpsIds)
             ->where('jenis', $jenis)
@@ -108,7 +102,7 @@ class PpsController extends Controller
         $desa = $this->activeDesa();
         $tpsIds = $desa->tps->pluck('id');
 
-        $rekaps = RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+        $rekaps = RekapHeader::with(['partaiSuaras', 'calegSuaras'])
             ->whereIn('tps_id', $tpsIds)
             ->where('jenis', $jenis)
             ->get();
@@ -135,18 +129,6 @@ class PpsController extends Controller
     // Mengambil master data sesuai jenis pemilihan.
     private function getMaster(string $jenis, Desa $desa): array
     {
-        if ($jenis === 'ppwp') {
-            return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'gubernur') {
-            return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'bupati') {
-            return ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'dpd') {
-            return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
-        }
         $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis)->garuda();
 
         if ($jenis === 'dprd_kab') {
@@ -160,10 +142,6 @@ class PpsController extends Controller
     private function getAllMaster(Desa $desa): array
     {
         return [
-            'ppwp' => ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
-            'gubernur' => ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
-            'bupati' => ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
-            'dpd' => ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->orderBy('nomor_urut')->get()],
             'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->garuda()->where('dapil_id', $desa->kecamatan?->dapil_id)->orderBy('nomor_urut')->get()],

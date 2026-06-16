@@ -41,7 +41,7 @@ class PpkController extends Controller
     // Memastikan jenis pemilihan sedang aktif.
     private function cekAktif(string $jenis): void
     {
-        abort_unless(array_key_exists($jenis, RekapHeader::JENIS_LABELS), 404);
+        abort_unless(in_array($jenis, RekapHeader::LEGISLATIVE_TYPES, true), 404);
         abort_if(! in_array($jenis, \App\Models\PemiluSetting::aktif()), 403, 'Jenis pemilu ini tidak aktif.');
     }
 
@@ -53,13 +53,7 @@ class PpkController extends Controller
         $showDetail = request()->boolean('detail');
         $detailDesaId = (int) request('detail_desa_id');
         $tpsIds = Tps::whereHas('desa', fn ($q) => $q->where('kecamatan_id', $kecamatan->id))->pluck('id');
-        $relations = match ($jenis) {
-            'ppwp' => ['tps.desa', 'ppwpSuaras.calon'],
-            'gubernur' => ['tps.desa', 'gubernurSuaras.calon'],
-            'bupati' => ['tps.desa', 'bupatiSuaras.calon'],
-            'dpd' => ['tps.desa', 'dpdSuaras.calon'],
-            default => ['tps.desa', 'partaiSuaras.partai', 'calegSuaras.caleg'],
-        };
+        $relations = ['tps.desa', 'partaiSuaras.partai', 'calegSuaras.caleg'];
         $rekaps = RekapHeader::with($relations)
             ->whereIn('tps_id', $tpsIds)
             ->where('jenis', $jenis)
@@ -101,40 +95,25 @@ class PpkController extends Controller
                 $desaStats[$desaId][$field] += (int) ($rekap->{$field} ?? 0);
             }
 
-            if (in_array($jenis, ['ppwp', 'gubernur', 'bupati', 'dpd'], true)) {
-                $suaraRows = match ($jenis) {
-                    'ppwp' => $rekap->ppwpSuaras,
-                    'gubernur' => $rekap->gubernurSuaras,
-                    'bupati' => $rekap->bupatiSuaras,
-                    default => $rekap->dpdSuaras,
-                };
+            foreach ($rekap->partaiSuaras as $suara) {
+                $desaPartaiTotals[$desaId][$suara->partai_id] =
+                    ($desaPartaiTotals[$desaId][$suara->partai_id] ?? 0) + (int) $suara->suara;
+                $desaPartaiGrandTotals[$desaId][$suara->partai_id] =
+                    ($desaPartaiGrandTotals[$desaId][$suara->partai_id] ?? 0) + (int) $suara->suara;
+                $desaStats[$desaId]['suara_sah'] += (int) $suara->suara;
+            }
 
-                foreach ($suaraRows as $suara) {
-                    $desaCalonTotals[$desaId][$suara->calon_id] =
-                        ($desaCalonTotals[$desaId][$suara->calon_id] ?? 0) + (int) $suara->suara;
-                    $desaStats[$desaId]['suara_sah'] += (int) $suara->suara;
-                }
-            } else {
-                foreach ($rekap->partaiSuaras as $suara) {
-                    $desaPartaiTotals[$desaId][$suara->partai_id] =
-                        ($desaPartaiTotals[$desaId][$suara->partai_id] ?? 0) + (int) $suara->suara;
-                    $desaPartaiGrandTotals[$desaId][$suara->partai_id] =
-                        ($desaPartaiGrandTotals[$desaId][$suara->partai_id] ?? 0) + (int) $suara->suara;
-                    $desaStats[$desaId]['suara_sah'] += (int) $suara->suara;
+            foreach ($rekap->calegSuaras as $suara) {
+                $partaiId = $suara->caleg?->partai_id;
+                $desaCalegTotals[$desaId][$suara->caleg_id] =
+                    ($desaCalegTotals[$desaId][$suara->caleg_id] ?? 0) + (int) $suara->suara;
+
+                if ($partaiId) {
+                    $desaPartaiGrandTotals[$desaId][$partaiId] =
+                        ($desaPartaiGrandTotals[$desaId][$partaiId] ?? 0) + (int) $suara->suara;
                 }
 
-                foreach ($rekap->calegSuaras as $suara) {
-                    $partaiId = $suara->caleg?->partai_id;
-                    $desaCalegTotals[$desaId][$suara->caleg_id] =
-                        ($desaCalegTotals[$desaId][$suara->caleg_id] ?? 0) + (int) $suara->suara;
-
-                    if ($partaiId) {
-                        $desaPartaiGrandTotals[$desaId][$partaiId] =
-                            ($desaPartaiGrandTotals[$desaId][$partaiId] ?? 0) + (int) $suara->suara;
-                    }
-
-                    $desaStats[$desaId]['suara_sah'] += (int) $suara->suara;
-                }
+                $desaStats[$desaId]['suara_sah'] += (int) $suara->suara;
             }
         }
 
@@ -224,7 +203,7 @@ class PpkController extends Controller
         $desas = $kecamatan->desas()->with('tps')->get();
         $tpsIds = $desas->flatMap(fn ($d) => $d->tps->pluck('id'));
 
-        $rekaps = RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+        $rekaps = RekapHeader::with(['partaiSuaras', 'calegSuaras'])
             ->whereIn('tps_id', $tpsIds)
             ->where('jenis', $jenis)
             ->get();
@@ -244,18 +223,6 @@ class PpkController extends Controller
     // Mengambil master data sesuai jenis pemilihan.
     private function getMaster(string $jenis, Kecamatan $kecamatan): array
     {
-        if ($jenis === 'ppwp') {
-            return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'gubernur') {
-            return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'bupati') {
-            return ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'dpd') {
-            return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
-        }
         $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis)->garuda();
 
         if ($jenis === 'dprd_kab') {
@@ -269,10 +236,6 @@ class PpkController extends Controller
     private function getAllMaster(Kecamatan $kecamatan): array
     {
         return [
-            'ppwp' => ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
-            'gubernur' => ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
-            'bupati' => ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
-            'dpd' => ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->orderBy('nomor_urut')->get()],
             'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->garuda()->where('dapil_id', $kecamatan->dapil_id)->orderBy('nomor_urut')->get()],

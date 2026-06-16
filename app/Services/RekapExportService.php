@@ -80,7 +80,7 @@ class RekapExportService
         $filename = "{$tpsSlug}_{$jenis}_{$version}.xlsx";
         $path = "{$dir}/{$filename}";
 
-        $rekaps = RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+        $rekaps = RekapHeader::with(['partaiSuaras', 'calegSuaras'])
             ->where('tps_id', $tps->id)
             ->where('jenis', $jenis)
             ->get();
@@ -110,7 +110,7 @@ class RekapExportService
         $path = "{$dir}/{$filename}";
 
         $tpsIds = $desa->tps->pluck('id');
-        $rekaps = RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+        $rekaps = RekapHeader::with(['partaiSuaras', 'calegSuaras'])
             ->whereIn('tps_id', $tpsIds)
             ->get();
         $master = $this->getAllMaster();
@@ -137,7 +137,7 @@ class RekapExportService
         $desas = $kecamatan->desas;
         $tpsIds = $desas->flatMap(fn ($d) => $d->tps->pluck('id'));
         $tpsList = $desas->flatMap(fn ($d) => $d->tps)->values();
-        $rekaps = RekapHeader::with(['ppwpSuaras', 'gubernurSuaras', 'bupatiSuaras', 'dpdSuaras', 'partaiSuaras', 'calegSuaras'])
+        $rekaps = RekapHeader::with(['partaiSuaras', 'calegSuaras'])
             ->whereIn('tps_id', $tpsIds)
             ->get();
         $master = $this->getAllMaster();
@@ -176,29 +176,12 @@ class RekapExportService
 
     private function getMaster(string $jenis): array
     {
-        if ($jenis === 'ppwp') {
-            return ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'gubernur') {
-            return ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'bupati') {
-            return ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()];
-        }
-        if ($jenis === 'dpd') {
-            return ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()];
-        }
-
         return ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis)->garuda()->orderBy('nomor_urut')->get()];
     }
 
     private function getAllMaster(): array
     {
         return [
-            'ppwp' => ['calons' => \App\Models\RekapPpwpCalon::orderBy('nomor_urut')->get()],
-            'gubernur' => ['calons' => \App\Models\RekapGubernurCalon::orderBy('nomor_urut')->get()],
-            'bupati' => ['calons' => \App\Models\RekapBupatiCalon::orderBy('nomor_urut')->get()],
-            'dpd' => ['calons' => \App\Models\RekapDpdCalon::orderBy('nomor_urut')->get()],
             'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->orderBy('nomor_urut')->get()],
             'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->orderBy('nomor_urut')->get()],
             'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->garuda()->orderBy('nomor_urut')->get()],
