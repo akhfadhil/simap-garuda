@@ -135,7 +135,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [ ] Hapus cabang kode PPWP, DPD, Gubernur, dan Bupati yang sekarang sudah tidak reachable.
   - [x] Bersihkan cabang non-legislatif dari alur input TPS, rekap Kordes, rekap Korcam, auto export, dan dashboard summary.
   - [x] Bersihkan sisa cabang non-legislatif di Admin rekap chart/export.
-  - [ ] Bersihkan setup legacy PPWP/DPD/Pilkada.
+  - [x] Bersihkan setup legacy PPWP/DPD/Pilkada.
 - [ ] Hapus atau refactor method controller koreksi inline/unlock yang sudah tidak diroute.
 - [ ] Hapus kolom atau relasi user legacy yang tidak dipakai setelah audit aman.
 - [ ] Hapus view Laravel default yang tidak dipakai jika masih ada.
@@ -189,4 +189,5 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Test input, update draft, finalisasi, proteksi final non-admin, dan scope wilayah sudah diperluas untuk Saksi TPS, Kordes, Korcam, dan Admin Partai.
 - Cabang non-legislatif sudah dibersihkan dari alur runtime input TPS, rekap Kordes/Korcam, auto export, dan dashboard summary.
 - Cabang non-legislatif sudah dibersihkan dari Admin rekap chart/export; endpoint admin rekap sekarang hanya menerima jenis legislatif aktif.
-- Next step: lanjut bersih-bersih setup legacy PPWP/DPD/Pilkada yang sudah tidak reachable.
+- Setup legacy PPWP/DPD/Pilkada sudah dihapus dari halaman setup, route, dan controller.
+- Next step: hapus atau refactor method controller koreksi inline/unlock yang sudah tidak diroute.

@@ -27,17 +27,13 @@ class SetupController extends Controller
             ->orderBy('nomor_urut')
             ->get()
             ->groupBy(fn ($p) => (string) $p->dapil_id);
+        $jenisOrder = array_flip(RekapHeader::LEGISLATIVE_TYPES);
         $pemiluSettings = PemiluSetting::whereIn('jenis', RekapHeader::LEGISLATIVE_TYPES)
-            ->orderByRaw("FIELD(jenis,'dpr_ri','dprd_prov','dprd_kab')")
             ->get()
+            ->sortBy(fn (PemiluSetting $setting) => $jenisOrder[$setting->jenis] ?? PHP_INT_MAX)
             ->keyBy('jenis');
-        $ppwpCalons = collect();
-        $gubernurCalons = collect();
-        $bupatiCalons = collect();
-        $dpdCalons = collect();
 
         return view('admin.setup.index', compact(
-            'ppwpCalons', 'gubernurCalons', 'bupatiCalons', 'dpdCalons',
             'partaiDprRi', 'partaiProv', 'partaiKab', 'dapils', 'kecamatans', 'pemiluSettings'
         ));
     }
@@ -56,30 +52,6 @@ class SetupController extends Controller
         PemiluSetting::whereIn('jenis', RekapHeader::LEGACY_NON_PARTY_TYPES)->update(['is_active' => false]);
 
         return back()->with('success', 'Pengaturan jenis pemilu berhasil disimpan.');
-    }
-
-    // Menyimpan batch paslon PPWP.
-    public function storePpwp(Request $request)
-    {
-        abort(410, 'Rekap non-legislatif tidak dipakai di SIMAP Garuda.');
-    }
-
-    // Menghapus paslon PPWP.
-    public function destroyPpwp(int $calon)
-    {
-        abort(410, 'Rekap non-legislatif tidak dipakai di SIMAP Garuda.');
-    }
-
-    // Menyimpan batch calon DPD.
-    public function storeDpd(Request $request)
-    {
-        abort(410, 'Rekap non-legislatif tidak dipakai di SIMAP Garuda.');
-    }
-
-    // Menghapus calon DPD.
-    public function destroyDpd(int $calon)
-    {
-        abort(410, 'Rekap non-legislatif tidak dipakai di SIMAP Garuda.');
     }
 
     // Menyimpan partai untuk DPR/DPRD.
@@ -210,30 +182,6 @@ class SetupController extends Controller
         return back()->with('success', 'Dapil kecamatan berhasil diupdate.');
     }
 
-    // Menyimpan batch paslon gubernur.
-    public function storeGubernur(Request $request)
-    {
-        abort(410, 'Rekap non-legislatif tidak dipakai di SIMAP Garuda.');
-    }
-
-    // Menghapus paslon gubernur.
-    public function destroyGubernur(int $calon)
-    {
-        abort(410, 'Rekap non-legislatif tidak dipakai di SIMAP Garuda.');
-    }
-
-    // Menyimpan batch paslon bupati.
-    public function storeBupati(Request $request)
-    {
-        abort(410, 'Rekap non-legislatif tidak dipakai di SIMAP Garuda.');
-    }
-
-    // Menghapus paslon bupati.
-    public function destroyBupati(int $calon)
-    {
-        abort(410, 'Rekap non-legislatif tidak dipakai di SIMAP Garuda.');
-    }
-
     private function isGarudaPartaiRow(array $row): bool
     {
         $party = config('party');
@@ -248,99 +196,5 @@ class SetupController extends Controller
                 str_contains($name, mb_strtolower($party['short_name'] ?? 'Garuda'))
                 || str_contains($name, mb_strtolower($party['name'] ?? 'Partai Garuda'))
             );
-    }
-
-    // Menyimpan beberapa paslon dari form batch.
-    private function storePaslonBatch(Request $request, string $modelClass, string $successMessage)
-    {
-        $request->validate([
-            'calons' => 'required|array',
-            'calons.*.nomor_urut' => 'nullable|integer|min:1|max:99',
-            'calons.*.nama_paslon' => 'nullable|string|max:200',
-        ]);
-
-        $rows = collect($request->input('calons', []));
-        $hasIncompleteRow = $rows->contains(function ($row) {
-            $nomor = trim((string) ($row['nomor_urut'] ?? ''));
-            $nama = trim((string) ($row['nama_paslon'] ?? ''));
-
-            return ($nomor === '') xor ($nama === '');
-        });
-
-        if ($hasIncompleteRow) {
-            return back()
-                ->withErrors(['calons' => 'Lengkapi nomor urut dan nama paslon pada setiap baris yang diisi.'])
-                ->withInput();
-        }
-
-        $validRows = $rows
-            ->map(fn ($row) => [
-                'nomor_urut' => trim((string) ($row['nomor_urut'] ?? '')),
-                'nama_paslon' => trim((string) ($row['nama_paslon'] ?? '')),
-            ])
-            ->filter(fn ($row) => $row['nomor_urut'] !== '' && $row['nama_paslon'] !== '')
-            ->values();
-
-        if ($validRows->isEmpty()) {
-            return back()
-                ->withErrors(['calons' => 'Isi minimal satu baris paslon.'])
-                ->withInput();
-        }
-
-        foreach ($validRows as $row) {
-            $modelClass::create([
-                'nomor_urut' => (int) $row['nomor_urut'],
-                'nama_paslon' => $row['nama_paslon'],
-            ]);
-        }
-
-        return back()->with('success', $successMessage);
-    }
-
-    // Menyimpan beberapa calon dari form batch.
-    private function storeCalonBatch(Request $request, string $modelClass, string $successMessage)
-    {
-        $request->validate([
-            'calons' => 'required|array',
-            'calons.*.nomor_urut' => 'nullable|integer|min:1|max:999',
-            'calons.*.nama_calon' => 'nullable|string|max:200',
-        ]);
-
-        $rows = collect($request->input('calons', []));
-        $hasIncompleteRow = $rows->contains(function ($row) {
-            $nomor = trim((string) ($row['nomor_urut'] ?? ''));
-            $nama = trim((string) ($row['nama_calon'] ?? ''));
-
-            return ($nomor === '') xor ($nama === '');
-        });
-
-        if ($hasIncompleteRow) {
-            return back()
-                ->withErrors(['calons' => 'Lengkapi nomor urut dan nama calon pada setiap baris yang diisi.'])
-                ->withInput();
-        }
-
-        $validRows = $rows
-            ->map(fn ($row) => [
-                'nomor_urut' => trim((string) ($row['nomor_urut'] ?? '')),
-                'nama_calon' => trim((string) ($row['nama_calon'] ?? '')),
-            ])
-            ->filter(fn ($row) => $row['nomor_urut'] !== '' && $row['nama_calon'] !== '')
-            ->values();
-
-        if ($validRows->isEmpty()) {
-            return back()
-                ->withErrors(['calons' => 'Isi minimal satu baris calon.'])
-                ->withInput();
-        }
-
-        foreach ($validRows as $row) {
-            $modelClass::create([
-                'nomor_urut' => (int) $row['nomor_urut'],
-                'nama_calon' => $row['nama_calon'],
-            ]);
-        }
-
-        return back()->with('success', $successMessage);
     }
 }

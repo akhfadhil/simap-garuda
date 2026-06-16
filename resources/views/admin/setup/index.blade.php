@@ -3,7 +3,9 @@
 @section('admin_active', 'setup')
 
 @section('admin_content')
-@php($party = $party ?? config('party'))
+@php
+    $party = $party ?? config('party');
+@endphp
 <div class="mb-8">
     <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">// Admin — Setup</p>
     <h1 class="font-display text-4xl tracking-[2px] admin-text">SETUP DATA {{ strtoupper($party['short_name']) }}</h1>
@@ -61,215 +63,7 @@
     </form>
 </div>
 
-{{-- ══ TAB PPWP ══ --}}
-<div id="panel-ppwp" class="tab-panel hidden">
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div class="lg:col-span-2 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Paslon</p>
-            <form method="POST" action="{{ route('admin.setup.ppwp.store') }}">
-                @csrf
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut</label>
-                    <input type="number" name="calons[0][nomor_urut]" min="1" max="99" placeholder="1"
-                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Paslon</label>
-                    <input type="text" name="calons[0][nama_paslon]" placeholder="NAMA CALON - NAMA WAKIL"
-                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-                </div>
-                <div class="paslon-extra-rows"></div>
-                <button type="button" onclick="addPaslonFields(this)"
-                        class="w-full mb-3 border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 hover:border-red-400 hover:text-red-500 font-semibold py-2.5 rounded-lg text-xs transition">
-                    + Tambah Baris Paslon
-                </button>
-                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                    Tambah →
-                </button>
-            </form>
-        </div>
-        <div class="lg:col-span-3 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
-            <div class="p-5 border-b dark:border-gray-700 border-gray-200">
-                <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Daftar Paslon PPWP ({{ $ppwpCalons->count() }})</p>
-            </div>
-            @forelse($ppwpCalons as $c)
-            <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 group">
-                <div class="flex items-center gap-4">
-                    <span class="w-8 h-8 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                        {{ $c->nomor_urut }}
-                    </span>
-                    <p class="text-sm font-medium dark:text-gray-100 text-gray-800">{{ $c->nama_paslon }}</p>
-                </div>
-                <form method="POST" action="{{ route('admin.setup.ppwp.destroy', $c) }}"
-                      onsubmit="return confirm('Hapus paslon ini?')" class="opacity-0 group-hover:opacity-100 transition">
-                    @csrf @method('DELETE')
-                    <button class="px-3 py-1.5 rounded-lg text-xs font-medium border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">Hapus</button>
-                </form>
-            </div>
-            @empty
-            <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada paslon.</div>
-            @endforelse
-        </div>
-    </div>
-</div>
-
-{{-- ══ TAB GUBERNUR ══ --}}
-<div id="panel-gubernur" class="tab-panel hidden">
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div class="lg:col-span-2 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Paslon Gubernur</p>
-            <form method="POST" action="{{ route('admin.setup.gubernur.store') }}">
-                @csrf
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut</label>
-                    <input type="number" name="calons[0][nomor_urut]" min="1" max="99" placeholder="1"
-                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Paslon</label>
-                    <input type="text" name="calons[0][nama_paslon]" placeholder="NAMA CALON - NAMA WAKIL"
-                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-                </div>
-                <div class="paslon-extra-rows"></div>
-                <button type="button" onclick="addPaslonFields(this)"
-                        class="w-full mb-3 border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 hover:border-red-400 hover:text-red-500 font-semibold py-2.5 rounded-lg text-xs transition">
-                    + Tambah Baris Paslon
-                </button>
-                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                    Tambah →
-                </button>
-            </form>
-        </div>
-        <div class="lg:col-span-3 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
-            <div class="p-5 border-b dark:border-gray-700 border-gray-200">
-                <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Daftar Paslon Gubernur ({{ $gubernurCalons->count() }})</p>
-            </div>
-            @forelse($gubernurCalons as $c)
-            <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 group">
-                <div class="flex items-center gap-4">
-                    <span class="w-8 h-8 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                        {{ $c->nomor_urut }}
-                    </span>
-                    <p class="text-sm font-medium dark:text-gray-100 text-gray-800">{{ $c->nama_paslon }}</p>
-                </div>
-                <form method="POST" action="{{ route('admin.setup.gubernur.destroy', $c) }}"
-                      onsubmit="return confirm('Hapus paslon ini?')" class="opacity-0 group-hover:opacity-100 transition">
-                    @csrf @method('DELETE')
-                    <button class="px-3 py-1.5 rounded-lg text-xs font-medium border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">Hapus</button>
-                </form>
-            </div>
-            @empty
-            <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada paslon gubernur.</div>
-            @endforelse
-        </div>
-    </div>
-</div>
-
-{{-- ══ TAB BUPATI ══ --}}
-<div id="panel-bupati" class="tab-panel hidden">
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div class="lg:col-span-2 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Paslon Bupati</p>
-            <form method="POST" action="{{ route('admin.setup.bupati.store') }}">
-                @csrf
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut</label>
-                    <input type="number" name="calons[0][nomor_urut]" min="1" max="99" placeholder="1"
-                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Paslon</label>
-                    <input type="text" name="calons[0][nama_paslon]" placeholder="NAMA CALON - NAMA WAKIL"
-                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-                </div>
-                <div class="paslon-extra-rows"></div>
-                <button type="button" onclick="addPaslonFields(this)"
-                        class="w-full mb-3 border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 hover:border-red-400 hover:text-red-500 font-semibold py-2.5 rounded-lg text-xs transition">
-                    + Tambah Baris Paslon
-                </button>
-                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                    Tambah →
-                </button>
-            </form>
-        </div>
-        <div class="lg:col-span-3 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
-            <div class="p-5 border-b dark:border-gray-700 border-gray-200">
-                <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Daftar Paslon Bupati ({{ $bupatiCalons->count() }})</p>
-            </div>
-            @forelse($bupatiCalons as $c)
-            <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 group">
-                <div class="flex items-center gap-4">
-                    <span class="w-8 h-8 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                        {{ $c->nomor_urut }}
-                    </span>
-                    <p class="text-sm font-medium dark:text-gray-100 text-gray-800">{{ $c->nama_paslon }}</p>
-                </div>
-                <form method="POST" action="{{ route('admin.setup.bupati.destroy', $c) }}"
-                      onsubmit="return confirm('Hapus paslon ini?')" class="opacity-0 group-hover:opacity-100 transition">
-                    @csrf @method('DELETE')
-                    <button class="px-3 py-1.5 rounded-lg text-xs font-medium border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">Hapus</button>
-                </form>
-            </div>
-            @empty
-            <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada paslon bupati.</div>
-            @endforelse
-        </div>
-    </div>
-</div>
-
-{{-- ══ TAB DPD ══ --}}
-<div id="panel-dpd" class="tab-panel hidden">
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div class="lg:col-span-2 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Calon DPD</p>
-            <form method="POST" action="{{ route('admin.setup.dpd.store') }}">
-                @csrf
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut</label>
-                    <input type="number" name="calons[0][nomor_urut]" min="1" placeholder="1"
-                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Calon</label>
-                    <input type="text" name="calons[0][nama_calon]" placeholder="Nama lengkap calon DPD"
-                           class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-                </div>
-                <div class="calon-extra-rows"></div>
-                <button type="button" onclick="addCalonFields(this)"
-                        class="w-full mb-3 border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 hover:border-red-400 hover:text-red-500 font-semibold py-2.5 rounded-lg text-xs transition">
-                    + Tambah Baris Calon
-                </button>
-                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                    Tambah →
-                </button>
-            </form>
-        </div>
-        <div class="lg:col-span-3 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
-            <div class="p-5 border-b dark:border-gray-700 border-gray-200">
-                <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Daftar Calon DPD ({{ $dpdCalons->count() }})</p>
-            </div>
-            @forelse($dpdCalons as $c)
-            <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 group">
-                <div class="flex items-center gap-4">
-                    <span class="w-8 h-8 rounded-full bg-teal-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                        {{ $c->nomor_urut }}
-                    </span>
-                    <p class="text-sm font-medium dark:text-gray-100 text-gray-800">{{ $c->nama_calon }}</p>
-                </div>
-                <form method="POST" action="{{ route('admin.setup.dpd.destroy', $c) }}"
-                      onsubmit="return confirm('Hapus calon ini?')" class="opacity-0 group-hover:opacity-100 transition">
-                    @csrf @method('DELETE')
-                    <button class="px-3 py-1.5 rounded-lg text-xs font-medium border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">Hapus</button>
-                </form>
-            </div>
-            @empty
-            <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada calon DPD.</div>
-            @endforelse
-        </div>
-    </div>
-</div>
-
-{{-- ══ TAB DPR RI & DPRD PROV ══ --}}
+{{-- TAB DPR RI & DPRD PROV --}}
 @foreach(['dpr_ri'=>['partaiDprRi','DPR RI','bg-orange-500'],'dprd_prov'=>['partaiProv','DPRD Provinsi','bg-sky-500']] as $jenis => [$var, $label, $color])
 <div id="panel-{{ $jenis }}" class="tab-panel hidden">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -554,63 +348,6 @@
 <script>
 const tabs = ['dpr_ri','dprd_prov','dprd_kab'];
 
-function addPaslonFields(button) {
-    const form = button.closest('form');
-    const container = form.querySelector('.paslon-extra-rows');
-    const indexes = Array.from(form.querySelectorAll('input[name*="[nomor_urut]"]'))
-        .map((input) => input.name.match(/calons\[(\d+)\]/))
-        .filter(Boolean)
-        .map((match) => Number(match[1]));
-    const index = indexes.length ? Math.max(...indexes) + 1 : 0;
-    const row = document.createElement('div');
-    row.className = 'grid grid-cols-1 md:grid-cols-[96px_1fr_auto] gap-2 mb-4 items-end';
-    row.innerHTML = `
-        <div>
-            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut</label>
-            <input type="number" name="calons[${index}][nomor_urut]" min="1" max="99" placeholder="${index + 1}"
-                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-        </div>
-        <div>
-            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Paslon</label>
-            <input type="text" name="calons[${index}][nama_paslon]" placeholder="NAMA CALON - NAMA WAKIL"
-                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-        </div>
-        <button type="button" onclick="this.closest('div').remove()"
-                class="px-3 py-2.5 rounded-lg text-xs font-semibold border border-red-400/40 text-red-400 hover:bg-red-500/10 transition">
-            Hapus
-        </button>
-    `;
-    container.appendChild(row);
-}
-
-function addCalonFields(button) {
-    const form = button.closest('form');
-    const container = form.querySelector('.calon-extra-rows');
-    const indexes = Array.from(form.querySelectorAll('input[name*="[nomor_urut]"]'))
-        .map((input) => input.name.match(/calons\[(\d+)\]/))
-        .filter(Boolean)
-        .map((match) => Number(match[1]));
-    const index = indexes.length ? Math.max(...indexes) + 1 : 0;
-    const row = document.createElement('div');
-    row.className = 'grid grid-cols-1 md:grid-cols-[96px_1fr_auto] gap-2 mb-4 items-end';
-    row.innerHTML = `
-        <div>
-            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut</label>
-            <input type="number" name="calons[${index}][nomor_urut]" min="1" placeholder="${index + 1}"
-                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-        </div>
-        <div>
-            <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Calon</label>
-            <input type="text" name="calons[${index}][nama_calon]" placeholder="Nama lengkap calon DPD"
-                   class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
-        </div>
-        <button type="button" onclick="this.closest('div').remove()"
-                class="px-3 py-2.5 rounded-lg text-xs font-semibold border border-red-400/40 text-red-400 hover:bg-red-500/10 transition">
-            Hapus
-        </button>
-    `;
-    container.appendChild(row);
-}
 
 function addPartaiFields(button) {
     const form = button.closest('form');
@@ -701,21 +438,6 @@ if (firstDapilBtn) {
 const savedTab = localStorage.getItem('setup_tab');
 switchTab(tabs.includes(savedTab) ? savedTab : 'dpr_ri');
 
-document.querySelectorAll('.paslon-extra-rows').forEach((container) => {
-    const addButton = container.nextElementSibling;
-    if (addButton) {
-        addPaslonFields(addButton);
-        addPaslonFields(addButton);
-    }
-});
-
-document.querySelectorAll('.calon-extra-rows').forEach((container) => {
-    const addButton = container.nextElementSibling;
-    if (addButton) {
-        addCalonFields(addButton);
-        addCalonFields(addButton);
-    }
-});
 
 document.querySelectorAll('.partai-extra-rows').forEach((container) => {
     const addButton = container.nextElementSibling;

@@ -60,15 +60,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\SetupController::class, 'index'])->name('index');
         Route::post('pemilu-settings', [App\Http\Controllers\Admin\SetupController::class, 'updatePemiluSettings'])->name('pemilu.settings');
 
-        Route::post('ppwp', [App\Http\Controllers\Admin\SetupController::class, 'storePpwp'])->name('ppwp.store');
-        Route::delete('ppwp/{calon}', [App\Http\Controllers\Admin\SetupController::class, 'destroyPpwp'])->name('ppwp.destroy');
-        Route::post('gubernur', [App\Http\Controllers\Admin\SetupController::class, 'storeGubernur'])->name('gubernur.store');
-        Route::delete('gubernur/{calon}', [App\Http\Controllers\Admin\SetupController::class, 'destroyGubernur'])->name('gubernur.destroy');
-        Route::post('bupati', [App\Http\Controllers\Admin\SetupController::class, 'storeBupati'])->name('bupati.store');
-        Route::delete('bupati/{calon}', [App\Http\Controllers\Admin\SetupController::class, 'destroyBupati'])->name('bupati.destroy');
-        Route::post('dpd', [App\Http\Controllers\Admin\SetupController::class, 'storeDpd'])->name('dpd.store');
-        Route::delete('dpd/{calon}', [App\Http\Controllers\Admin\SetupController::class, 'destroyDpd'])->name('dpd.destroy');
-
         Route::post('partai', [App\Http\Controllers\Admin\SetupController::class, 'storePartai'])->name('partai.store');
         Route::delete('partai/{partai}', [App\Http\Controllers\Admin\SetupController::class, 'destroyPartai'])->name('partai.destroy');
         Route::post('partai/{partai}/caleg', [App\Http\Controllers\Admin\SetupController::class, 'storeCaleg'])->name('caleg.store');

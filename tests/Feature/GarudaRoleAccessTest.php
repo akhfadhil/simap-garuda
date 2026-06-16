@@ -140,13 +140,26 @@ class GarudaRoleAccessTest extends TestCase
             ->get(route('admin.rekap.export.download', ['jenis' => 'ppwp', 'level' => 'kabupaten']))
             ->assertSessionHasErrors('jenis');
 
+        foreach ([
+            'admin.setup.ppwp.store',
+            'admin.setup.ppwp.destroy',
+            'admin.setup.dpd.store',
+            'admin.setup.dpd.destroy',
+            'admin.setup.gubernur.store',
+            'admin.setup.gubernur.destroy',
+            'admin.setup.bupati.store',
+            'admin.setup.bupati.destroy',
+        ] as $routeName) {
+            $this->assertFalse(\Route::has($routeName));
+        }
+
         $this->actingAs($this->admin)
-            ->post(route('admin.setup.ppwp.store'), [
-                'calons' => [
-                    ['nomor_urut' => 1, 'nama_paslon' => 'Paslon Legacy'],
-                ],
-            ])
-            ->assertStatus(410);
+            ->get(route('admin.setup.index'))
+            ->assertOk()
+            ->assertDontSee('PPWP')
+            ->assertDontSee('Calon DPD')
+            ->assertDontSee('Gubernur')
+            ->assertDontSee('Bupati');
     }
 
     public function test_admin_can_only_create_garuda_party_master(): void
