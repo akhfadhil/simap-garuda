@@ -6,10 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Desa;
 use App\Models\RekapCellFlag;
 use App\Models\RekapHeader;
+use App\Services\PartyScopeService;
 use Illuminate\Support\Facades\Auth;
 
 class PpsController extends Controller
 {
+    public function __construct(private PartyScopeService $partyScope)
+    {
+    }
+
     // Menampilkan daftar rekap TPS dalam desa Kordes.
     public function index()
     {
@@ -150,24 +155,6 @@ class PpsController extends Controller
 
     private function activeDesa(): Desa
     {
-        $user = Auth::user();
-
-        if ($user->role === 'admin_partai') {
-            abort_if(! session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
-
-            return Desa::with('kecamatan', 'tps')->findOrFail(session('admin_view_desa_id'));
-        }
-
-        if ($user->role === 'korcam') {
-            abort_if(! session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
-            $desa = Desa::with('kecamatan', 'tps')->findOrFail(session('admin_view_desa_id'));
-            abort_if($desa->kecamatan_id !== $user->kecamatan_id, 403, 'Akses ditolak.');
-
-            return $desa;
-        }
-
-        abort_if(! $user->desa_id, 403, 'Akun belum di-assign ke Desa.');
-
-        return Desa::with('kecamatan', 'tps')->findOrFail($user->desa_id);
+        return $this->partyScope->activeDesaFor(Auth::user())->loadMissing('kecamatan', 'tps');
     }
 }

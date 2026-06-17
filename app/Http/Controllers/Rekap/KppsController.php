@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\RekapHeader;
 use App\Models\RekapPartai;
 use App\Models\Tps;
+use App\Services\PartyScopeService;
 use App\Services\RekapAdminCache;
 use App\Support\PartyConfig;
 use Illuminate\Http\Request;
@@ -17,6 +18,10 @@ use Maatwebsite\Excel\Facades\Excel;
 class KppsController extends Controller
 {
     const JENIS = RekapHeader::LEGISLATIVE_TYPES;
+
+    public function __construct(private PartyScopeService $partyScope)
+    {
+    }
 
     // Menampilkan daftar rekap milik TPS user.
     public function index()
@@ -292,26 +297,6 @@ class KppsController extends Controller
 
     private function activeTps(): Tps
     {
-        $user = Auth::user();
-
-        if (in_array($user->role, ['admin_partai', 'korcam', 'kordes'], true)) {
-            abort_if(! session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
-            $tps = Tps::with('desa.kecamatan.dapil')->findOrFail(session('admin_view_tps_id'));
-
-            $allowed = match ($user->role) {
-                'admin_partai' => true,
-                'korcam' => $tps->desa?->kecamatan_id === $user->kecamatan_id,
-                'kordes' => $tps->desa_id === $user->desa_id,
-                default => false,
-            };
-
-            abort_if(! $allowed, 403, 'Akses ditolak.');
-
-            return $tps;
-        }
-
-        abort_if(! $user->tps_id, 403, 'Akun belum di-assign ke TPS.');
-
-        return Tps::with('desa.kecamatan.dapil')->findOrFail($user->tps_id);
+        return $this->partyScope->activeTpsFor(Auth::user());
     }
 }

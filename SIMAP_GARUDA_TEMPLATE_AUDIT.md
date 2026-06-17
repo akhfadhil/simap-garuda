@@ -294,8 +294,8 @@ Helper yang perlu dibuat saat ekstraksi:
 
 1. Buat helper `PartyConfig` untuk menggantikan duplikasi query matching partai. Selesai di SIMAP Garuda.
 2. Rename konsep Garuda menjadi konsep party generik di SIMAP Garuda tanpa mengubah behavior. Sebagian selesai: matching partai, scope `configuredParty()`, dan label export/UI utama sudah berbasis config.
-3. Rename controller/view legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`.
-4. Buat `PartyScopeService` untuk menyatukan aturan scope wilayah.
+3. Buat `PartyScopeService` untuk menyatukan aturan scope wilayah. Selesai di SIMAP Garuda.
+4. Rename controller/view legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`.
 5. Hapus backward route legacy dari calon template.
 6. Buat fresh migration template yang hanya membawa schema party app.
 7. Generalisasi test fixture dari Garuda ke party config.
@@ -308,4 +308,5 @@ Helper yang perlu dibuat saat ekstraksi:
 - Daftar hardcode Garuda selesai.
 - Daftar legacy yang tidak boleh masuk template selesai.
 - Helper `PartyConfig` dan scope `configuredParty()` sudah dibuat sebagai langkah awal generalisasi.
+- `PartyScopeService` sudah dibuat untuk memusatkan akses kecamatan, desa, TPS, active scope dashboard, dan active entity per role.
 - Import snapshot dari SIMAP utama belum didesain; tetap menjadi pekerjaan terpisah setelah kebutuhan format data SIMAP utama jelas.

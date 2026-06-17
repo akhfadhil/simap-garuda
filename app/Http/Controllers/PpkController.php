@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Desa;
 use App\Models\Kecamatan;
+use App\Services\PartyScopeService;
 
 class PpkController extends Controller
 {
+    public function __construct(private PartyScopeService $partyScope)
+    {
+    }
+
     // Menampilkan daftar kordes/desa dalam kecamatan korcam.
     public function dataPps()
     {
@@ -37,15 +42,6 @@ class PpkController extends Controller
 
     private function activeKecamatan(): Kecamatan
     {
-        $user = Auth::user();
-
-        if ($user->role === 'admin_partai') {
-            abort_if(!session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
-            return Kecamatan::findOrFail(session('admin_view_kecamatan_id'));
-        }
-
-        abort_if(!$user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
-
-        return Kecamatan::findOrFail($user->kecamatan_id);
+        return $this->partyScope->activeKecamatanFor(Auth::user());
     }
 }

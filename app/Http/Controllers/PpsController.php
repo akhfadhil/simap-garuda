@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Desa;
 use App\Models\Tps;
+use App\Services\PartyScopeService;
 
 class PpsController extends Controller
 {
+    public function __construct(private PartyScopeService $partyScope)
+    {
+    }
+
     // Menampilkan daftar TPS dalam desa kordes.
     public function dataTps()
     {
@@ -37,23 +42,6 @@ class PpsController extends Controller
 
     private function activeDesa(): Desa
     {
-        $user = Auth::user();
-
-        if ($user->role === 'admin_partai') {
-            abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
-            return Desa::findOrFail(session('admin_view_desa_id'));
-        }
-
-        if ($user->role === 'korcam') {
-            abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
-            $desa = Desa::findOrFail(session('admin_view_desa_id'));
-            abort_if($desa->kecamatan_id !== $user->kecamatan_id, 403, 'Akses ditolak.');
-
-            return $desa;
-        }
-
-        abort_if(!$user->desa_id, 403, 'Akun belum di-assign ke Desa.');
-
-        return Desa::findOrFail($user->desa_id);
+        return $this->partyScope->activeDesaFor(Auth::user());
     }
 }

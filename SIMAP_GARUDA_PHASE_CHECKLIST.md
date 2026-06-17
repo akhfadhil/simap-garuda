@@ -181,6 +181,7 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 - [x] Tandai fitur yang terlalu spesifik Garuda agar tidak ikut masuk template.
 - [x] Siapkan daftar file/konsep reusable untuk template: `config/party.php`, role label, scope wilayah, form input TPS, dashboard, export, status internal, dan test.
 - [x] Generalisasi hardcode Garuda tahap pertama ke helper party generik tanpa mengubah behavior runtime.
+- [x] Ekstrak aturan scope wilayah ke `PartyScopeService` agar akses kecamatan/desa/TPS terpusat untuk template.
 - [ ] Siapkan standar import snapshot dari SIMAP utama jika nanti SIMAP utama membuat `export:party-snapshot`.
 - [x] Siapkan dokumentasi operasional yang bisa digeneralisasi untuk project partai lain.
 - [x] Pastikan cleanup role/URI teknis dilakukan dengan mempertimbangkan template, bukan hanya kebutuhan Garuda.
@@ -188,7 +189,7 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 ## Rekomendasi Urutan Kerja
 
 1. Lanjutkan rename controller/view legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi` tanpa membawa backward route ke template.
-2. Buat `PartyScopeService` agar aturan scope wilayah tidak tersebar di controller dan dashboard.
+2. Generalisasi test fixture dari Garuda ke party config agar template tidak membawa data contoh Garuda.
 3. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
 
 ## Mapping ke PARTAI_PORTAL_BRAINSTORM.md
@@ -244,4 +245,6 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Audit template selesai di `SIMAP_GARUDA_TEMPLATE_AUDIT.md`: daftar fitur reusable, hardcode Garuda yang harus diparameterkan, legacy yang tidak boleh masuk template, dan urutan ekstraksi sudah dicatat.
 - Generalisasi hardcode Garuda tahap pertama selesai: `app/Support/PartyConfig.php` menjadi helper identitas/matching partai, `RekapPartai` punya scope `configuredParty()`, query utama memakai helper generik, dan label export/UI utama memakai `config('party.*')`.
 - `php artisan test` lulus setelah generalisasi helper party.
-- Next step untuk eksekusi berikutnya: ekstrak aturan scope wilayah ke `PartyScopeService` atau rename controller/view legacy `Ppk/Pps/Kpps` ke istilah final.
+- Aturan scope wilayah sudah diekstrak ke `app/Services/PartyScopeService.php`; dashboard summary, dashboard role, Korcam/Kordes controller, dan input TPS memakai service yang sama untuk akses kecamatan/desa/TPS.
+- `php artisan test` lulus setelah ekstraksi `PartyScopeService`.
+- Next step untuk eksekusi berikutnya: rename controller/view legacy `Ppk/Pps/Kpps` ke istilah final `Korcam/Kordes/Saksi`.

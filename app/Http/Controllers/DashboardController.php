@@ -5,10 +5,15 @@ use App\Models\Desa;
 use App\Models\Kecamatan;
 use App\Models\Tps;
 use App\Services\DashboardElectionSummary;
+use App\Services\PartyScopeService;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    public function __construct(private PartyScopeService $partyScope)
+    {
+    }
+
     // Menampilkan dashboard admin partai.
     public function admin(DashboardElectionSummary $summary)
     {
@@ -49,7 +54,7 @@ class DashboardController extends Controller
         } else {
             abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
             $viewDesa = Desa::with('kecamatan')->findOrFail(session('admin_view_desa_id'));
-            $this->authorizeDesaScope($viewDesa);
+            abort_if(! $this->partyScope->canAccessDesa($user, $viewDesa), 403, 'Akses ditolak.');
         }
 
         return view('dashboard.pps', [
@@ -70,7 +75,7 @@ class DashboardController extends Controller
         } else {
             abort_if(!session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
             $viewTps = Tps::with('desa.kecamatan')->findOrFail(session('admin_view_tps_id'));
-            $this->authorizeTpsScope($viewTps);
+            abort_if(! $this->partyScope->canAccessTps($user, $viewTps), 403, 'Akses ditolak.');
         }
 
         return view('dashboard.kpps', [
@@ -84,33 +89,6 @@ class DashboardController extends Controller
     private function checkRole(string $role)
     {
         if (Auth::user()->role !== $role) abort(403, 'Akses ditolak.');
-    }
-
-    private function authorizeDesaScope(Desa $desa): void
-    {
-        $user = Auth::user();
-
-        $allowed = match ($user->role) {
-            'admin_partai' => true,
-            'korcam' => $desa->kecamatan_id === $user->kecamatan_id,
-            default => false,
-        };
-
-        abort_if(!$allowed, 403, 'Akses ditolak.');
-    }
-
-    private function authorizeTpsScope(Tps $tps): void
-    {
-        $user = Auth::user();
-
-        $allowed = match ($user->role) {
-            'admin_partai' => true,
-            'korcam' => $tps->desa?->kecamatan_id === $user->kecamatan_id,
-            'kordes' => $tps->desa_id === $user->desa_id,
-            default => false,
-        };
-
-        abort_if(!$allowed, 403, 'Akses ditolak.');
     }
 
     // Menyimpan mode lihat sebagai Korcam untuk admin.

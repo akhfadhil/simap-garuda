@@ -3,12 +3,9 @@
 namespace App\Services;
 
 use App\Models\Dapil;
-use App\Models\Desa;
-use App\Models\Kecamatan;
 use App\Models\PemiluSetting;
 use App\Models\RekapHeader;
 use App\Models\RekapPartai;
-use App\Models\Tps;
 use App\Models\User;
 use App\Support\PartyConfig;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -17,9 +14,13 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardElectionSummary
 {
+    public function __construct(private PartyScopeService $partyScope)
+    {
+    }
+
     public function forUser(User $user): array
     {
-        $scope = $this->scopeForUser($user);
+        $scope = $this->partyScope->dashboardScopeFor($user);
         $activeJenis = PemiluSetting::aktif();
 
         return RekapAdminCache::rememberDashboardSummary($this->cacheParts($user, $scope, $activeJenis), function () use ($activeJenis, $scope) {
@@ -46,82 +47,6 @@ class DashboardElectionSummary
                 'sections' => array_values(array_filter($sections)),
             ];
         });
-    }
-
-    private function scopeForUser(User $user): array
-    {
-        if (session('admin_view_tps_id')) {
-            $tps = Tps::with('desa.kecamatan')->find(session('admin_view_tps_id'));
-
-            if ($tps && $this->canAccessTps($user, $tps)) {
-                return [
-                    'type' => 'tps',
-                    'id' => $tps->id,
-                    'label' => $tps->nama.' - '.($tps->desa?->nama ?? '-'),
-                    'dapil_id' => $tps->desa?->kecamatan?->dapil_id,
-                ];
-            }
-        }
-
-        if (session('admin_view_desa_id')) {
-            $desa = Desa::with('kecamatan')->find(session('admin_view_desa_id'));
-
-            if ($desa && $this->canAccessDesa($user, $desa)) {
-                return [
-                    'type' => 'desa',
-                    'id' => $desa->id,
-                    'label' => 'Desa '.($desa->nama ?? '-'),
-                    'dapil_id' => $desa->kecamatan?->dapil_id,
-                ];
-            }
-        }
-
-        if (session('admin_view_kecamatan_id')) {
-            $kecamatan = Kecamatan::find(session('admin_view_kecamatan_id'));
-
-            if ($kecamatan && $this->canAccessKecamatan($user, $kecamatan)) {
-                return [
-                    'type' => 'kecamatan',
-                    'id' => $kecamatan->id,
-                    'label' => 'Kecamatan '.($kecamatan->nama ?? '-'),
-                    'dapil_id' => $kecamatan->dapil_id,
-                ];
-            }
-        }
-
-        if ($user->role === 'korcam') {
-            return [
-                'type' => 'kecamatan',
-                'id' => $user->kecamatan_id,
-                'label' => 'Kecamatan '.($user->kecamatan?->nama ?? '-'),
-                'dapil_id' => $user->kecamatan?->dapil_id,
-            ];
-        }
-
-        if ($user->role === 'kordes') {
-            return [
-                'type' => 'desa',
-                'id' => $user->desa_id,
-                'label' => 'Desa '.($user->desa?->nama ?? '-'),
-                'dapil_id' => $user->desa?->kecamatan?->dapil_id,
-            ];
-        }
-
-        if ($user->role === 'saksi_tps') {
-            return [
-                'type' => 'tps',
-                'id' => $user->tps_id,
-                'label' => $user->tps?->nama.' - '.($user->tps?->desa?->nama ?? '-'),
-                'dapil_id' => $user->tps?->desa?->kecamatan?->dapil_id,
-            ];
-        }
-
-        return [
-            'type' => 'kabupaten',
-            'id' => null,
-            'label' => 'Kabupaten Banyuwangi',
-            'dapil_id' => null,
-        ];
     }
 
     private function overview(array $activeJenis, array $scope): array
@@ -354,36 +279,6 @@ class DashboardElectionSummary
                 ->whereIn('h.jenis', $jenisList), 'p.nama_partai', 'p.nomor_urut'),
             $scope
         );
-    }
-
-    private function canAccessKecamatan(User $user, Kecamatan $kecamatan): bool
-    {
-        return match ($user->role) {
-            'admin_partai' => true,
-            'korcam' => $user->kecamatan_id === $kecamatan->id,
-            default => false,
-        };
-    }
-
-    private function canAccessDesa(User $user, Desa $desa): bool
-    {
-        return match ($user->role) {
-            'admin_partai' => true,
-            'korcam' => $user->kecamatan_id === $desa->kecamatan_id,
-            'kordes' => $user->desa_id === $desa->id,
-            default => false,
-        };
-    }
-
-    private function canAccessTps(User $user, Tps $tps): bool
-    {
-        return match ($user->role) {
-            'admin_partai' => true,
-            'korcam' => $user->kecamatan_id === $tps->desa?->kecamatan_id,
-            'kordes' => $user->desa_id === $tps->desa_id,
-            'saksi_tps' => $user->tps_id === $tps->id,
-            default => false,
-        };
     }
 
     private function partySection(string $jenis, array $scope, ?int $dapilId = null, ?string $dapilName = null): array

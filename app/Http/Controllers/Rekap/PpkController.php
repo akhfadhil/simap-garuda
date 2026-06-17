@@ -7,10 +7,15 @@ use App\Models\Kecamatan;
 use App\Models\RekapCellFlag;
 use App\Models\RekapHeader;
 use App\Models\Tps;
+use App\Services\PartyScopeService;
 use Illuminate\Support\Facades\Auth;
 
 class PpkController extends Controller
 {
+    public function __construct(private PartyScopeService $partyScope)
+    {
+    }
+
     // Menampilkan daftar rekap TPS dalam kecamatan Korcam.
     public function index()
     {
@@ -244,16 +249,6 @@ class PpkController extends Controller
 
     private function activeKecamatan(): Kecamatan
     {
-        $user = Auth::user();
-
-        if ($user->role === 'admin_partai') {
-            abort_if(! session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
-
-            return Kecamatan::findOrFail(session('admin_view_kecamatan_id'));
-        }
-
-        abort_if(! $user->kecamatan_id, 403, 'Akun belum di-assign ke Kecamatan.');
-
-        return Kecamatan::findOrFail($user->kecamatan_id);
+        return $this->partyScope->activeKecamatanFor(Auth::user());
     }
 }
