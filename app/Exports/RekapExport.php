@@ -30,7 +30,7 @@ class RekapExport implements WithMultipleSheets
     {
         $sheets = [];
 
-        if (in_array($this->level, ['ppk', 'admin']) && $this->desas && $this->jenis) {
+        if (in_array($this->level, ['korcam', 'admin_partai']) && $this->desas && $this->jenis) {
             $jenis       = $this->jenis;
             $label       = RekapHeader::JENIS_LABELS[$jenis];
             $masterJenis = $this->master[$jenis] ?? [];

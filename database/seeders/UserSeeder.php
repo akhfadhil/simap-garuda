@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            ['name' => config('party.roles.admin') . ' ' . config('party.short_name'), 'username' => 'admin', 'role' => 'admin', 'password' => Hash::make('admin123')],
+            ['name' => config('party.roles.admin_partai') . ' ' . config('party.short_name'), 'username' => 'admin', 'role' => 'admin_partai', 'password' => Hash::make('admin123')],
         ];
 
         foreach ($users as $u) {

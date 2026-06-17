@@ -12,14 +12,14 @@ return new class extends Migration
             ->delete();
 
         if (DB::getDriverName() !== 'sqlite') {
-            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin','ppk','pps','kpps') NOT NULL");
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin','ppk','pps','kpps','admin_partai','korcam','kordes','saksi_tps') NOT NULL");
         }
     }
 
     public function down(): void
     {
         if (DB::getDriverName() !== 'sqlite') {
-            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin','ppk','pps','kpps') NOT NULL");
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('admin','ppk','pps','kpps','komisioner','partai') NOT NULL");
         }
     }
 };

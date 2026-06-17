@@ -525,10 +525,10 @@
     $defaultJenis = collect(\App\Models\RekapHeader::JENIS_LABELS)
         ->keys()
         ->first(fn ($key) => in_array($key, $aktifJenis));
-    $roleLabel = $party['roles']['admin'];
-    $homeRoute = route('dashboard.admin');
+    $roleLabel = $party['roles']['admin_partai'];
+    $homeRoute = route('dashboard.admin_partai');
     $adminMenus = [
-        ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin')],
+        ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin_partai')],
         ['key' => 'users', 'label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
         ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
         ['key' => 'kecamatan', 'label' => 'Kelola Kecamatan', 'icon' => 'map', 'route' => route('admin.kecamatan.index')],

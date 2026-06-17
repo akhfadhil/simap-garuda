@@ -13,7 +13,7 @@ class PpsController extends Controller
         $desa = $this->activeDesa();
 
         $tpsList = Tps::where('desa_id', $desa->id)
-            ->with(['rekapHeaders', 'users' => fn($q) => $q->where('role', 'kpps')])
+            ->with(['rekapHeaders', 'users' => fn($q) => $q->where('role', 'saksi_tps')])
             ->get();
 
         return view('pps.data-tps', compact('tpsList'));
@@ -32,19 +32,19 @@ class PpsController extends Controller
             'admin_view_tps_id' => $tps->id,
         ]);
 
-        return redirect()->route('dashboard.kpps');
+        return redirect()->route('dashboard.saksi');
     }
 
     private function activeDesa(): Desa
     {
         $user = Auth::user();
 
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin_partai') {
             abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
             return Desa::findOrFail(session('admin_view_desa_id'));
         }
 
-        if ($user->role === 'ppk') {
+        if ($user->role === 'korcam') {
             abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
             $desa = Desa::findOrFail(session('admin_view_desa_id'));
             abort_if($desa->kecamatan_id !== $user->kecamatan_id, 403, 'Akses ditolak.');

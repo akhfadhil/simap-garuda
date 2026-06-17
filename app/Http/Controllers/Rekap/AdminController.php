@@ -257,7 +257,7 @@ class AdminController extends Controller
     // Menandai/menghapus tanda merah manual pada cell rekap dari halaman admin.
     public function toggleCellFlag(Request $request, string $jenis)
     {
-        abort_if($request->user()?->role !== 'admin', 403);
+        abort_if($request->user()?->role !== 'admin_partai', 403);
         abort_unless(array_key_exists($jenis, RekapHeader::JENIS_LABELS), 404);
 
         $data = $request->validate([
@@ -337,7 +337,7 @@ class AdminController extends Controller
         $filename = 'Rekap_'.strtoupper($jenis).'_Admin'.$suffix.'.xlsx';
 
         return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'admin', $wilayah, $desas, $jenis),
+            new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'admin_partai', $wilayah, $desas, $jenis),
             $filename
         );
     }
@@ -604,7 +604,7 @@ class AdminController extends Controller
                 $master = $this->getAllMaster();
                 $wilayah = $tps->nama.' — '.$tps->desa->nama;
                 $filename = 'Rekap_'.strtoupper($jenis).'_'.str_replace(' ', '_', $tps->nama).'.xlsx';
-                $sheet = new \App\Exports\RekapSheetExport($jenis, $label, $rekaps, $master, $tpsList, 'kpps', $wilayah);
+                $sheet = new \App\Exports\RekapSheetExport($jenis, $label, $rekaps, $master, $tpsList, 'saksi_tps', $wilayah);
 
                 return \Maatwebsite\Excel\Facades\Excel::download($sheet, $filename);
 
@@ -617,7 +617,7 @@ class AdminController extends Controller
                 $master = $this->getAllMaster();
                 $wilayah = $desa->nama.' — Kec. '.$desa->kecamatan->nama;
                 $filename = 'Rekap_'.strtoupper($jenis).'_'.str_replace(' ', '_', $desa->nama).'.xlsx';
-                $sheet = new \App\Exports\RekapSheetExport($jenis, $label, $rekaps, $master, $tpsList, 'pps', $wilayah);
+                $sheet = new \App\Exports\RekapSheetExport($jenis, $label, $rekaps, $master, $tpsList, 'kordes', $wilayah);
 
                 return \Maatwebsite\Excel\Facades\Excel::download($sheet, $filename);
 
@@ -633,7 +633,7 @@ class AdminController extends Controller
                 $filename = 'Rekap_'.strtoupper($jenis).'_Kec_'.str_replace(' ', '_', $kecamatan->nama).'.xlsx';
 
                 return \Maatwebsite\Excel\Facades\Excel::download(
-                    new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'ppk', $wilayah, $desas, $jenis),
+                    new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'korcam', $wilayah, $desas, $jenis),
                     $filename
                 );
 
@@ -655,7 +655,7 @@ class AdminController extends Controller
                 });
 
                 return \Maatwebsite\Excel\Facades\Excel::download(
-                    new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'admin', $wilayah, $pseudoDesas, $jenis),
+                    new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'admin_partai', $wilayah, $pseudoDesas, $jenis),
                     $filename
                 );
         }

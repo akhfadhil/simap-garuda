@@ -16,7 +16,7 @@
     $regions = $overview['regions'] ?? ['label' => null, 'strong' => [], 'weak' => []];
     $strongRegions = collect($regions['strong'] ?? []);
     $weakRegions = collect($regions['weak'] ?? []);
-    $canExportTpsReports = auth()->user()?->role === 'admin';
+    $canExportTpsReports = auth()->user()?->role === 'admin_partai';
 @endphp
 
 <section class="mb-12">

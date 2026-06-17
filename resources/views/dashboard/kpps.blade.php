@@ -1,6 +1,6 @@
 @extends('layouts.role-dashboard')
 @section('title', 'Dashboard Saksi TPS')
-@section('role_key', 'kpps')
+@section('role_key', 'saksi_tps')
 @section('role_title', 'Saksi TPS')
 @section('role_subtitle', 'Saksi Tempat Pemungutan Suara')
 @section('role_active', 'dashboard')

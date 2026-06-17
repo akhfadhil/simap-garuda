@@ -90,7 +90,7 @@ class RekapExportService
         $wilayah = $tps->nama.' — '.$tps->desa->nama;
 
         $sheet = new \App\Exports\RekapSheetExport(
-            $jenis, $label, $rekaps, $master, $tpsList, 'kpps', $wilayah
+            $jenis, $label, $rekaps, $master, $tpsList, 'saksi_tps', $wilayah
         );
 
         Excel::store($sheet, $path);
@@ -117,7 +117,7 @@ class RekapExportService
         $wilayah = $desa->nama.' — Kec. '.$desa->kecamatan->nama;
 
         Excel::store(
-            new \App\Exports\RekapExport($rekaps, $master, $desa->tps, 'pps', $wilayah, collect([$desa]), null),
+            new \App\Exports\RekapExport($rekaps, $master, $desa->tps, 'kordes', $wilayah, collect([$desa]), null),
             $path
         );
     }
@@ -144,7 +144,7 @@ class RekapExportService
         $wilayah = 'Kec. '.$kecamatan->nama;
 
         Excel::store(
-            new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'ppk', $wilayah, $desas, null),
+            new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'korcam', $wilayah, $desas, null),
             $path
         );
     }

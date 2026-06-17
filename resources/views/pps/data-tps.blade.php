@@ -1,6 +1,6 @@
 @extends('layouts.role-dashboard')
 @section('title', 'Data TPS')
-@section('role_key', 'pps')
+@section('role_key', 'kordes')
 @section('role_title', 'Kordes')
 @section('role_subtitle', 'Koordinator Desa')
 @section('role_active', 'tps')
@@ -80,7 +80,7 @@
         </div>
     </div>
 
-    <a href="{{ route('pps.view-tps', $tps) }}"
+    <a href="{{ route('kordes.view-tps', $tps) }}"
        class="px-4 py-2 rounded-lg text-xs font-semibold border border-teal-400 text-teal-400 hover:bg-teal-400 hover:text-white transition">
         Kelola Rekap TPS
     </a>

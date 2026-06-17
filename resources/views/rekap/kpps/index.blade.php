@@ -1,6 +1,6 @@
 @extends('layouts.role-dashboard')
 @section('title', 'Rekapitulasi Data')
-@section('role_key', 'kpps')
+@section('role_key', 'saksi_tps')
 @section('role_title', 'Saksi TPS')
 @section('role_subtitle', 'Saksi Tempat Pemungutan Suara')
 @section('role_active', 'rekap')
@@ -25,7 +25,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 @php
     $aktifJenis = \App\Models\PemiluSetting::aktif();
-    $canEditRekap = in_array(Auth::user()->role, ['kpps', 'pps', 'ppk', 'admin'], true);
+    $canEditRekap = in_array(Auth::user()->role, ['saksi_tps', 'kordes', 'korcam', 'admin_partai'], true);
 @endphp
 
 @foreach(\App\Models\RekapHeader::JENIS_LABELS as $jenis => $label)

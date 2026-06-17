@@ -44,10 +44,10 @@ class User extends Authenticatable
     public function roleColor(): string
     {
         return match($this->role) {
-            'admin' => '#E63946',
-            'ppk'   => '#F4A261',
-            'pps'   => '#2EC4B6',
-            'kpps'  => '#A8DADC',
+            'admin_partai' => '#E63946',
+            'korcam'   => '#F4A261',
+            'kordes'   => '#2EC4B6',
+            'saksi_tps'  => '#A8DADC',
             default => '#666666',
         };
     }

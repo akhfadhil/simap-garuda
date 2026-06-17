@@ -3,12 +3,12 @@
 
 @section('content')
 @php
-    $isAdminRekapEdit = Auth::user()->role === 'admin';
-    $isCoordinatorRekapEdit = in_array(Auth::user()->role, ['pps', 'ppk'], true);
+    $isAdminRekapEdit = Auth::user()->role === 'admin_partai';
+    $isCoordinatorRekapEdit = in_array(Auth::user()->role, ['kordes', 'korcam'], true);
     $backUrl = $isAdminRekapEdit
         ? (session('admin_rekap_return_url') ?: route('admin.rekap.show', $jenis))
         : route('rekap.index');
-    $canEditRekap = in_array(Auth::user()->role, ['kpps', 'pps', 'ppk'], true) || $isAdminRekapEdit;
+    $canEditRekap = in_array(Auth::user()->role, ['saksi_tps', 'kordes', 'korcam'], true) || $isAdminRekapEdit;
     $isFinal = $rekap && $rekap->status === 'final';
     $readOnly = !$canEditRekap || ($isFinal && !$isAdminRekapEdit);
     $statusLabels = [

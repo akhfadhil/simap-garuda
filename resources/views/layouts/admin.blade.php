@@ -102,8 +102,8 @@
 @php
     $party = $party ?? config('party');
     $adminActive = trim($__env->yieldContent('admin_active', ''));
-    $roleLabel = $party['roles']['admin'];
-    $userRoleLabel = $party['roles']['admin'] . ' ' . $party['short_name'];
+    $roleLabel = $party['roles']['admin_partai'];
+    $userRoleLabel = $party['roles']['admin_partai'] . ' ' . $party['short_name'];
     $menus = [
         ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin')],
         ['key' => 'users', 'label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],

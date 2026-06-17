@@ -37,7 +37,7 @@ class AuthController extends Controller
             ]);
             $role = Auth::user()->role;
 
-            if (!in_array($role, ['admin', 'ppk', 'pps', 'kpps'], true)) {
+            if (!in_array($role, ['admin_partai', 'korcam', 'kordes', 'saksi_tps'], true)) {
                 Auth::logout();
 
                 return back()
@@ -65,10 +65,10 @@ class AuthController extends Controller
     private function dashboardRoute(string $role): string
     {
         return match ($role) {
-            'admin' => 'dashboard.admin',
-            'ppk' => 'dashboard.ppk',
-            'pps' => 'dashboard.pps',
-            'kpps' => 'dashboard.kpps',
+            'admin_partai' => 'dashboard.admin_partai',
+            'korcam' => 'dashboard.korcam',
+            'kordes' => 'dashboard.kordes',
+            'saksi_tps' => 'dashboard.saksi',
             default => 'login',
         };
     }

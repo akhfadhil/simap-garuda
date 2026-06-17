@@ -1,4 +1,6 @@
-@php($party = $party ?? config('party'))
+@php
+    $party = $party ?? config('party');
+@endphp
 <!DOCTYPE html>
 <html lang="id" class="dark">
 <head>
@@ -27,10 +29,10 @@
         .dark ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
         html:not(.dark) ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
 
-        .role-ppk   { background: rgba(244,162,97,0.15); color: #F4A261; border: 1px solid rgba(244,162,97,0.35); }
-        .role-pps   { background: rgba(46,196,182,0.15); color: #2EC4B6; border: 1px solid rgba(46,196,182,0.35); }
-        .role-kpps  { background: rgba(168,218,220,0.15); color: #5BA4CF; border: 1px solid rgba(168,218,220,0.35); }
-        .role-admin { background: rgba(220,38,38,0.15); color: #DC2626; border: 1px solid rgba(220,38,38,0.35); }
+        .role-korcam   { background: rgba(244,162,97,0.15); color: #F4A261; border: 1px solid rgba(244,162,97,0.35); }
+        .role-kordes   { background: rgba(46,196,182,0.15); color: #2EC4B6; border: 1px solid rgba(46,196,182,0.35); }
+        .role-saksi_tps  { background: rgba(168,218,220,0.15); color: #5BA4CF; border: 1px solid rgba(168,218,220,0.35); }
+        .role-admin_partai { background: rgba(220,38,38,0.15); color: #DC2626; border: 1px solid rgba(220,38,38,0.35); }
         .rekap-table-scroll {
             max-height: calc(100vh - 5rem);
             overflow: auto;
@@ -55,7 +57,16 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
 
         {{-- Brand --}}
-        <a href="{{ route('dashboard.' . Auth::user()->role) }}" class="flex items-center gap-3 flex-shrink-0">
+        @php
+            $homeRoute = match (Auth::user()->role) {
+                'admin_partai' => 'dashboard.admin_partai',
+                'korcam' => 'dashboard.korcam',
+                'kordes' => 'dashboard.kordes',
+                'saksi_tps' => 'dashboard.saksi',
+                default => 'login',
+            };
+        @endphp
+        <a href="{{ route($homeRoute) }}" class="flex items-center gap-3 flex-shrink-0">
             <div class="w-8 h-8 flex items-center justify-center rounded overflow-hidden">
                 <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }}" class="w-full h-full object-contain">
             </div>

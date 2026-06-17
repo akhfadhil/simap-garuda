@@ -38,13 +38,13 @@
         <div>
             <label class="block text-[10px] font-semibold dark:text-gray-500 text-gray-400 uppercase tracking-wider mb-1.5">Role</label>
             <select name="role" onchange="this.form.submit()" class="{{ $inputClass }}">
-                <option value="kpps" {{ $role === 'kpps' ? 'selected' : '' }}>Saksi TPS per TPS</option>
-                <option value="pps" {{ $role === 'pps' ? 'selected' : '' }}>Kordes per Desa</option>
-                <option value="ppk" {{ $role === 'ppk' ? 'selected' : '' }}>Korcam per Kecamatan</option>
+                <option value="saksi_tps" {{ $role === 'saksi_tps' ? 'selected' : '' }}>Saksi TPS per TPS</option>
+                <option value="kordes" {{ $role === 'kordes' ? 'selected' : '' }}>Kordes per Desa</option>
+                <option value="korcam" {{ $role === 'korcam' ? 'selected' : '' }}>Korcam per Kecamatan</option>
             </select>
         </div>
 
-        @if($role !== 'ppk')
+        @if($role !== 'korcam')
         <div>
             <label class="block text-[10px] font-semibold dark:text-gray-500 text-gray-400 uppercase tracking-wider mb-1.5">Kecamatan</label>
             <select name="kecamatan_id" onchange="this.form.submit()" class="{{ $inputClass }}">
@@ -58,7 +58,7 @@
         </div>
         @endif
 
-        @if($role === 'kpps' && $selectedKecamatanId)
+        @if($role === 'saksi_tps' && $selectedKecamatanId)
         <div>
             <label class="block text-[10px] font-semibold dark:text-gray-500 text-gray-400 uppercase tracking-wider mb-1.5">Desa</label>
             <select name="desa_id" onchange="this.form.submit()" class="{{ $inputClass }}">
@@ -78,9 +78,9 @@
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm p-10 text-center">
     <p class="text-sm font-semibold dark:text-gray-100 text-gray-800">Belum ada data untuk ditampilkan</p>
     <p class="text-xs dark:text-gray-500 text-gray-400 mt-1">
-        @if($role === 'kpps')
+        @if($role === 'saksi_tps')
             Pilih kecamatan dan desa untuk menampilkan semua TPS.
-        @elseif($role === 'pps')
+        @elseif($role === 'kordes')
             Pilih kecamatan untuk menampilkan semua desa.
         @else
             Data kecamatan belum tersedia.

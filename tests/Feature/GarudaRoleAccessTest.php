@@ -52,46 +52,46 @@ class GarudaRoleAccessTest extends TestCase
         $this->tpsB = Tps::create(['nama' => 'TPS B', 'desa_id' => $this->desaB->id]);
         PemiluSetting::create(['jenis' => 'dpr_ri', 'is_active' => true]);
 
-        $this->admin = $this->user('admin');
-        $this->korcamA = $this->user('ppk', ['kecamatan_id' => $this->kecamatanA->id]);
-        $this->kordesA = $this->user('pps', ['desa_id' => $this->desaA->id]);
-        $this->saksiA = $this->user('kpps', ['tps_id' => $this->tpsA->id]);
+        $this->admin = $this->user('admin_partai');
+        $this->korcamA = $this->user('korcam', ['kecamatan_id' => $this->kecamatanA->id]);
+        $this->kordesA = $this->user('kordes', ['desa_id' => $this->desaA->id]);
+        $this->saksiA = $this->user('saksi_tps', ['tps_id' => $this->tpsA->id]);
     }
 
     public function test_admin_can_enter_all_garuda_view_levels(): void
     {
         $this->actingAs($this->admin)
             ->get(route('admin.kecamatan.view', $this->kecamatanB))
-            ->assertRedirect(route('dashboard.ppk'));
+            ->assertRedirect(route('dashboard.korcam'));
 
         $this->actingAs($this->admin)
             ->get(route('admin.desa.view', $this->desaB))
-            ->assertRedirect(route('dashboard.pps'));
+            ->assertRedirect(route('dashboard.kordes'));
 
         $this->actingAs($this->admin)
             ->get(route('admin.tps.view', $this->tpsB))
-            ->assertRedirect(route('dashboard.kpps'));
+            ->assertRedirect(route('dashboard.saksi'));
     }
 
     public function test_korcam_can_only_open_kordes_inside_own_kecamatan(): void
     {
         $this->actingAs($this->korcamA)
-            ->get(route('ppk.view-pps', $this->desaA))
-            ->assertRedirect(route('dashboard.pps'));
+            ->get(route('korcam.view-kordes', $this->desaA))
+            ->assertRedirect(route('dashboard.kordes'));
 
         $this->actingAs($this->korcamA)
-            ->get(route('ppk.view-pps', $this->desaB))
+            ->get(route('korcam.view-kordes', $this->desaB))
             ->assertForbidden();
     }
 
     public function test_kordes_can_only_open_saksi_tps_inside_own_desa(): void
     {
         $this->actingAs($this->kordesA)
-            ->get(route('pps.view-tps', $this->tpsA))
-            ->assertRedirect(route('dashboard.kpps'));
+            ->get(route('kordes.view-tps', $this->tpsA))
+            ->assertRedirect(route('dashboard.saksi'));
 
         $this->actingAs($this->kordesA)
-            ->get(route('pps.view-tps', $this->tpsB))
+            ->get(route('kordes.view-tps', $this->tpsB))
             ->assertForbidden();
     }
 
@@ -284,7 +284,7 @@ class GarudaRoleAccessTest extends TestCase
             $rekaps,
             $master,
             collect([$this->tpsA, $this->tpsB]),
-            'pps',
+            'kordes',
             'Desa A'
         );
 
@@ -313,7 +313,7 @@ class GarudaRoleAccessTest extends TestCase
             $rekaps,
             $master['dpr_ri'],
             collect([$this->desaA, $this->desaB]),
-            'ppk',
+            'korcam',
             'Kecamatan A'
         );
 
@@ -462,8 +462,8 @@ class GarudaRoleAccessTest extends TestCase
         ]);
 
         $this->actingAs($this->kordesA)
-            ->get(route('pps.view-tps', $this->tpsA))
-            ->assertRedirect(route('dashboard.kpps'));
+            ->get(route('kordes.view-tps', $this->tpsA))
+            ->assertRedirect(route('dashboard.saksi'));
 
         $this->actingAs($this->kordesA)
             ->post(route('rekap.store', 'dpr_ri'), [
@@ -495,12 +495,12 @@ class GarudaRoleAccessTest extends TestCase
         ]);
 
         $this->actingAs($this->korcamA)
-            ->get(route('ppk.view-pps', $this->desaA))
-            ->assertRedirect(route('dashboard.pps'));
+            ->get(route('korcam.view-kordes', $this->desaA))
+            ->assertRedirect(route('dashboard.kordes'));
 
         $this->actingAs($this->korcamA)
-            ->get(route('pps.view-tps', $this->tpsA))
-            ->assertRedirect(route('dashboard.kpps'));
+            ->get(route('kordes.view-tps', $this->tpsA))
+            ->assertRedirect(route('dashboard.saksi'));
 
         $this->actingAs($this->korcamA)
             ->post(route('rekap.store', 'dpr_ri'), [
@@ -823,3 +823,4 @@ class GarudaRoleAccessTest extends TestCase
             ->implode(' | ');
     }
 }
+

@@ -33,9 +33,9 @@ return [
     ],
 
     'roles' => [
-        'admin' => 'Admin Partai',
-        'ppk' => 'Korcam',
-        'pps' => 'Kordes',
-        'kpps' => 'Saksi TPS',
+        'admin_partai' => 'Admin Partai',
+        'korcam' => 'Korcam',
+        'kordes' => 'Kordes',
+        'saksi_tps' => 'Saksi TPS',
     ],
 ];

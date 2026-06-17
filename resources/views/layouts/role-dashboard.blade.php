@@ -74,35 +74,35 @@
     $roleTitle = trim($__env->yieldContent('role_title', strtoupper($roleKey)));
     $roleSubtitle = trim($__env->yieldContent('role_subtitle', 'Dashboard'));
     $active = trim($__env->yieldContent('role_active', 'dashboard'));
-    $accent = ['ppk' => '#f4a261', 'pps' => '#2ec4b6', 'kpps' => '#7dd3fc'][$roleKey] ?? '#e63946';
+    $accent = ['korcam' => '#f4a261', 'kordes' => '#2ec4b6', 'saksi_tps' => '#7dd3fc'][$roleKey] ?? '#e63946';
     $viewModeActive = match ($roleKey) {
-        'ppk' => Auth::user()->role === 'admin' && session()->has('admin_view_kecamatan_id'),
-        'pps' => in_array(Auth::user()->role, ['admin', 'ppk'], true) && session()->has('admin_view_desa_id'),
-        'kpps' => in_array(Auth::user()->role, ['admin', 'ppk', 'pps'], true) && session()->has('admin_view_tps_id'),
+        'korcam' => Auth::user()->role === 'admin_partai' && session()->has('admin_view_kecamatan_id'),
+        'kordes' => in_array(Auth::user()->role, ['admin_partai', 'korcam'], true) && session()->has('admin_view_desa_id'),
+        'saksi_tps' => in_array(Auth::user()->role, ['admin_partai', 'korcam', 'kordes'], true) && session()->has('admin_view_tps_id'),
         default => false,
     };
     $viewModeBackRoute = match (true) {
-        $roleKey === 'ppk' => route('admin.kecamatan.index'),
-        $roleKey === 'pps' && Auth::user()->role === 'ppk' => route('ppk.data-pps'),
-        $roleKey === 'pps' => route('admin.desa.index'),
-        $roleKey === 'kpps' && Auth::user()->role === 'ppk' => route('ppk.data-pps'),
-        $roleKey === 'kpps' && Auth::user()->role === 'pps' => route('pps.data-tps'),
-        $roleKey === 'kpps' => route('admin.tps.index'),
-        default => route('dashboard.admin'),
+        $roleKey === 'korcam' => route('admin.kecamatan.index'),
+        $roleKey === 'kordes' && Auth::user()->role === 'korcam' => route('korcam.data-kordes'),
+        $roleKey === 'kordes' => route('admin.desa.index'),
+        $roleKey === 'saksi_tps' && Auth::user()->role === 'korcam' => route('korcam.data-kordes'),
+        $roleKey === 'saksi_tps' && Auth::user()->role === 'kordes' => route('kordes.data-tps'),
+        $roleKey === 'saksi_tps' => route('admin.tps.index'),
+        default => route('dashboard.admin_partai'),
     };
     $menus = match ($roleKey) {
-        'ppk' => [
-            ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.ppk')],
-            ['key' => 'pps', 'label' => 'Data Kordes', 'icon' => 'location_city', 'route' => route('ppk.data-pps')],
-            ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('ppk.rekap.index')],
+        'korcam' => [
+            ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.korcam')],
+            ['key' => 'kordes', 'label' => 'Data Kordes', 'icon' => 'location_city', 'route' => route('korcam.data-kordes')],
+            ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('korcam.rekap.index')],
         ],
-        'pps' => [
-            ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.pps')],
-            ['key' => 'tps', 'label' => 'Data TPS', 'icon' => 'pin_drop', 'route' => route('pps.data-tps')],
-            ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('pps.rekap.index')],
+        'kordes' => [
+            ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.kordes')],
+            ['key' => 'tps', 'label' => 'Data TPS', 'icon' => 'pin_drop', 'route' => route('kordes.data-tps')],
+            ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('kordes.rekap.index')],
         ],
         default => [
-            ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.kpps')],
+            ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.saksi')],
             ['key' => 'rekap', 'label' => 'Isi Rekapitulasi', 'icon' => 'edit_document', 'route' => route('rekap.index')],
         ],
     };

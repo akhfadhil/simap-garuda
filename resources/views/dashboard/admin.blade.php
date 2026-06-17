@@ -143,8 +143,8 @@
 @section('content')
 @php
     $party = $party ?? config('party');
-    $roleLabel = $party['roles']['admin'];
-    $userRoleLabel = $party['roles']['admin'] . ' ' . $party['short_name'];
+    $roleLabel = $party['roles']['admin_partai'];
+    $userRoleLabel = $party['roles']['admin_partai'] . ' ' . $party['short_name'];
     $totalPengguna     = \App\Models\User::count();
     $totalTps          = \App\Models\Tps::count();
     $aktifJenis        = \App\Models\PemiluSetting::aktif();

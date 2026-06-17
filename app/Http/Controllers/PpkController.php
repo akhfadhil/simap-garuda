@@ -13,7 +13,7 @@ class PpkController extends Controller
         $kecamatan = $this->activeKecamatan();
 
         $desas = Desa::where('kecamatan_id', $kecamatan->id)
-            ->with(['tps.rekapHeaders', 'users' => fn($q) => $q->where('role', 'pps')])
+            ->with(['tps.rekapHeaders', 'users' => fn($q) => $q->where('role', 'kordes')])
             ->get();
 
         return view('ppk.data-pps', compact('desas'));
@@ -32,14 +32,14 @@ class PpkController extends Controller
         ]);
         session()->forget('admin_view_tps_id');
 
-        return redirect()->route('dashboard.pps');
+        return redirect()->route('dashboard.kordes');
     }
 
     private function activeKecamatan(): Kecamatan
     {
         $user = Auth::user();
 
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin_partai') {
             abort_if(!session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
             return Kecamatan::findOrFail(session('admin_view_kecamatan_id'));
         }

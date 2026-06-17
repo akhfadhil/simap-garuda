@@ -19,10 +19,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/password', [AccountController::class, 'editPassword'])->name('password.edit');
     Route::post('/password', [AccountController::class, 'updatePassword'])->name('password.update');
 
-    Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
-    Route::get('/dashboard/ppk', [DashboardController::class, 'ppk'])->name('dashboard.ppk');
-    Route::get('/dashboard/pps', [DashboardController::class, 'pps'])->name('dashboard.pps');
-    Route::get('/dashboard/kpps', [DashboardController::class, 'kpps'])->name('dashboard.kpps');
+    Route::get('/dashboard/admin-partai', [DashboardController::class, 'admin'])->name('dashboard.admin_partai');
+    Route::redirect('/dashboard/admin', '/dashboard/admin-partai')->name('dashboard.admin');
+    Route::get('/dashboard/korcam', [DashboardController::class, 'ppk'])->name('dashboard.korcam');
+    Route::redirect('/dashboard/ppk', '/dashboard/korcam')->name('dashboard.ppk');
+    Route::get('/dashboard/kordes', [DashboardController::class, 'pps'])->name('dashboard.kordes');
+    Route::redirect('/dashboard/pps', '/dashboard/kordes')->name('dashboard.pps');
+    Route::get('/dashboard/saksi', [DashboardController::class, 'kpps'])->name('dashboard.saksi');
+    Route::redirect('/dashboard/kpps', '/dashboard/saksi')->name('dashboard.kpps');
 
     Route::get('/clear-view-session', function () {
         session()->forget('admin_view_kecamatan_id');
@@ -32,17 +36,21 @@ Route::middleware('auth')->group(function () {
         return response()->noContent();
     })->name('clear.view.session');
 
-    Route::middleware('role:ppk,admin')->group(function () {
-        Route::get('/ppk/data-pps', [PpkController::class, 'dataPps'])->name('ppk.data-pps');
-        Route::get('/ppk/view-pps/{desa}', [PpkController::class, 'viewPps'])->name('ppk.view-pps');
+    Route::middleware('role:korcam,admin_partai')->group(function () {
+        Route::get('/korcam/data-kordes', [PpkController::class, 'dataPps'])->name('korcam.data-kordes');
+        Route::redirect('/ppk/data-pps', '/korcam/data-kordes')->name('ppk.data-pps');
+        Route::get('/korcam/view-kordes/{desa}', [PpkController::class, 'viewPps'])->name('korcam.view-kordes');
+        Route::get('/ppk/view-pps/{desa}', fn ($desa) => redirect()->route('korcam.view-kordes', $desa))->name('ppk.view-pps');
     });
 
-    Route::middleware('role:pps,ppk,admin')->group(function () {
-        Route::get('/pps/data-tps', [PpsController::class, 'dataTps'])->name('pps.data-tps');
-        Route::get('/pps/view-tps/{tps}', [PpsController::class, 'viewTps'])->name('pps.view-tps');
+    Route::middleware('role:kordes,korcam,admin_partai')->group(function () {
+        Route::get('/kordes/data-tps', [PpsController::class, 'dataTps'])->name('kordes.data-tps');
+        Route::redirect('/pps/data-tps', '/kordes/data-tps')->name('pps.data-tps');
+        Route::get('/kordes/view-tps/{tps}', [PpsController::class, 'viewTps'])->name('kordes.view-tps');
+        Route::get('/pps/view-tps/{tps}', fn ($tps) => redirect()->route('kordes.view-tps', $tps))->name('pps.view-tps');
     });
 
-    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('role:admin_partai')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('kecamatan', KecamatanController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('desa', DesaController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('tps', TpsController::class)->only(['index', 'store', 'update', 'destroy']);
@@ -56,7 +64,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/tps/{tps}/view', [DashboardController::class, 'viewAsKpps'])->name('tps.view');
     });
 
-    Route::prefix('admin/setup')->name('admin.setup.')->middleware('role:admin')->group(function () {
+    Route::prefix('admin/setup')->name('admin.setup.')->middleware('role:admin_partai')->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\SetupController::class, 'index'])->name('index');
         Route::post('pemilu-settings', [App\Http\Controllers\Admin\SetupController::class, 'updatePemiluSettings'])->name('pemilu.settings');
 
@@ -70,7 +78,7 @@ Route::middleware('auth')->group(function () {
         Route::post('kecamatan-dapil', [App\Http\Controllers\Admin\SetupController::class, 'assignDapil'])->name('kecamatan.dapil');
     });
 
-    Route::prefix('rekap')->name('rekap.')->middleware('role:kpps,pps,ppk,admin')->group(function () {
+    Route::prefix('rekap')->name('rekap.')->middleware('role:saksi_tps,kordes,korcam,admin_partai')->group(function () {
         Route::get('/', [App\Http\Controllers\Rekap\KppsController::class, 'index'])->name('index');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\KppsController::class, 'export'])->name('export');
         Route::get('{jenis}', [App\Http\Controllers\Rekap\KppsController::class, 'form'])->name('form');
@@ -78,19 +86,29 @@ Route::middleware('auth')->group(function () {
         Route::post('{jenis}/finalisasi', [App\Http\Controllers\Rekap\KppsController::class, 'finalisasi'])->name('finalisasi');
     });
 
-    Route::prefix('pps/rekap')->name('pps.rekap.')->middleware('role:pps,ppk,admin')->group(function () {
+    Route::prefix('kordes/rekap')->name('kordes.rekap.')->middleware('role:kordes,korcam,admin_partai')->group(function () {
         Route::get('/', [App\Http\Controllers\Rekap\PpsController::class, 'index'])->name('index');
         Route::get('{jenis}', [App\Http\Controllers\Rekap\PpsController::class, 'show'])->name('show');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\PpsController::class, 'export'])->name('export');
     });
+    Route::prefix('pps/rekap')->name('pps.rekap.')->middleware('role:kordes,korcam,admin_partai')->group(function () {
+        Route::redirect('/', '/kordes/rekap')->name('index');
+        Route::get('{jenis}', fn ($jenis) => redirect()->route('kordes.rekap.show', $jenis))->name('show');
+        Route::get('{jenis}/export', fn ($jenis) => redirect()->route('kordes.rekap.export', $jenis))->name('export');
+    });
 
-    Route::prefix('ppk/rekap')->name('ppk.rekap.')->middleware('role:ppk,admin')->group(function () {
+    Route::prefix('korcam/rekap')->name('korcam.rekap.')->middleware('role:korcam,admin_partai')->group(function () {
         Route::get('/', [App\Http\Controllers\Rekap\PpkController::class, 'index'])->name('index');
         Route::get('{jenis}', [App\Http\Controllers\Rekap\PpkController::class, 'show'])->name('show');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\PpkController::class, 'export'])->name('export');
     });
+    Route::prefix('ppk/rekap')->name('ppk.rekap.')->middleware('role:korcam,admin_partai')->group(function () {
+        Route::redirect('/', '/korcam/rekap')->name('index');
+        Route::get('{jenis}', fn ($jenis) => redirect()->route('korcam.rekap.show', $jenis))->name('show');
+        Route::get('{jenis}/export', fn ($jenis) => redirect()->route('korcam.rekap.export', $jenis))->name('export');
+    });
 
-    Route::prefix('admin/rekap')->name('admin.rekap.')->middleware('role:admin')->group(function () {
+    Route::prefix('admin/rekap')->name('admin.rekap.')->middleware('role:admin_partai')->group(function () {
         Route::get('/', [App\Http\Controllers\Rekap\AdminController::class, 'index'])->name('index');
         Route::get('chart', [App\Http\Controllers\Rekap\AdminController::class, 'chartPage'])->name('chart');
         Route::get('chart/data', [App\Http\Controllers\Rekap\AdminController::class, 'chartData'])->name('chart.data');

@@ -215,7 +215,7 @@ class PpkController extends Controller
         $filename = 'Rekap_'.strtoupper($jenis).'_KORCAM_'.str_replace(' ', '_', $kecamatan->nama).'.xlsx';
 
         return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'ppk', $wilayah, $desas, $jenis),
+            new \App\Exports\RekapExport($rekaps, $master, $tpsList, 'korcam', $wilayah, $desas, $jenis),
             $filename
         );
     }
@@ -246,7 +246,7 @@ class PpkController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin_partai') {
             abort_if(! session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
 
             return Kecamatan::findOrFail(session('admin_view_kecamatan_id'));

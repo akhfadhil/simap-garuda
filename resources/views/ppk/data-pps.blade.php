@@ -1,9 +1,9 @@
 @extends('layouts.role-dashboard')
 @section('title', 'Data Kordes')
-@section('role_key', 'ppk')
+@section('role_key', 'korcam')
 @section('role_title', 'Korcam')
 @section('role_subtitle', 'Koordinator Kecamatan')
-@section('role_active', 'pps')
+@section('role_active', 'kordes')
 
 @section('role_content')
 @php
@@ -75,7 +75,7 @@
         </div>
     </div>
 
-    <a href="{{ route('ppk.view-pps', $desa) }}"
+    <a href="{{ route('korcam.view-kordes', $desa) }}"
        class="px-4 py-2 rounded-lg text-xs font-semibold border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white transition">
         Kelola Desa
     </a>

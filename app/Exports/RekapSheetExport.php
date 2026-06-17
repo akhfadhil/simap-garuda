@@ -46,7 +46,7 @@ class RekapSheetExport implements FromArray, WithColumnWidths, WithStyles, WithT
         $this->tpsList = $tpsList;
         $this->level = $level;
         $this->wilayah = $wilayah;
-        $this->showTotal = $level !== 'kpps';
+        $this->showTotal = $level !== 'saksi_tps';
     }
 
     public function title(): string

@@ -119,7 +119,7 @@ class PpsController extends Controller
             $rekaps,
             $master,
             $tpsList,
-            'pps',
+            'kordes',
             $wilayah
         );
 
@@ -152,13 +152,13 @@ class PpsController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin_partai') {
             abort_if(! session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
 
             return Desa::with('kecamatan', 'tps')->findOrFail(session('admin_view_desa_id'));
         }
 
-        if ($user->role === 'ppk') {
+        if ($user->role === 'korcam') {
             abort_if(! session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
             $desa = Desa::with('kecamatan', 'tps')->findOrFail(session('admin_view_desa_id'));
             abort_if($desa->kecamatan_id !== $user->kecamatan_id, 403, 'Akses ditolak.');

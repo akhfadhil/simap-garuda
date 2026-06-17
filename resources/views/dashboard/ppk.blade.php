@@ -1,6 +1,6 @@
 @extends('layouts.role-dashboard')
 @section('title', 'Dashboard Korcam')
-@section('role_key', 'ppk')
+@section('role_key', 'korcam')
 @section('role_title', 'Korcam')
 @section('role_subtitle', 'Koordinator Kecamatan')
 @section('role_active', 'dashboard')

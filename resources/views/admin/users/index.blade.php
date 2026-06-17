@@ -137,7 +137,7 @@
             </div>
             <div>
                 <h1 class="admin-display admin-primary text-2xl leading-none">{{ $party['app_name'] }}</h1>
-                <span class="admin-mono admin-muted-soft text-[10px] uppercase tracking-widest">{{ $party['roles']['admin'] }}</span>
+                <span class="admin-mono admin-muted-soft text-[10px] uppercase tracking-widest">{{ $party['roles']['admin_partai'] }}</span>
             </div>
         </div>
         <label for="admin-mobile-menu" class="admin-icon-button cursor-pointer p-2">
@@ -285,10 +285,10 @@
         <select name="role" onchange="this.form.submit()"
                 class="dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 px-4 py-2.5 text-xs rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
             <option value="">Semua Role</option>
-            <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin Partai</option>
-            <option value="ppk"  {{ request('role') == 'ppk'  ? 'selected' : '' }}>Korcam</option>
-            <option value="pps"  {{ request('role') == 'pps'  ? 'selected' : '' }}>Kordes</option>
-            <option value="kpps" {{ request('role') == 'kpps' ? 'selected' : '' }}>Saksi TPS</option>
+            <option value="admin_partai" {{ request('role') == 'admin_partai' ? 'selected' : '' }}>Admin Partai</option>
+            <option value="korcam"  {{ request('role') == 'korcam'  ? 'selected' : '' }}>Korcam</option>
+            <option value="kordes"  {{ request('role') == 'kordes'  ? 'selected' : '' }}>Kordes</option>
+            <option value="saksi_tps" {{ request('role') == 'saksi_tps' ? 'selected' : '' }}>Saksi TPS</option>
         </select>
 
         {{-- Kecamatan --}}
@@ -353,23 +353,23 @@
     @forelse($users as $user)
     @php
         $roleColor = match($user->role) {
-            'admin' => '#DC2626',
-            'ppk'  => '#F4A261',
-            'pps'  => '#2EC4B6',
-            'kpps' => '#A8DADC',
+            'admin_partai' => '#DC2626',
+            'korcam'  => '#F4A261',
+            'kordes'  => '#2EC4B6',
+            'saksi_tps' => '#A8DADC',
             default => '#666'
         };
         $roleDisplay = match($user->role) {
-            'admin' => 'Admin Partai',
-            'ppk' => 'Korcam',
-            'pps' => 'Kordes',
-            'kpps' => 'Saksi TPS',
+            'admin_partai' => 'Admin Partai',
+            'korcam' => 'Korcam',
+            'kordes' => 'Kordes',
+            'saksi_tps' => 'Saksi TPS',
             default => strtoupper($user->role),
         };
         $wilayah = match($user->role) {
-            'ppk'  => $user->kecamatan->nama ?? '-',
-            'pps'  => ($user->desa->nama ?? '-') . ' / ' . ($user->desa->kecamatan->nama ?? '-'),
-            'kpps' => ($user->tps->nama ?? '-') . ' / ' . ($user->tps->desa->nama ?? '-'),
+            'korcam'  => $user->kecamatan->nama ?? '-',
+            'kordes'  => ($user->desa->nama ?? '-') . ' / ' . ($user->desa->kecamatan->nama ?? '-'),
+            'saksi_tps' => ($user->tps->nama ?? '-') . ' / ' . ($user->tps->desa->nama ?? '-'),
             default => '-'
         };
     @endphp
@@ -515,10 +515,10 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                 <label class="{{ $labelClass }}">Role</label>
                 <select name="role" id="tambah-role" onchange="updateWilayahField('tambah')" class="{{ $inputClass }}">
                     <option value="">- Pilih Role -</option>
-                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin Partai - Akses penuh sistem</option>
-                    <option value="ppk"  {{ old('role') == 'ppk'  ? 'selected' : '' }}>Korcam - Koordinator Kecamatan</option>
-                    <option value="pps"  {{ old('role') == 'pps'  ? 'selected' : '' }}>Kordes - Koordinator Desa</option>
-                    <option value="kpps" {{ old('role') == 'kpps' ? 'selected' : '' }}>Saksi TPS - Input rekap TPS</option>
+                    <option value="admin_partai" {{ old('role') == 'admin_partai' ? 'selected' : '' }}>Admin Partai - Akses penuh sistem</option>
+                    <option value="korcam"  {{ old('role') == 'korcam'  ? 'selected' : '' }}>Korcam - Koordinator Kecamatan</option>
+                    <option value="kordes"  {{ old('role') == 'kordes'  ? 'selected' : '' }}>Kordes - Koordinator Desa</option>
+                    <option value="saksi_tps" {{ old('role') == 'saksi_tps' ? 'selected' : '' }}>Saksi TPS - Input rekap TPS</option>
                 </select>
             </div>
 
@@ -698,11 +698,11 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
             const el = document.getElementById(prefix + '-field-' + f);
             if (el) el.classList.add('hidden');
         });
-        if (!role || role === 'admin') { wrap.classList.add('hidden'); return; }
+        if (!role || role === 'admin_partai') { wrap.classList.add('hidden'); return; }
         wrap.classList.remove('hidden');
-        if (role === 'ppk')  document.getElementById(prefix + '-field-kecamatan').classList.remove('hidden');
-        else if (role === 'pps')  document.getElementById(prefix + '-field-kecamatan-pps').classList.remove('hidden');
-        else if (role === 'kpps') document.getElementById(prefix + '-field-kecamatan-kpps').classList.remove('hidden');
+        if (role === 'korcam')  document.getElementById(prefix + '-field-kecamatan').classList.remove('hidden');
+        else if (role === 'kordes')  document.getElementById(prefix + '-field-kecamatan-pps').classList.remove('hidden');
+        else if (role === 'saksi_tps') document.getElementById(prefix + '-field-kecamatan-kpps').classList.remove('hidden');
     }
 
     function loadDesa(prefix, kecId) {
@@ -732,20 +732,20 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
     function openEdit(user) {
         document.getElementById('edit-name').value         = user.name;
         document.getElementById('edit-username').value     = user.username;
-        const roleLabels = {admin: 'Admin Partai', ppk: 'Korcam', pps: 'Kordes', kpps: 'Saksi TPS'};
+        const roleLabels = {admin_partai: 'Admin Partai', korcam: 'Korcam', kordes: 'Kordes', saksi_tps: 'Saksi TPS'};
         document.getElementById('edit-role-display').value = roleLabels[user.role] || 'Legacy';
         document.getElementById('edit-form').action        = `/admin/users/${user.id}`;
         ['ppk','pps','kpps'].forEach(r => document.getElementById('edit-wilayah-' + r).classList.add('hidden'));
-        if (user.role === 'ppk') {
+        if (user.role === 'korcam') {
             document.getElementById('edit-wilayah-ppk').classList.remove('hidden');
             if (user.kecamatan_id) document.getElementById('edit-kecamatan').value = user.kecamatan_id;
-        } else if (user.role === 'pps') {
+        } else if (user.role === 'kordes') {
             document.getElementById('edit-wilayah-pps').classList.remove('hidden');
             if (user.desa_id) {
                 const desa = allDesas.find(d => d.id == user.desa_id);
                 if (desa) { document.getElementById('edit-kec-pps').value = desa.kecamatan_id; loadDesaEdit(desa.kecamatan_id, user.desa_id); }
             }
-        } else if (user.role === 'kpps') {
+        } else if (user.role === 'saksi_tps') {
             document.getElementById('edit-wilayah-kpps').classList.remove('hidden');
             if (user.tps_id) {
                 const tps  = allTps.find(t => t.id == user.tps_id);
@@ -781,3 +781,4 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
 @endpush
 
 @endsection
+

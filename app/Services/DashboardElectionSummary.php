@@ -88,7 +88,7 @@ class DashboardElectionSummary
             }
         }
 
-        if ($user->role === 'ppk') {
+        if ($user->role === 'korcam') {
             return [
                 'type' => 'kecamatan',
                 'id' => $user->kecamatan_id,
@@ -97,7 +97,7 @@ class DashboardElectionSummary
             ];
         }
 
-        if ($user->role === 'pps') {
+        if ($user->role === 'kordes') {
             return [
                 'type' => 'desa',
                 'id' => $user->desa_id,
@@ -106,7 +106,7 @@ class DashboardElectionSummary
             ];
         }
 
-        if ($user->role === 'kpps') {
+        if ($user->role === 'saksi_tps') {
             return [
                 'type' => 'tps',
                 'id' => $user->tps_id,
@@ -389,8 +389,8 @@ class DashboardElectionSummary
     private function canAccessKecamatan(User $user, Kecamatan $kecamatan): bool
     {
         return match ($user->role) {
-            'admin' => true,
-            'ppk' => $user->kecamatan_id === $kecamatan->id,
+            'admin_partai' => true,
+            'korcam' => $user->kecamatan_id === $kecamatan->id,
             default => false,
         };
     }
@@ -398,9 +398,9 @@ class DashboardElectionSummary
     private function canAccessDesa(User $user, Desa $desa): bool
     {
         return match ($user->role) {
-            'admin' => true,
-            'ppk' => $user->kecamatan_id === $desa->kecamatan_id,
-            'pps' => $user->desa_id === $desa->id,
+            'admin_partai' => true,
+            'korcam' => $user->kecamatan_id === $desa->kecamatan_id,
+            'kordes' => $user->desa_id === $desa->id,
             default => false,
         };
     }
@@ -408,10 +408,10 @@ class DashboardElectionSummary
     private function canAccessTps(User $user, Tps $tps): bool
     {
         return match ($user->role) {
-            'admin' => true,
-            'ppk' => $user->kecamatan_id === $tps->desa?->kecamatan_id,
-            'pps' => $user->desa_id === $tps->desa_id,
-            'kpps' => $user->tps_id === $tps->id,
+            'admin_partai' => true,
+            'korcam' => $user->kecamatan_id === $tps->desa?->kecamatan_id,
+            'kordes' => $user->desa_id === $tps->desa_id,
+            'saksi_tps' => $user->tps_id === $tps->id,
             default => false,
         };
     }

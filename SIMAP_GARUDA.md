@@ -34,14 +34,14 @@ Nomor urut `11` hanya metadata historis untuk Pemilu 2024, bukan identitas perma
 
 ## Role
 
-Nilai role database masih memakai role teknis lama untuk kompatibilitas, tetapi UI memakai istilah Partai Garuda.
+Nilai role database sudah memakai istilah teknis Partai Garuda. URI publik utama juga memakai istilah partai; URI lama `ppk`, `pps`, dan `kpps` masih tersedia sebagai backward redirect sementara.
 
 | Role DB | Istilah UI | Scope |
 | --- | --- | --- |
-| `admin` | Admin Partai | Semua wilayah |
-| `ppk` | Korcam | Satu kecamatan |
-| `pps` | Kordes | Satu desa |
-| `kpps` | Saksi TPS | Satu TPS |
+| `admin_partai` | Admin Partai | Semua wilayah |
+| `korcam` | Korcam | Satu kecamatan |
+| `kordes` | Kordes | Satu desa |
+| `saksi_tps` | Saksi TPS | Satu TPS |
 
 Role legacy `komisioner` dan `partai` tidak boleh login ke SIMAP Garuda.
 

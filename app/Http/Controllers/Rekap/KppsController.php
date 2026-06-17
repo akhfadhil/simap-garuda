@@ -51,9 +51,9 @@ class KppsController extends Controller
     public function store(Request $request, string $jenis)
     {
         $user = Auth::user();
-        $isAdminEdit = $user->role === 'admin';
+        $isAdminEdit = $user->role === 'admin_partai';
 
-        abort_unless(in_array($user->role, ['kpps', 'pps', 'ppk', 'admin'], true), 403, 'Akses ditolak.');
+        abort_unless(in_array($user->role, ['saksi_tps', 'kordes', 'korcam', 'admin_partai'], true), 403, 'Akses ditolak.');
 
         $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
@@ -138,7 +138,7 @@ class KppsController extends Controller
 
     public function finalisasi(string $jenis)
     {
-        abort_unless(in_array(Auth::user()->role, ['kpps', 'pps', 'ppk'], true), 403, 'Akses ditolak.');
+        abort_unless(in_array(Auth::user()->role, ['saksi_tps', 'kordes', 'korcam'], true), 403, 'Akses ditolak.');
         $this->cekAktif($jenis);
         abort_unless(in_array($jenis, self::JENIS), 404);
 
@@ -179,7 +179,7 @@ class KppsController extends Controller
             $rekap,
             $master,
             $tpsList,
-            'kpps',
+            'saksi_tps',
             $wilayah
         );
 
@@ -293,14 +293,14 @@ class KppsController extends Controller
     {
         $user = Auth::user();
 
-        if (in_array($user->role, ['admin', 'ppk', 'pps'], true)) {
+        if (in_array($user->role, ['admin_partai', 'korcam', 'kordes'], true)) {
             abort_if(! session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
             $tps = Tps::with('desa.kecamatan.dapil')->findOrFail(session('admin_view_tps_id'));
 
             $allowed = match ($user->role) {
-                'admin' => true,
-                'ppk' => $tps->desa?->kecamatan_id === $user->kecamatan_id,
-                'pps' => $tps->desa_id === $user->desa_id,
+                'admin_partai' => true,
+                'korcam' => $tps->desa?->kecamatan_id === $user->kecamatan_id,
+                'kordes' => $tps->desa_id === $user->desa_id,
                 default => false,
             };
 

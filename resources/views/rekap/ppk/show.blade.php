@@ -19,7 +19,7 @@
 
 <div class="mb-8 flex items-end justify-between gap-4">
     <div>
-        <a href="{{ route('ppk.rekap.index') }}"
+        <a href="{{ route('korcam.rekap.index') }}"
            class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
             &larr; Kembali
         </a>
@@ -30,7 +30,7 @@
             {{ strtoupper(\App\Models\RekapHeader::JENIS_LABELS[$jenis]) }}
         </h1>
     </div>
-    <a href="{{ route('ppk.rekap.export', $jenis) }}"
+    <a href="{{ route('korcam.rekap.export', $jenis) }}"
        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-orange-400 hover:bg-orange-500 text-white transition flex-shrink-0">
         Export Excel
     </a>
@@ -137,7 +137,7 @@
 </div>
 
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm p-4 mb-4">
-    <form method="GET" action="{{ route('ppk.rekap.show', $jenis) }}" class="flex flex-col lg:flex-row lg:items-end gap-3">
+    <form method="GET" action="{{ route('korcam.rekap.show', $jenis) }}" class="flex flex-col lg:flex-row lg:items-end gap-3">
         <div class="flex-1">
             <label for="detail_desa_id" class="block text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">
                 Pilih Desa
@@ -157,7 +157,7 @@
             Tampilkan Detail
         </button>
         @if($showDetail)
-        <a href="{{ route('ppk.rekap.show', $jenis) }}"
+        <a href="{{ route('korcam.rekap.show', $jenis) }}"
            class="inline-flex items-center justify-center px-4 py-2.5 rounded-lg text-xs font-semibold border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 dark:hover:bg-gray-700 hover:bg-gray-100 transition">
             Sembunyikan Detail
         </a>

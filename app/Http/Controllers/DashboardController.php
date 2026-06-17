@@ -12,7 +12,7 @@ class DashboardController extends Controller
     // Menampilkan dashboard admin Partai Garuda.
     public function admin(DashboardElectionSummary $summary)
     {
-        $this->checkRole('admin');
+        $this->checkRole('admin_partai');
         session()->forget(['admin_view_kecamatan_id', 'admin_view_desa_id', 'admin_view_tps_id']);
 
         return view('dashboard.admin', ['electionSummary' => $summary->forUser(Auth::user())]);
@@ -24,11 +24,11 @@ class DashboardController extends Controller
         $user = Auth::user();
         $viewKecamatan = null;
 
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin_partai') {
             abort_if(!session('admin_view_kecamatan_id'), 403, 'Pilih kecamatan yang ingin dilihat.');
             $viewKecamatan = Kecamatan::findOrFail(session('admin_view_kecamatan_id'));
         } else {
-            $this->checkRole('ppk');
+            $this->checkRole('korcam');
         }
 
         return view('dashboard.ppk', [
@@ -44,7 +44,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $viewDesa = null;
 
-        if ($user->role === 'pps') {
+        if ($user->role === 'kordes') {
             // Kordes membuka dashboard wilayahnya sendiri.
         } else {
             abort_if(!session('admin_view_desa_id'), 403, 'Pilih desa yang ingin dilihat.');
@@ -65,7 +65,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         $viewTps = null;
 
-        if ($user->role === 'kpps') {
+        if ($user->role === 'saksi_tps') {
             // Saksi TPS membuka dashboard TPS miliknya sendiri.
         } else {
             abort_if(!session('admin_view_tps_id'), 403, 'Pilih TPS yang ingin dilihat.');
@@ -91,8 +91,8 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         $allowed = match ($user->role) {
-            'admin' => true,
-            'ppk' => $desa->kecamatan_id === $user->kecamatan_id,
+            'admin_partai' => true,
+            'korcam' => $desa->kecamatan_id === $user->kecamatan_id,
             default => false,
         };
 
@@ -104,9 +104,9 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         $allowed = match ($user->role) {
-            'admin' => true,
-            'ppk' => $tps->desa?->kecamatan_id === $user->kecamatan_id,
-            'pps' => $tps->desa_id === $user->desa_id,
+            'admin_partai' => true,
+            'korcam' => $tps->desa?->kecamatan_id === $user->kecamatan_id,
+            'kordes' => $tps->desa_id === $user->desa_id,
             default => false,
         };
 
@@ -121,7 +121,7 @@ class DashboardController extends Controller
         ]);
         session()->forget(['admin_view_desa_id', 'admin_view_tps_id']);
 
-        return redirect()->route('dashboard.ppk');
+        return redirect()->route('dashboard.korcam');
     }
 
     // Menyimpan mode lihat sebagai Kordes untuk admin.
@@ -133,7 +133,7 @@ class DashboardController extends Controller
         ]);
         session()->forget('admin_view_tps_id');
 
-        return redirect()->route('dashboard.pps');
+        return redirect()->route('dashboard.kordes');
     }
 
     // Menyimpan mode lihat sebagai Saksi TPS untuk admin.
@@ -146,6 +146,6 @@ class DashboardController extends Controller
             'admin_view_tps_id' => $tps->id,
         ]);
 
-        return redirect()->route('dashboard.kpps');
+        return redirect()->route('dashboard.saksi');
     }
 }

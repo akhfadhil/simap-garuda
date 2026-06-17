@@ -18,7 +18,7 @@
 
 <div class="mb-8 flex items-end justify-between gap-4">
     <div>
-        <a href="{{ route('pps.rekap.index') }}"
+        <a href="{{ route('kordes.rekap.index') }}"
            class="inline-flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400 hover:text-red-500 transition font-medium mb-4">
             &larr; Kembali
         </a>
@@ -29,7 +29,7 @@
             {{ strtoupper(\App\Models\RekapHeader::JENIS_LABELS[$jenis]) }}
         </h1>
     </div>
-    <a href="{{ route('pps.rekap.export', $jenis) }}"
+    <a href="{{ route('kordes.rekap.export', $jenis) }}"
        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-teal-500 hover:bg-teal-600 text-white transition flex-shrink-0">
         Export Excel
     </a>

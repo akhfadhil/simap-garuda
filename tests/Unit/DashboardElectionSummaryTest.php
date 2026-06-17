@@ -31,7 +31,7 @@ class DashboardElectionSummaryTest extends TestCase
         $admin = User::create([
             'name' => 'Admin',
             'username' => 'admin_test',
-            'role' => 'admin',
+            'role' => 'admin_partai',
             'password' => 'password',
         ]);
 
@@ -62,7 +62,7 @@ class DashboardElectionSummaryTest extends TestCase
         $admin = User::create([
             'name' => 'Admin',
             'username' => 'admin_garuda_test',
-            'role' => 'admin',
+            'role' => 'admin_partai',
             'password' => 'password',
         ]);
 
@@ -116,3 +116,4 @@ class DashboardElectionSummaryTest extends TestCase
         $this->assertSame(8, $overview['regions']['weak'][0]['suara']);
     }
 }
+

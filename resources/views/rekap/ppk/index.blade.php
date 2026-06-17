@@ -1,6 +1,6 @@
 @extends('layouts.role-dashboard')
 @section('title', 'Rekapitulasi Data')
-@section('role_key', 'ppk')
+@section('role_key', 'korcam')
 @section('role_title', 'Korcam')
 @section('role_subtitle', 'Koordinator Kecamatan')
 @section('role_active', 'rekap')
@@ -29,7 +29,7 @@
     $persen = $totalTps > 0 ? round(($sudahFinal / $totalTps) * 100) : 0;
     $hasFlag = ($flaggedJenis ?? collect())->has($jenis);
 @endphp
-<a href="{{ route('ppk.rekap.show', $jenis) }}"
+<a href="{{ route('korcam.rekap.show', $jenis) }}"
    class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm hover:shadow-md transition overflow-hidden group block">
     <div class="p-5 border-b dark:border-gray-700 border-gray-200">
         <div class="flex items-start justify-between mb-3">
