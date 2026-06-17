@@ -142,6 +142,32 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Hapus command import lama yang masih terlalu spesifik SIMAP utama.
 - [x] Audit ulang string dan route legacy sebelum commit.
 
+#### Audit Legacy Model/Tabel Non-Partai - 2026-06-17
+
+Hasil audit:
+
+- Route dokumen, import, backup, restore, dan setup non-legislatif tidak terdaftar di runtime SIMAP Garuda.
+- Command import, backup, dan restore legacy tidak tersisa.
+- View dokumen dan view setup non-legislatif tidak tersisa.
+- Tabel/model rekap non-legislatif masih ada sebagai sisa schema historis dan relasi compatibility, bukan runtime utama.
+
+Bisa dihapus setelah dibuat migration cleanup:
+
+- Model `RekapPpwpCalon`, `RekapPpwpSuara`, `RekapDpdCalon`, `RekapDpdSuara`, `RekapGubernurCalon`, `RekapGubernurSuara`, `RekapBupatiCalon`, dan `RekapBupatiSuara`.
+- Relasi non-legislatif di `RekapHeader`: `ppwpSuaras`, `dpdSuaras`, `gubernurSuaras`, `bupatiSuaras`, serta cabang non-legislatif pada `getSuaraSahAttribute()`.
+- Tabel legacy `rekap_ppwp_calons`, `rekap_ppwp_suaras`, `rekap_dpd_calons`, `rekap_dpd_suaras`, `rekap_gubernur_calons`, `rekap_gubernur_suaras`, `rekap_bupati_calons`, dan `rekap_bupati_suaras`.
+- Index legacy pada migration covering index untuk tabel suara non-legislatif, setelah jalur fresh migration dipisahkan atau ditutup lewat migration cleanup.
+- Fallback `ppwp` di `RekapExport`, setelah semua caller dipastikan selalu mengirim jenis legislatif eksplisit.
+
+Ditunda:
+
+- Mengubah migration lama pembuat tabel non-legislatif; lebih aman lewat migration drop baru dulu, lalu squash saat template/fresh schema.
+- File migration no-op `2026_03_02_000006_create_dokumens_table.php`; biarkan sampai migration squash agar histori migration existing DB tetap jelas.
+- Migration role legacy `2026_05_24_*` dan `2026_06_14_000001_*`; biarkan sampai migration squash karena masih menjadi jalur upgrade existing DB.
+- Backward route/URI `ppk`, `pps`, `kpps` serta nama class/view internal `Ppk`, `Pps`, dan `Kpps`; tunda sampai masa kompatibilitas lama selesai atau saat ekstraksi template.
+- `config.filesystems.backup_path` dan env `BACKUP_DOKUMEN_PATH`; tunda sampai audit config menyeluruh karena saat ini hanya tersisa sebagai config, bukan route runtime.
+- Test guard non-party `ppwp`; tetap dipertahankan sebagai bukti jenis non-partai tidak bisa diakses.
+
 ### 9. Sinkronisasi Dengan Roadmap Multi-Project Partai
 
 Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_PORTAL_BRAINSTORM.md`: SIMAP utama menjadi sumber data/core, SIMAP Garuda menjadi pilot aplikasi partai mandiri, dan berikutnya perlu ada `simap-partai-template`.
@@ -160,10 +186,11 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 
 ## Rekomendasi Urutan Kerja
 
-1. Audit model/tabel legacy non-partai yang masih tersisa sebelum migration cleanup berikutnya.
-2. Siapkan dokumentasi operasional SIMAP Garuda.
-3. Audit fitur generik yang layak dipromosikan ke `simap-partai-template`.
-4. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
+1. Buat migration cleanup terpisah untuk drop tabel rekap non-legislatif yang sudah terklasifikasi aman.
+2. Setelah migration cleanup lulus test, hapus model/relasi non-legislatif terkait.
+3. Siapkan dokumentasi operasional SIMAP Garuda.
+4. Audit fitur generik yang layak dipromosikan ke `simap-partai-template`.
+5. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
 
 ## Mapping ke PARTAI_PORTAL_BRAINSTORM.md
 
@@ -211,4 +238,5 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Roadmap SIMAP utama sudah berubah ke pola multi-project partai: SIMAP utama sebagai core/sumber snapshot, SIMAP Garuda sebagai pilot, dan `simap-partai-template` sebagai target standardisasi berikutnya.
 - Checklist SIMAP Garuda sudah diselaraskan dengan roadmap tersebut; pekerjaan template dicatat sebagai audit/generalisasi, bukan eksekusi langsung hari ini.
 - Audit aman `users.partai_id` selesai: kolom ini hanya sisa schema user multi-partai lama, tidak dipakai runtime SIMAP Garuda, dan sudah dihapus lewat migration `2026_06_17_000001_drop_legacy_partai_id_from_users_table`.
-- Next step untuk eksekusi berikutnya: audit model/tabel legacy non-partai yang masih tersisa, lalu mulai dokumentasi operasional SIMAP Garuda.
+- Audit legacy model/tabel non-partai selesai: route/view/command legacy non-party tidak reachable, sedangkan model dan tabel rekap non-legislatif masuk kandidat cleanup migration berikutnya.
+- Next step untuk eksekusi berikutnya: buat migration cleanup tabel rekap non-legislatif, lalu hapus model/relasi terkait setelah test lulus.
