@@ -183,7 +183,7 @@
                 Total suara {{ config('party.name') }} dan seluruh caleg {{ config('party.short_name') }}
                 <span class="text-[10px] dark:text-gray-600 text-gray-400 font-normal">(otomatis dari input di atas)</span>
             </p>
-            <div id="display-suara-garuda"
+            <div id="display-suara-partai"
                  class="w-36 dark:bg-gray-900 bg-gray-100 border dark:border-gray-700 border-gray-300 px-3 py-2 text-sm font-bold dark:text-sky-400 text-sky-600 rounded-lg text-right">
                 0
             </div>
@@ -242,7 +242,7 @@ function updateSuaraPartai() {
         totalPartai += subtotal;
     });
 
-    const elTotal = document.getElementById('display-suara-garuda');
+    const elTotal = document.getElementById('display-suara-partai');
     if (elTotal) elTotal.textContent = totalPartai.toLocaleString('id-ID');
 }
 

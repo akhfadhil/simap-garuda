@@ -17,19 +17,9 @@ class RekapPartai extends Model
         return PartyConfig::applyPartyQuery($query);
     }
 
-    public function scopeGaruda(Builder $query): Builder
-    {
-        return $this->scopeConfiguredParty($query);
-    }
-
     public function isConfiguredParty(): bool
     {
         return PartyConfig::matchesParty($this->nomor_urut, $this->nama_partai);
-    }
-
-    public function isGaruda(): bool
-    {
-        return $this->isConfiguredParty();
     }
 
     // Relasi caleg dalam partai.

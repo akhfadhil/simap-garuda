@@ -31,7 +31,7 @@
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5 mb-5">
         <div class="admin-glass rounded-lg p-5">
             <p class="admin-mono admin-muted-soft text-[10px] uppercase tracking-[.2em]">Total Suara {{ config('party.short_name') }}</p>
-            <p class="admin-display admin-text text-4xl leading-none mt-2">{{ number_format($overview['total_suara_partai'] ?? $overview['total_suara_garuda'] ?? 0) }}</p>
+            <p class="admin-display admin-text text-4xl leading-none mt-2">{{ number_format($overview['total_suara_partai'] ?? 0) }}</p>
             <p class="admin-muted text-xs mt-2">Akumulasi suara partai dan caleg {{ config('party.short_name') }}.</p>
         </div>
         <div class="admin-glass rounded-lg p-5">

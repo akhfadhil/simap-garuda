@@ -101,10 +101,10 @@ Yang bisa masuk template:
 - Guard agar caleg hanya masuk ke partai utama.
 - Relasi partai-caleg dan dapil.
 
-Yang perlu diparameterkan:
+Status sebelum template:
 
-- Method `scopeGaruda()` dan `isGaruda()` perlu diganti menjadi nama generik seperti `scopeConfiguredParty()` dan `isConfiguredParty()`.
-- Method `isGarudaPartaiRow()` perlu diganti menjadi validasi partai utama berbasis config.
+- Scope/model final memakai `scopeConfiguredParty()` dan `isConfiguredParty()`; alias lama `scopeGaruda()` dan `isGaruda()` sudah dihapus.
+- Validasi partai utama sudah berbasis config/helper party.
 - Pesan error yang menyebut `SIMAP Garuda`, `Partai Garuda`, atau nomor `11`.
 
 ### Input Manual TPS
@@ -152,8 +152,8 @@ Yang bisa masuk template:
 
 Yang perlu diparameterkan:
 
-- Key output `total_suara_garuda` perlu diganti menjadi nama generik seperti `total_suara_partai`.
-- Method `totalGarudaSuara`, `garudaPartaiSuaraQuery`, `garudaCalegSuaraQuery`, dan `onlyGarudaPartai` perlu diganti nama generik.
+- Key output dashboard sudah memakai `total_suara_partai`; fallback legacy `total_suara_garuda` sudah dihapus.
+- Method query dashboard sudah memakai istilah `configuredParty`.
 - Label dashboard yang menyebut Garuda harus berbasis `config('party.short_name')`.
 
 ### Export Laporan
@@ -226,7 +226,7 @@ Status sebelum template:
 - Nama class test utama sudah generik: `PartyRoleAccessTest`.
 - Fixture partai/caleg utama di feature dan unit test sudah mengambil nama serta nomor historis dari `config('party.*')`.
 - Assertion label utama sudah memakai `config('party.short_name')`.
-- Key backward-compatible `total_suara_garuda` masih ada di service/dashboard sebagai fallback runtime lama dan perlu diaudit terpisah sebelum template.
+- Key backward-compatible `total_suara_garuda` sudah dihapus dari service/dashboard.
 
 ## Spesifik Garuda Yang Tidak Boleh Masuk Template Apa Adanya
 
@@ -234,7 +234,7 @@ Berikut item yang harus diganti, diparameterkan, atau ditahan saat ekstraksi tem
 
 - `config/party.php` berisi slug `garuda`, nama `Partai Garuda`, nomor historis `11`, warna Garuda, dan logo Garuda.
 - Asset `public/images/logo-garuda.png`.
-- Method dan scope bernama `garuda`, `scopeGaruda`, `isGaruda`, `onlyGarudaPartai`, `applyGarudaPartaiQuery`, dan `guardGarudaSuaraPayload`.
+- Method dan scope bernama `garuda`, `scopeGaruda`, `isGaruda`, `onlyGarudaPartai`, `applyGarudaPartaiQuery`, dan `guardGarudaSuaraPayload` tidak boleh masuk template; alias runtime yang tersisa sudah dibersihkan di SIMAP Garuda.
 - Label UI/export `Garuda`, `Partai Garuda`, `Caleg Garuda`, `Total Suara Garuda`, dan `REKAPITULASI SUARA GARUDA`.
 - Test fixture dan assertion Garuda lama sudah digeneralisasi di SIMAP Garuda; template tetap perlu memastikan tidak ada fixture spesifik partai yang ikut.
 - Dokumentasi operasional Garuda harus dijadikan template dokumentasi generik dengan placeholder partai.
@@ -291,7 +291,7 @@ Helper yang perlu dibuat saat ekstraksi:
 ## Urutan Ekstraksi Yang Disarankan
 
 1. Buat helper `PartyConfig` untuk menggantikan duplikasi query matching partai. Selesai di SIMAP Garuda.
-2. Rename konsep Garuda menjadi konsep party generik di SIMAP Garuda tanpa mengubah behavior. Sebagian selesai: matching partai, scope `configuredParty()`, dan label export/UI utama sudah berbasis config.
+2. Rename konsep Garuda menjadi konsep party generik di SIMAP Garuda tanpa mengubah behavior. Sebagian besar selesai: matching partai, scope `configuredParty()`, label export/UI utama, key dashboard, fixture test, dan identifier Blade/JS internal sudah berbasis config/party.
 3. Buat `PartyScopeService` untuk menyatukan aturan scope wilayah. Selesai di SIMAP Garuda.
 4. Rename controller/view legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`. Selesai di SIMAP Garuda.
 5. Hapus backward route legacy dari calon template.
@@ -310,4 +310,5 @@ Helper yang perlu dibuat saat ekstraksi:
 - Rename controller/view legacy selesai di SIMAP Garuda: class, method, folder view, dan DOM/helper internal sudah memakai istilah Korcam/Kordes/Saksi.
 - Backward route `ppk/pps/kpps` sengaja masih dipertahankan di SIMAP Garuda sebagai redirect kompatibilitas, tetapi ditandai tidak boleh masuk template.
 - Generalisasi fixture test selesai: test feature utama sudah menjadi `PartyRoleAccessTest`, dan fixture/assertion partai utama di test memakai `config('party.*')`.
+- Generalisasi identifier internal selesai: key dashboard `total_suara_partai` menjadi satu-satunya key aktif, alias model Garuda dihapus, dan DOM/variabel Blade rekap memakai istilah party.
 - Import snapshot dari SIMAP utama belum didesain; tetap menjadi pekerjaan terpisah setelah kebutuhan format data SIMAP utama jelas.

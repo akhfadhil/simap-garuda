@@ -3,7 +3,7 @@
 
 @section('content')
 @php
-    $totalGaruda = $rekaps->sum('suara_sah');
+    $totalParty = $rekaps->sum('suara_sah');
     $totalFinal = $rekaps->where('status', 'final')->count();
     $totalDraft = $rekaps->where('status', 'draft')->count();
     $totalTps = $tpsList->count();
@@ -38,7 +38,7 @@
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">Total Suara {{ config('party.short_name') }}</p>
-        <p class="font-display text-3xl text-teal-400">{{ number_format($totalGaruda) }}</p>
+        <p class="font-display text-3xl text-teal-400">{{ number_format($totalParty) }}</p>
     </div>
     <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">TPS Final</p>

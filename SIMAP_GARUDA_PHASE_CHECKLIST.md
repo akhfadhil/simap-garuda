@@ -184,14 +184,15 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 - [x] Ekstrak aturan scope wilayah ke `PartyScopeService` agar akses kecamatan/desa/TPS terpusat untuk template.
 - [x] Rename controller, method, folder view, dan DOM/helper internal legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`.
 - [x] Generalisasi test fixture dari Garuda ke party config agar template tidak membawa data contoh Garuda.
+- [x] Generalisasi sisa identifier/key internal Garuda di dashboard, model, dan view rekap ke istilah party/configured party.
 - [ ] Siapkan standar import snapshot dari SIMAP utama jika nanti SIMAP utama membuat `export:party-snapshot`.
 - [x] Siapkan dokumentasi operasional yang bisa digeneralisasi untuk project partai lain.
 - [x] Pastikan cleanup role/URI teknis dilakukan dengan mempertimbangkan template, bukan hanya kebutuhan Garuda.
 
 ## Rekomendasi Urutan Kerja
 
-1. Audit dan generalisasi sisa label/key internal Garuda di dashboard/export yang masih bisa diganti ke istilah party generik tanpa mengubah UI runtime.
-2. Siapkan opsi pelepasan backward route `ppk/pps/kpps` saat masa kompatibilitas dianggap selesai; route lama tidak boleh dibawa ke template.
+1. Siapkan opsi pelepasan backward route `ppk/pps/kpps` saat masa kompatibilitas dianggap selesai; route lama tidak boleh dibawa ke template.
+2. Audit ulang schema/migration fresh template agar hanya membawa struktur party app yang dibutuhkan.
 3. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
 
 ## Mapping ke PARTAI_PORTAL_BRAINSTORM.md
@@ -255,3 +256,6 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - `php artisan test` dan `npm.cmd run build` lulus setelah rename controller/view legacy.
 - Generalisasi fixture test selesai: `tests/Feature/GarudaRoleAccessTest.php` sudah menjadi `tests/Feature/PartyRoleAccessTest.php`, nama test memakai istilah party/configured party, dan nomor/nama partai/caleg fixture diambil dari `config('party.*')`.
 - `php artisan test` lulus setelah generalisasi fixture test.
+- Generalisasi identifier internal selesai: alias model `scopeGaruda()`/`isGaruda()` dihapus, key fallback `total_suara_garuda` dihapus dari dashboard summary, DOM id form input memakai `display-suara-partai`, dan variabel Blade rekap memakai istilah party.
+- Sisa kata `Garuda` di kode runtime hanya berada di `config/party.php` sebagai identitas deployment SIMAP Garuda.
+- `php artisan test` dan `npm.cmd run build` lulus setelah generalisasi identifier internal.

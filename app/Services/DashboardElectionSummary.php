@@ -145,7 +145,6 @@ class DashboardElectionSummary
 
         return [
             'total_suara_partai' => $totalSuara,
-            'total_suara_garuda' => $totalSuara,
             'total_tps' => $totalTps,
             'input_tps' => $inputTps,
             'missing_tps_count' => max(0, $totalTps - $inputTps),
@@ -481,7 +480,7 @@ class DashboardElectionSummary
     private function cacheParts(User $user, array $scope, array $activeJenis): array
     {
         return [
-            'version' => 7,
+            'version' => 8,
             'user_role' => $user->role,
             'scope' => $scope,
             'active' => $activeJenis,

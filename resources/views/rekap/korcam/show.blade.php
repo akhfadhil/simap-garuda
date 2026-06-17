@@ -3,7 +3,7 @@
 
 @section('content')
 @php
-    $totalGaruda = collect($desaStats)->sum(fn ($stats) => $stats['suara_sah'] ?? 0);
+    $totalParty = collect($desaStats)->sum(fn ($stats) => $stats['suara_sah'] ?? 0);
     $totalTps = $desas->sum(fn ($desa) => $desa->tps->count());
     $totalFinal = $rekaps->where('status', 'final')->count();
     $totalDraft = $rekaps->where('status', 'draft')->count();
@@ -39,7 +39,7 @@
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">Total Suara {{ config('party.short_name') }}</p>
-        <p class="font-display text-3xl text-orange-400">{{ number_format($totalGaruda) }}</p>
+        <p class="font-display text-3xl text-orange-400">{{ number_format($totalParty) }}</p>
     </div>
     <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm">
         <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">TPS Final</p>
@@ -117,14 +117,14 @@
             </tr>
             @endforeach
 
-            @php $garudaTotal = 0; @endphp
+            @php $partyTotal = 0; @endphp
             <tr class="border-t-2 dark:border-gray-600 border-gray-300 dark:bg-gray-700/30 bg-gray-50">
                 <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara {{ config('party.short_name') }}</td>
                 @foreach($desas as $desa)
-                    @php $suara = $desaPartaiGrandTotals[$desa->id][$partai->id] ?? 0; $garudaTotal += $suara; @endphp
+                    @php $suara = $desaPartaiGrandTotals[$desa->id][$partai->id] ?? 0; $partyTotal += $suara; @endphp
                     {!! $formatCell($suara, 'px-3 py-2 text-center font-bold text-teal-400') !!}
                 @endforeach
-                {!! $formatCell($garudaTotal, 'px-3 py-2 text-center font-bold text-teal-400') !!}
+                {!! $formatCell($partyTotal, 'px-3 py-2 text-center font-bold text-teal-400') !!}
             </tr>
             @endforeach
             </tbody>
@@ -247,7 +247,7 @@
             </tr>
             @endforeach
 
-            @php $garudaTotal = 0; @endphp
+            @php $partyTotal = 0; @endphp
             <tr class="border-t-2 dark:border-gray-600 border-gray-300 dark:bg-gray-700/30 bg-gray-50">
                 <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara {{ config('party.short_name') }}</td>
                 @foreach($desa->tps as $tps)
@@ -256,11 +256,11 @@
                         $suaraPartai = $r ? ($r->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : 0;
                         $suaraCaleg = $r ? $r->calegSuaras->whereIn('caleg_id', $partai->calegs->pluck('id'))->sum('suara') : 0;
                         $total = $r ? ($suaraPartai + $suaraCaleg) : null;
-                        $garudaTotal += $total ?? 0;
+                        $partyTotal += $total ?? 0;
                     @endphp
                     {!! $formatCell($r ? $total : null, 'px-3 py-2 text-center font-bold text-teal-400') !!}
                 @endforeach
-                {!! $formatCell($garudaTotal, 'px-3 py-2 text-center font-bold text-teal-400') !!}
+                {!! $formatCell($partyTotal, 'px-3 py-2 text-center font-bold text-teal-400') !!}
             </tr>
             @endforeach
 
