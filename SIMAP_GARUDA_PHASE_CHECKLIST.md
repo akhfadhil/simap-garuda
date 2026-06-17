@@ -32,7 +32,7 @@ Target Phase 1: fork SIMAP menjadi aplikasi mandiri untuk Partai Garuda, databas
 
 - [ ] Nilai role teknis database masih `admin`, `ppk`, `pps`, `kpps`; belum menjadi `admin_partai`, `korcam`, `kordes`, `saksi_tps`.
 - [ ] URI dan nama route teknis masih memakai `ppk`, `pps`, `kpps`.
-- [ ] Kolom `users.partai_id` masih ada sebagai sisa schema lama, walau tidak dipakai di manajemen user.
+- [x] Kolom `users.partai_id` sudah diaudit dan dihapus dari schema user SIMAP Garuda.
 - [x] Method controller koreksi internal admin yang sudah tidak diroute sudah dihapus.
 - [x] Setup pemilu disederhanakan ke DPR RI, DPRD Provinsi, dan DPRD Kabupaten.
 - [x] Dashboard sudah fokus pada performa Partai Garuda.
@@ -137,7 +137,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
   - [x] Bersihkan sisa cabang non-legislatif di Admin rekap chart/export.
   - [x] Bersihkan setup legacy PPWP/DPD/Pilkada.
 - [x] Hapus atau refactor method controller koreksi inline/unlock yang sudah tidak diroute.
-- [ ] Hapus kolom atau relasi user legacy yang tidak dipakai setelah audit aman.
+- [x] Hapus kolom atau relasi user legacy yang tidak dipakai setelah audit aman.
 - [x] Hapus view Laravel default yang tidak dipakai jika masih ada.
 - [x] Hapus command import lama yang masih terlalu spesifik SIMAP utama.
 - [x] Audit ulang string dan route legacy sebelum commit.
@@ -160,13 +160,12 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 
 ## Rekomendasi Urutan Kerja
 
-1. Audit aman kolom/relasi user legacy, terutama `users.partai_id`.
-2. Putuskan strategi role teknis: tetap kompatibel atau migrasi penuh ke `admin_partai/korcam/kordes/saksi_tps`.
-3. Jika migrasi role dilakukan, rename URI publik ke `/korcam`, `/kordes`, dan `/saksi` dengan backward redirect.
-4. Audit model/tabel legacy non-partai yang masih tersisa sebelum migration cleanup.
-5. Siapkan dokumentasi operasional SIMAP Garuda.
-6. Audit fitur generik yang layak dipromosikan ke `simap-partai-template`.
-7. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
+1. Putuskan strategi role teknis: tetap kompatibel atau migrasi penuh ke `admin_partai/korcam/kordes/saksi_tps`.
+2. Jika migrasi role dilakukan, rename URI publik ke `/korcam`, `/kordes`, dan `/saksi` dengan backward redirect.
+3. Audit model/tabel legacy non-partai yang masih tersisa sebelum migration cleanup berikutnya.
+4. Siapkan dokumentasi operasional SIMAP Garuda.
+5. Audit fitur generik yang layak dipromosikan ke `simap-partai-template`.
+6. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
 
 ## Mapping ke PARTAI_PORTAL_BRAINSTORM.md
 
@@ -212,4 +211,5 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - View Laravel default `welcome.blade.php` sudah dihapus karena tidak dipakai route mana pun.
 - Roadmap SIMAP utama sudah berubah ke pola multi-project partai: SIMAP utama sebagai core/sumber snapshot, SIMAP Garuda sebagai pilot, dan `simap-partai-template` sebagai target standardisasi berikutnya.
 - Checklist SIMAP Garuda sudah diselaraskan dengan roadmap tersebut; pekerjaan template dicatat sebagai audit/generalisasi, bukan eksekusi langsung hari ini.
-- Next step untuk eksekusi besok: audit aman kolom/relasi user legacy, terutama `users.partai_id`, sebelum memutuskan migration cleanup.
+- Audit aman `users.partai_id` selesai: kolom ini hanya sisa schema user multi-partai lama, tidak dipakai runtime SIMAP Garuda, dan sudah dihapus lewat migration `2026_06_17_000001_drop_legacy_partai_id_from_users_table`.
+- Next step untuk eksekusi berikutnya: putuskan strategi role teknis, tetap kompatibel dengan `admin/ppk/pps/kpps` atau migrasi penuh ke `admin_partai/korcam/kordes/saksi_tps`.

@@ -131,7 +131,7 @@ Jenis PPWP, DPD, Gubernur, dan Bupati sudah dinonaktifkan dari aplikasi dan dibe
 | `rekap_caleg_suaras` | Suara caleg Garuda |
 | `rekap_cell_flags` | Penanda koreksi/manual check jika masih dipakai |
 
-Kolom `users.partai_id` masih sisa schema lama dan belum dipakai di manajemen user SIMAP Garuda.
+Kolom legacy `users.partai_id` sudah diaudit dan dihapus dari schema user SIMAP Garuda lewat migration `2026_06_17_000001_drop_legacy_partai_id_from_users_table`.
 
 ## Artisan dan Development
 

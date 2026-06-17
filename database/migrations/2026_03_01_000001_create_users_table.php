@@ -16,7 +16,6 @@ return new class extends Migration
             $table->unsignedBigInteger('kecamatan_id')->nullable();
             $table->unsignedBigInteger('desa_id')->nullable();
             $table->unsignedBigInteger('tps_id')->nullable();
-            $table->unsignedBigInteger('partai_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

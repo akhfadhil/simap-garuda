@@ -90,7 +90,6 @@ class UserManagementController extends Controller
             'kecamatan_id' => $request->role === 'ppk'  ? $request->kecamatan_id : null,
             'desa_id'      => $request->role === 'pps'  ? $request->desa_id      : null,
             'tps_id'       => $request->role === 'kpps' ? $request->tps_id       : null,
-            'partai_id'    => null,
         ]);
 
         return back()->with('success', 'User berhasil ditambahkan.');
@@ -114,7 +113,6 @@ class UserManagementController extends Controller
             'kecamatan_id' => $user->role === 'ppk'  ? $request->kecamatan_id : null,
             'desa_id'      => $user->role === 'pps'  ? $request->desa_id      : null,
             'tps_id'       => $user->role === 'kpps' ? $request->tps_id       : null,
-            'partai_id'    => null,
         ];
 
         if ($request->filled('password')) {
