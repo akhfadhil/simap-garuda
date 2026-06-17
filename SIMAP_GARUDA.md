@@ -4,6 +4,8 @@ SIMAP Garuda adalah aplikasi Laravel mandiri untuk Partai Garuda. Project ini di
 
 Project ini bukan portal multi-partai dan tidak lagi membawa alur internal SIMAP/KPU. Data suara masuk dari form manual Saksi TPS, lalu dipantau berjenjang oleh Kordes, Korcam, dan Admin Partai.
 
+Panduan operasional rinci tersedia di `SIMAP_GARUDA_OPERASIONAL.md`.
+
 ## Identitas Aplikasi
 
 | Item | Nilai |

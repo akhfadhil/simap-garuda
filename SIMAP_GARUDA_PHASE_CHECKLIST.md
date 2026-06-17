@@ -181,13 +181,13 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 - [ ] Tandai fitur yang terlalu spesifik Garuda agar tidak ikut masuk template.
 - [ ] Siapkan daftar file/konsep reusable untuk template: `config/party.php`, role label, scope wilayah, form input TPS, dashboard, export, status internal, dan test.
 - [ ] Siapkan standar import snapshot dari SIMAP utama jika nanti SIMAP utama membuat `export:party-snapshot`.
-- [ ] Siapkan dokumentasi operasional yang bisa digeneralisasi untuk project partai lain.
+- [x] Siapkan dokumentasi operasional yang bisa digeneralisasi untuk project partai lain.
 - [x] Pastikan cleanup role/URI teknis dilakukan dengan mempertimbangkan template, bukan hanya kebutuhan Garuda.
 
 ## Rekomendasi Urutan Kerja
 
-1. Siapkan dokumentasi operasional SIMAP Garuda.
-2. Audit fitur generik yang layak dipromosikan ke `simap-partai-template`.
+1. Audit fitur generik yang layak dipromosikan ke `simap-partai-template`.
+2. Tandai bagian yang terlalu spesifik Garuda agar bisa diparameterkan atau ditahan dari template.
 3. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
 
 ## Mapping ke PARTAI_PORTAL_BRAINSTORM.md
@@ -238,5 +238,6 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Audit aman `users.partai_id` selesai: kolom ini hanya sisa schema user multi-partai lama, tidak dipakai runtime SIMAP Garuda, dan sudah dihapus lewat migration `2026_06_17_000001_drop_legacy_partai_id_from_users_table`.
 - Cleanup legacy model/tabel non-partai selesai di kode: migration drop tabel rekap non-legislatif sudah dibuat, model non-legislatif sudah dihapus, relasi `RekapHeader` sudah dibersihkan, dan fallback export sudah memakai `dpr_ri`.
 - `php artisan test` lulus setelah cleanup legacy model/tabel non-partai.
-- Apply migration ke database MySQL lokal belum bisa diverifikasi karena koneksi `127.0.0.1:3306` sedang menolak koneksi; jalur fresh migration sudah tervalidasi lewat test SQLite.
-- Next step untuk eksekusi berikutnya: mulai dokumentasi operasional SIMAP Garuda, lalu audit fitur generik untuk `simap-partai-template`.
+- Migration cleanup legacy sudah berhasil diterapkan ke database MySQL lokal; tabel rekap non-legislatif legacy sudah tidak ada.
+- Dokumentasi operasional lengkap tersedia di `SIMAP_GARUDA_OPERASIONAL.md`: setup fresh clone, konfigurasi, role/scope, alur input, export, deployment, backup, dan troubleshooting.
+- Next step untuk eksekusi berikutnya: audit fitur generik SIMAP Garuda yang layak dipromosikan ke `simap-partai-template`.
