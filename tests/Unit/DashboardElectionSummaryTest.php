@@ -97,11 +97,11 @@ class DashboardElectionSummaryTest extends TestCase
         $overview = $summary['overview'];
         $labels = collect($section['rows'])->pluck('label')->all();
 
-        $this->assertSame('DPR RI - Garuda', $section['title']);
+        $this->assertSame('DPR RI - '.config('party.short_name'), $section['title']);
         $this->assertContains('Caleg Garuda No. 1', $labels);
         $this->assertNotContains('Caleg Kompetitor No. 1', $labels);
         $this->assertSame(33, $section['total_suara']);
-        $this->assertSame(58, $overview['total_suara_garuda']);
+        $this->assertSame(58, $overview['total_suara_partai']);
         $this->assertSame(3, $overview['total_tps']);
         $this->assertSame(2, $overview['input_tps']);
         $this->assertSame(1, $overview['missing_tps_count']);

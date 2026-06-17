@@ -176,15 +176,15 @@ class RekapExportService
 
     private function getMaster(string $jenis): array
     {
-        return ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis)->garuda()->orderBy('nomor_urut')->get()];
+        return ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis)->configuredParty()->orderBy('nomor_urut')->get()];
     }
 
     private function getAllMaster(): array
     {
         return [
-            'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->orderBy('nomor_urut')->get()],
-            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->orderBy('nomor_urut')->get()],
-            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->garuda()->orderBy('nomor_urut')->get()],
+            'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->configuredParty()->orderBy('nomor_urut')->get()],
+            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->configuredParty()->orderBy('nomor_urut')->get()],
+            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->configuredParty()->orderBy('nomor_urut')->get()],
         ];
     }
 }

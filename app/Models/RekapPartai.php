@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PartyConfig;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,38 +12,24 @@ class RekapPartai extends Model
 
     const JENIS = ['dpr_ri', 'dprd_prov', 'dprd_kab'];
 
+    public function scopeConfiguredParty(Builder $query): Builder
+    {
+        return PartyConfig::applyPartyQuery($query);
+    }
+
     public function scopeGaruda(Builder $query): Builder
     {
-        $party = config('party');
-        $numbers = collect($party['historical_numbers'] ?? [])
-            ->map(fn ($number) => (int) $number)
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
+        return $this->scopeConfiguredParty($query);
+    }
 
-        return $query->where(function (Builder $query) use ($party, $numbers) {
-            $query->where('nama_partai', 'like', '%'.($party['short_name'] ?? 'Garuda').'%')
-                ->orWhere('nama_partai', 'like', '%'.($party['name'] ?? 'Partai Garuda').'%');
-
-            if ($numbers) {
-                $query->orWhereIn('nomor_urut', $numbers);
-            }
-        });
+    public function isConfiguredParty(): bool
+    {
+        return PartyConfig::matchesParty($this->nomor_urut, $this->nama_partai);
     }
 
     public function isGaruda(): bool
     {
-        $party = config('party');
-        $numbers = collect($party['historical_numbers'] ?? [])
-            ->map(fn ($number) => (int) $number)
-            ->filter()
-            ->unique();
-        $name = mb_strtolower($this->nama_partai);
-
-        return $numbers->contains((int) $this->nomor_urut)
-            || str_contains($name, mb_strtolower($party['short_name'] ?? 'Garuda'))
-            || str_contains($name, mb_strtolower($party['name'] ?? 'Partai Garuda'));
+        return $this->isConfiguredParty();
     }
 
     // Relasi caleg dalam partai.

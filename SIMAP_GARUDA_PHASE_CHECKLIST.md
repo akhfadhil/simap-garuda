@@ -180,14 +180,15 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 - [x] Audit fitur generik SIMAP Garuda yang layak dipromosikan ke `simap-partai-template`.
 - [x] Tandai fitur yang terlalu spesifik Garuda agar tidak ikut masuk template.
 - [x] Siapkan daftar file/konsep reusable untuk template: `config/party.php`, role label, scope wilayah, form input TPS, dashboard, export, status internal, dan test.
+- [x] Generalisasi hardcode Garuda tahap pertama ke helper party generik tanpa mengubah behavior runtime.
 - [ ] Siapkan standar import snapshot dari SIMAP utama jika nanti SIMAP utama membuat `export:party-snapshot`.
 - [x] Siapkan dokumentasi operasional yang bisa digeneralisasi untuk project partai lain.
 - [x] Pastikan cleanup role/URI teknis dilakukan dengan mempertimbangkan template, bukan hanya kebutuhan Garuda.
 
 ## Rekomendasi Urutan Kerja
 
-1. Rename konsep Garuda yang masih hardcoded menjadi konsep party generik tanpa mengubah behavior.
-2. Buat helper `PartyConfig`/`PartyScopeService` agar matching partai dan scope wilayah tidak tersebar.
+1. Lanjutkan rename controller/view legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi` tanpa membawa backward route ke template.
+2. Buat `PartyScopeService` agar aturan scope wilayah tidak tersebar di controller dan dashboard.
 3. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
 
 ## Mapping ke PARTAI_PORTAL_BRAINSTORM.md
@@ -241,4 +242,6 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Migration cleanup legacy sudah berhasil diterapkan ke database MySQL lokal; tabel rekap non-legislatif legacy sudah tidak ada.
 - Dokumentasi operasional lengkap tersedia di `SIMAP_GARUDA_OPERASIONAL.md`: setup fresh clone, konfigurasi, role/scope, alur input, export, deployment, backup, dan troubleshooting.
 - Audit template selesai di `SIMAP_GARUDA_TEMPLATE_AUDIT.md`: daftar fitur reusable, hardcode Garuda yang harus diparameterkan, legacy yang tidak boleh masuk template, dan urutan ekstraksi sudah dicatat.
-- Next step untuk eksekusi berikutnya: generalisasi hardcode Garuda menjadi helper party generik tanpa mengubah behavior runtime.
+- Generalisasi hardcode Garuda tahap pertama selesai: `app/Support/PartyConfig.php` menjadi helper identitas/matching partai, `RekapPartai` punya scope `configuredParty()`, query utama memakai helper generik, dan label export/UI utama memakai `config('party.*')`.
+- `php artisan test` lulus setelah generalisasi helper party.
+- Next step untuk eksekusi berikutnya: ekstrak aturan scope wilayah ke `PartyScopeService` atau rename controller/view legacy `Ppk/Pps/Kpps` ke istilah final.

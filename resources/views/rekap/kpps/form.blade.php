@@ -116,12 +116,12 @@
 
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-4 overflow-hidden">
     <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-        <p class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider">Perolehan Suara Partai Garuda</p>
+        <p class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider">Perolehan Suara {{ config('party.name') }}</p>
     </div>
     <div class="p-6">
         @if($data['partais']->isEmpty())
         <div class="text-center py-8 dark:text-gray-500 text-gray-400 text-sm">
-            Belum ada data Partai Garuda. Minta admin untuk menginput terlebih dahulu.
+            Belum ada data {{ config('party.name') }}. Minta admin untuk menginput terlebih dahulu.
         </div>
         @else
         <div class="space-y-4">
@@ -175,12 +175,12 @@
 
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm mb-6 overflow-hidden">
     <div class="px-6 py-4 border-b dark:border-gray-700 border-gray-200 dark:bg-gray-700/50 bg-gray-50">
-        <p class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider">Total Suara Garuda</p>
+        <p class="text-xs font-bold dark:text-gray-300 text-gray-700 uppercase tracking-wider">Total Suara {{ config('party.short_name') }}</p>
     </div>
     <div class="p-6">
         <div class="flex items-center gap-4">
             <p class="flex-1 text-sm dark:text-gray-300 text-gray-700">
-                Total suara Partai Garuda dan seluruh caleg Garuda
+                Total suara {{ config('party.name') }} dan seluruh caleg {{ config('party.short_name') }}
                 <span class="text-[10px] dark:text-gray-600 text-gray-400 font-normal">(otomatis dari input di atas)</span>
             </p>
             <div id="display-suara-garuda"
@@ -221,8 +221,8 @@
 
 @push('scripts')
 <script>
-function updateSuaraGaruda() {
-    let totalGaruda = 0;
+function updateSuaraPartai() {
+    let totalPartai = 0;
 
     document.querySelectorAll('.partai-subtotal').forEach(elSubtotal => {
         const partaiId = elSubtotal.dataset.partaiId;
@@ -239,18 +239,18 @@ function updateSuaraGaruda() {
         }
 
         elSubtotal.textContent = subtotal.toLocaleString('id-ID');
-        totalGaruda += subtotal;
+        totalPartai += subtotal;
     });
 
     const elTotal = document.getElementById('display-suara-garuda');
-    if (elTotal) elTotal.textContent = totalGaruda.toLocaleString('id-ID');
+    if (elTotal) elTotal.textContent = totalPartai.toLocaleString('id-ID');
 }
 
 document.querySelectorAll('input[type="number"]').forEach(inp => {
-    inp.addEventListener('input', updateSuaraGaruda);
+    inp.addEventListener('input', updateSuaraPartai);
 });
 
-updateSuaraGaruda();
+updateSuaraPartai();
 
 async function confirmFinalisasi() {
     const ok = await confirmFinal();

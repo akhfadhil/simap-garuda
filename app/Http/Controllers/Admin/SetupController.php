@@ -9,6 +9,7 @@ use App\Models\PemiluSetting;
 use App\Models\RekapCaleg;
 use App\Models\RekapHeader;
 use App\Models\RekapPartai;
+use App\Support\PartyConfig;
 use Illuminate\Http\Request;
 
 class SetupController extends Controller
@@ -18,13 +19,13 @@ class SetupController extends Controller
     // Menampilkan halaman setup master data pemilu.
     public function index()
     {
-        $partaiDprRi = RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->orderBy('nomor_urut')->get();
-        $partaiProv = RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->orderBy('nomor_urut')->get();
+        $partaiDprRi = RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->configuredParty()->orderBy('nomor_urut')->get();
+        $partaiProv = RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->configuredParty()->orderBy('nomor_urut')->get();
         $dapils = \App\Models\Dapil::with('kecamatans')->orderBy('nama')->get();
         $kecamatans = \App\Models\Kecamatan::with('dapil')->orderBy('nama')->get();
         $partaiKab = RekapPartai::with('calegs', 'dapil')
             ->where('jenis', 'dprd_kab')
-            ->garuda()
+            ->configuredParty()
             ->orderBy('dapil_id')
             ->orderBy('nomor_urut')
             ->get()
@@ -95,11 +96,11 @@ class SetupController extends Controller
                 ->withInput();
         }
 
-        $invalidRows = $validRows->reject(fn ($row) => $this->isGarudaPartaiRow($row));
+        $invalidRows = $validRows->reject(fn ($row) => $this->isConfiguredPartyRow($row));
 
         if ($invalidRows->isNotEmpty()) {
             return back()
-                ->withErrors(['partais' => 'SIMAP Garuda hanya menerima Partai Garuda nomor urut '.config('party.historical_numbers.2024').'.'])
+                ->withErrors(['partais' => PartyConfig::appName().' hanya menerima '.PartyConfig::name().' nomor urut '.(config('party.historical_numbers.2024') ?? '-').'.'])
                 ->withInput();
         }
 
@@ -122,8 +123,8 @@ class SetupController extends Controller
     // Menghapus partai beserta calegnya.
     public function destroyPartai(RekapPartai $partai)
     {
-        if ($partai->isGaruda()) {
-            return back()->with('error', config('party.name').' adalah partai utama dan tidak bisa dihapus dari SIMAP Garuda.');
+        if ($partai->isConfiguredParty()) {
+            return back()->with('error', PartyConfig::name().' adalah partai utama dan tidak bisa dihapus dari '.PartyConfig::appName().'.');
         }
 
         $partai->delete();
@@ -134,7 +135,7 @@ class SetupController extends Controller
     // Menyimpan caleg pada partai tertentu.
     public function storeCaleg(Request $request, RekapPartai $partai)
     {
-        abort_unless($partai->isGaruda(), 403, 'Caleg hanya bisa ditambahkan untuk '.config('party.name').'.');
+        abort_unless($partai->isConfiguredParty(), 403, 'Caleg hanya bisa ditambahkan untuk '.PartyConfig::name().'.');
 
         $request->validate(['nomor_urut' => 'required|integer', 'nama_caleg' => 'required|string|max:200']);
         $partai->calegs()->create($request->only('nomor_urut', 'nama_caleg'));
@@ -184,19 +185,8 @@ class SetupController extends Controller
         return back()->with('success', 'Dapil kecamatan berhasil diupdate.');
     }
 
-    private function isGarudaPartaiRow(array $row): bool
+    private function isConfiguredPartyRow(array $row): bool
     {
-        $party = config('party');
-        $numbers = collect($party['historical_numbers'] ?? [])
-            ->map(fn ($number) => (int) $number)
-            ->filter()
-            ->unique();
-        $name = mb_strtolower($row['nama_partai']);
-
-        return $numbers->contains((int) $row['nomor_urut'])
-            && (
-                str_contains($name, mb_strtolower($party['short_name'] ?? 'Garuda'))
-                || str_contains($name, mb_strtolower($party['name'] ?? 'Partai Garuda'))
-            );
+        return PartyConfig::matchesSubmittedParty($row['nomor_urut'], $row['nama_partai']);
     }
 }

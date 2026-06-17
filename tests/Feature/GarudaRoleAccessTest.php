@@ -292,7 +292,7 @@ class GarudaRoleAccessTest extends TestCase
 
         $this->assertStringContainsString('Partai Garuda', $content);
         $this->assertStringContainsString('Caleg Garuda', $content);
-        $this->assertStringContainsString('Total Suara Garuda', $content);
+        $this->assertStringContainsString('Total Suara '.config('party.short_name'), $content);
         $this->assertStringContainsString('Status', $content);
         $this->assertStringContainsString('Final', $content);
         $this->assertStringContainsString('Kosong', $content);
@@ -321,7 +321,7 @@ class GarudaRoleAccessTest extends TestCase
 
         $this->assertStringContainsString('Partai Garuda', $content);
         $this->assertStringContainsString('Caleg Garuda', $content);
-        $this->assertStringContainsString('Total Suara Garuda', $content);
+        $this->assertStringContainsString('Total Suara '.config('party.short_name'), $content);
         $this->assertStringContainsString('1/1 final, 1 masuk', $content);
         $this->assertStringNotContainsString('DPT', $content);
         $this->assertStringNotContainsString('Pengguna Hak Pilih', $content);
@@ -386,13 +386,13 @@ class GarudaRoleAccessTest extends TestCase
             ]));
 
         $response->assertOk()
-            ->assertJsonPath('labels.0', 'Total Suara Garuda')
+            ->assertJsonPath('labels.0', 'Total Suara '.config('party.short_name'))
             ->assertJsonPath('data.0.suara.0', 50)
             ->assertJsonMissing(['label' => 'Caleg Kompetitor'])
             ->assertJsonMissing(['meta' => 'Partai Kompetitor']);
 
         $payload = $response->json();
-        $this->assertSame(['Total Suara Garuda'], $payload['labels']);
+        $this->assertSame(['Total Suara '.config('party.short_name')], $payload['labels']);
         $this->assertSame('Caleg Garuda', $payload['candidate_rank'][0]['label']);
         $this->assertSame(30, $payload['candidate_rank'][0]['suara']);
     }

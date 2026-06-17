@@ -10,6 +10,7 @@ use App\Models\RekapHeader;
 use App\Models\RekapPartai;
 use App\Models\Tps;
 use App\Models\User;
+use App\Support\PartyConfig;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -213,11 +214,12 @@ class DashboardElectionSummary
                     'note' => $row->catatan_internal,
                 ]);
 
-            $totalSuara = $this->totalGarudaSuara($jenisList, $scope);
+            $totalSuara = $this->totalConfiguredPartySuara($jenisList, $scope);
             $regions = $this->regionPerformance($jenisList, $scope);
         }
 
         return [
+            'total_suara_partai' => $totalSuara,
             'total_suara_garuda' => $totalSuara,
             'total_tps' => $totalTps,
             'input_tps' => $inputTps,
@@ -282,12 +284,12 @@ class DashboardElectionSummary
             ];
         }
 
-        $partaiTotals = $this->garudaPartaiSuaraQuery($jenisList, $scope)
+        $partaiTotals = $this->configuredPartySuaraQuery($jenisList, $scope)
             ->selectRaw($config['id'].' as region_id, SUM(s.suara) as total_suara')
             ->groupBy('region_id')
             ->pluck('total_suara', 'region_id');
 
-        $calegTotals = $this->garudaCalegSuaraQuery($jenisList, $scope)
+        $calegTotals = $this->configuredPartyCalegSuaraQuery($jenisList, $scope)
             ->selectRaw($config['id'].' as region_id, SUM(s.suara) as total_suara')
             ->groupBy('region_id')
             ->pluck('total_suara', 'region_id');
@@ -319,69 +321,37 @@ class DashboardElectionSummary
         ];
     }
 
-    private function totalGarudaSuara(array $jenisList, array $scope): int
+    private function totalConfiguredPartySuara(array $jenisList, array $scope): int
     {
-        return (int) $this->garudaPartaiSuaraQuery($jenisList, $scope)->sum('s.suara')
-            + (int) $this->garudaCalegSuaraQuery($jenisList, $scope)->sum('s.suara');
+        return (int) $this->configuredPartySuaraQuery($jenisList, $scope)->sum('s.suara')
+            + (int) $this->configuredPartyCalegSuaraQuery($jenisList, $scope)->sum('s.suara');
     }
 
-    private function garudaPartaiSuaraQuery(array $jenisList, array $scope): Builder
+    private function configuredPartySuaraQuery(array $jenisList, array $scope): Builder
     {
-        $party = config('party');
-        $numbers = collect($party['historical_numbers'] ?? [])
-            ->map(fn ($number) => (int) $number)
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
         return $this->applyScope(
-            DB::table('rekap_partai_suaras as s')
+            PartyConfig::applyPartyQuery(DB::table('rekap_partai_suaras as s')
                 ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
                 ->join('tps as t', 't.id', '=', 'h.tps_id')
                 ->join('desas as d', 'd.id', '=', 't.desa_id')
                 ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
                 ->join('rekap_partais as p', 'p.id', '=', 's.partai_id')
-                ->whereIn('h.jenis', $jenisList)
-                ->where(function ($query) use ($party, $numbers) {
-                    $query->where('p.nama_partai', 'like', '%'.($party['short_name'] ?? 'Garuda').'%')
-                        ->orWhere('p.nama_partai', 'like', '%'.($party['name'] ?? 'Partai Garuda').'%');
-
-                    if ($numbers) {
-                        $query->orWhereIn('p.nomor_urut', $numbers);
-                    }
-                }),
+                ->whereIn('h.jenis', $jenisList), 'p.nama_partai', 'p.nomor_urut'),
             $scope
         );
     }
 
-    private function garudaCalegSuaraQuery(array $jenisList, array $scope): Builder
+    private function configuredPartyCalegSuaraQuery(array $jenisList, array $scope): Builder
     {
-        $party = config('party');
-        $numbers = collect($party['historical_numbers'] ?? [])
-            ->map(fn ($number) => (int) $number)
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
         return $this->applyScope(
-            DB::table('rekap_caleg_suaras as s')
+            PartyConfig::applyPartyQuery(DB::table('rekap_caleg_suaras as s')
                 ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
                 ->join('tps as t', 't.id', '=', 'h.tps_id')
                 ->join('desas as d', 'd.id', '=', 't.desa_id')
                 ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
                 ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
                 ->join('rekap_partais as p', 'p.id', '=', 'c.partai_id')
-                ->whereIn('h.jenis', $jenisList)
-                ->where(function ($query) use ($party, $numbers) {
-                    $query->where('p.nama_partai', 'like', '%'.($party['short_name'] ?? 'Garuda').'%')
-                        ->orWhere('p.nama_partai', 'like', '%'.($party['name'] ?? 'Partai Garuda').'%');
-
-                    if ($numbers) {
-                        $query->orWhereIn('p.nomor_urut', $numbers);
-                    }
-                }),
+                ->whereIn('h.jenis', $jenisList), 'p.nama_partai', 'p.nomor_urut'),
             $scope
         );
     }
@@ -421,7 +391,7 @@ class DashboardElectionSummary
         $partais = RekapPartai::query()
             ->where('jenis', $jenis)
             ->when($jenis === 'dprd_kab' && $dapilId, fn ($query) => $query->where('dapil_id', $dapilId))
-            ->tap(fn ($query) => $this->onlyGarudaPartai($query))
+            ->tap(fn ($query) => $this->onlyConfiguredParty($query))
             ->orderBy('nomor_urut')
             ->get(['id', 'nomor_urut', 'nama_partai']);
 
@@ -523,7 +493,7 @@ class DashboardElectionSummary
         $partais = RekapPartai::with('calegs')
             ->where('jenis', $jenis)
             ->when($jenis === 'dprd_kab' && $dapilId, fn ($query) => $query->where('dapil_id', $dapilId))
-            ->tap(fn ($query) => $this->onlyGarudaPartai($query))
+            ->tap(fn ($query) => $this->onlyConfiguredParty($query))
             ->orderBy('nomor_urut')
             ->get();
 
@@ -589,24 +559,9 @@ class DashboardElectionSummary
         ];
     }
 
-    private function onlyGarudaPartai(EloquentBuilder $query): EloquentBuilder
+    private function onlyConfiguredParty(EloquentBuilder $query): EloquentBuilder
     {
-        $party = config('party');
-        $numbers = collect($party['historical_numbers'] ?? [])
-            ->map(fn ($number) => (int) $number)
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        return $query->where(function (EloquentBuilder $query) use ($party, $numbers) {
-            $query->where('nama_partai', 'like', '%'.($party['short_name'] ?? 'Garuda').'%')
-                ->orWhere('nama_partai', 'like', '%'.($party['name'] ?? 'Partai Garuda').'%');
-
-            if ($numbers) {
-                $query->orWhereIn('nomor_urut', $numbers);
-            }
-        });
+        return PartyConfig::applyPartyQuery($query);
     }
 
     private function applyScope(Builder $query, array $scope): Builder

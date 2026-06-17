@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Support\PartyConfig;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -66,12 +67,12 @@ class RekapSheetExport implements FromArray, WithColumnWidths, WithStyles, WithT
         $rekaps = $this->rekaps;
         $tpsNames = $tpsList->map(fn ($tps) => $tps->nama)->toArray();
 
-        $rows[] = ['REKAPITULASI SUARA GARUDA - '.strtoupper($this->label)];
+        $rows[] = [PartyConfig::recapTitlePrefix().' - '.strtoupper($this->label)];
         $rows[] = [$this->wilayah];
         $rows[] = [''];
         $this->headerRows[] = 1;
 
-        $rows[] = ['SECTION I - PEROLEHAN SUARA GARUDA'];
+        $rows[] = ['SECTION I - '.PartyConfig::voteAcquisitionLabel()];
         $this->sectionRows[] = count($rows);
         $rows[] = $this->showTotal
             ? array_merge(['Keterangan'], $tpsNames, ['Total'])
@@ -114,7 +115,7 @@ class RekapSheetExport implements FromArray, WithColumnWidths, WithStyles, WithT
             }
 
             $grandTotal = 0;
-            $cells = ['  Total Suara Garuda'];
+            $cells = ['  '.PartyConfig::totalVoiceLabel()];
             foreach ($tpsList as $tps) {
                 $rekap = $rekaps[$tps->id] ?? null;
                 $suaraPartai = $rekap ? ($rekap->partaiSuaras->firstWhere('partai_id', $partai->id)?->suara ?? 0) : 0;

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    // Menampilkan dashboard admin Partai Garuda.
+    // Menampilkan dashboard admin partai.
     public function admin(DashboardElectionSummary $summary)
     {
         $this->checkRole('admin_partai');

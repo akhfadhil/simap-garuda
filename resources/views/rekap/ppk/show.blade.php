@@ -38,7 +38,7 @@
 
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm">
-        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">Total Suara Garuda</p>
+        <p class="text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase mb-2 font-semibold">Total Suara {{ config('party.short_name') }}</p>
         <p class="font-display text-3xl text-orange-400">{{ number_format($totalGaruda) }}</p>
     </div>
     <div class="dark:bg-gray-800 bg-white rounded-xl p-5 border dark:border-gray-700 border-gray-200 shadow-sm">
@@ -79,7 +79,7 @@
             <tbody>
             <tr class="dark:bg-gray-900/60 bg-gray-100 border-b dark:border-gray-700 border-gray-200">
                 <td colspan="{{ $desas->count() + 2 }}" class="px-5 py-1.5 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">
-                    Perolehan Suara Partai Garuda
+                    Perolehan Suara {{ config('party.name') }}
                 </td>
             </tr>
 
@@ -119,7 +119,7 @@
 
             @php $garudaTotal = 0; @endphp
             <tr class="border-t-2 dark:border-gray-600 border-gray-300 dark:bg-gray-700/30 bg-gray-50">
-                <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Garuda</td>
+                <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara {{ config('party.short_name') }}</td>
                 @foreach($desas as $desa)
                     @php $suara = $desaPartaiGrandTotals[$desa->id][$partai->id] ?? 0; $garudaTotal += $suara; @endphp
                     {!! $formatCell($suara, 'px-3 py-2 text-center font-bold text-teal-400') !!}
@@ -249,7 +249,7 @@
 
             @php $garudaTotal = 0; @endphp
             <tr class="border-t-2 dark:border-gray-600 border-gray-300 dark:bg-gray-700/30 bg-gray-50">
-                <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara Garuda</td>
+                <td class="px-5 py-2 text-xs font-bold dark:text-gray-300 text-gray-700 uppercase">Total Suara {{ config('party.short_name') }}</td>
                 @foreach($desa->tps as $tps)
                     @php
                         $r = $detailRekaps[$tps->id] ?? null;

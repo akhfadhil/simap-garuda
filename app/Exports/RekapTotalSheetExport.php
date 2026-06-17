@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Support\PartyConfig;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -62,11 +63,11 @@ class RekapTotalSheetExport implements FromArray, WithColumnWidths, WithStyles, 
         $desaList = $this->desas;
         $desaNames = $desaList->map(fn ($desa) => $desa->nama)->toArray();
 
-        $rows[] = ['REKAPITULASI SUARA GARUDA - '.strtoupper($this->label).' - '.strtoupper($this->wilayah)];
+        $rows[] = [PartyConfig::recapTitlePrefix().' - '.strtoupper($this->label).' - '.strtoupper($this->wilayah)];
         $rows[] = [''];
         $this->headerRows[] = 1;
 
-        $rows[] = ['SECTION I - PEROLEHAN SUARA GARUDA'];
+        $rows[] = ['SECTION I - '.PartyConfig::voteAcquisitionLabel()];
         $this->sectionRows[] = count($rows);
         $rows[] = array_merge(['Keterangan'], $desaNames, ['Total']);
         $this->subHeaderRows[] = count($rows);
@@ -99,7 +100,7 @@ class RekapTotalSheetExport implements FromArray, WithColumnWidths, WithStyles, 
             }
 
             $grandTotal = 0;
-            $cells = ['  Total Suara Garuda'];
+            $cells = ['  '.PartyConfig::totalVoiceLabel()];
             foreach ($desaList as $desa) {
                 $total = $desa->tps->sum(function ($tps) use ($partai) {
                     $rekap = $this->rekaps[$tps->id] ?? null;

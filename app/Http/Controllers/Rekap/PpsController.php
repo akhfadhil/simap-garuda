@@ -129,7 +129,7 @@ class PpsController extends Controller
     // Mengambil master data sesuai jenis pemilihan.
     private function getMaster(string $jenis, Desa $desa): array
     {
-        $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis)->garuda();
+        $partais = \App\Models\RekapPartai::with('calegs')->where('jenis', $jenis)->configuredParty();
 
         if ($jenis === 'dprd_kab') {
             $partais->where('dapil_id', $desa->kecamatan?->dapil_id);
@@ -142,9 +142,9 @@ class PpsController extends Controller
     private function getAllMaster(Desa $desa): array
     {
         return [
-            'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->orderBy('nomor_urut')->get()],
-            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->orderBy('nomor_urut')->get()],
-            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->garuda()->where('dapil_id', $desa->kecamatan?->dapil_id)->orderBy('nomor_urut')->get()],
+            'dpr_ri' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->configuredParty()->orderBy('nomor_urut')->get()],
+            'dprd_prov' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->configuredParty()->orderBy('nomor_urut')->get()],
+            'dprd_kab' => ['partais' => \App\Models\RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->configuredParty()->where('dapil_id', $desa->kecamatan?->dapil_id)->orderBy('nomor_urut')->get()],
         ];
     }
 

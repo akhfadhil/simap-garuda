@@ -66,7 +66,7 @@
     @if($rekap)
     <div class="px-5 py-3 border-b dark:border-gray-700 border-gray-100">
         <div class="flex justify-between text-[11px] dark:text-gray-500 text-gray-400 mb-1">
-            <span>Total suara Garuda</span>
+            <span>Total suara {{ config('party.short_name') }}</span>
             <span class="font-semibold dark:text-gray-300 text-gray-600">{{ number_format($rekap->suara_sah) }}</span>
         </div>
         <div class="flex justify-between text-[11px] dark:text-gray-500 text-gray-400">

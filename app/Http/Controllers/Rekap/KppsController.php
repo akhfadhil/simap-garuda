@@ -8,6 +8,7 @@ use App\Models\RekapHeader;
 use App\Models\RekapPartai;
 use App\Models\Tps;
 use App\Services\RekapAdminCache;
+use App\Support\PartyConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -67,7 +68,7 @@ class KppsController extends Controller
             'status_internal' => [$isAdminEdit ? 'required' : 'prohibited', 'string', 'in:draft,perlu_dicek,final'],
             'catatan_internal' => [$isAdminEdit ? 'nullable' : 'prohibited', 'string', 'max:2000'],
         ]);
-        $this->guardGarudaSuaraPayload($request, $jenis, $tps);
+        $this->guardConfiguredPartySuaraPayload($request, $jenis, $tps);
 
         $existing = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->first();
         if ($existing && $existing->status === 'final' && ! $isAdminEdit) {
@@ -201,7 +202,7 @@ class KppsController extends Controller
             return [
                 'partais' => RekapPartai::with('calegs')
                     ->where('jenis', 'dpr_ri')
-                    ->garuda()
+                    ->configuredParty()
                     ->orderBy('nomor_urut')
                     ->get(),
                 'suara_partai' => $existingPartai,
@@ -213,7 +214,7 @@ class KppsController extends Controller
             return [
                 'partais' => RekapPartai::with('calegs')
                     ->where('jenis', 'dprd_prov')
-                    ->garuda()
+                    ->configuredParty()
                     ->orderBy('nomor_urut')
                     ->get(),
                 'suara_partai' => $existingPartai,
@@ -228,7 +229,7 @@ class KppsController extends Controller
             return [
                 'partais' => RekapPartai::with('calegs')
                     ->where('jenis', 'dprd_kab')
-                    ->garuda()
+                    ->configuredParty()
                     ->where('dapil_id', $dapilId)
                     ->orderBy('nomor_urut')
                     ->get(),
@@ -247,17 +248,17 @@ class KppsController extends Controller
         $kecamatan = $tps->desa->kecamatan;
 
         return [
-            'dpr_ri' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->garuda()->orderBy('nomor_urut')->get()],
-            'dprd_prov' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->garuda()->orderBy('nomor_urut')->get()],
-            'dprd_kab' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->garuda()->where('dapil_id', $kecamatan->dapil_id)->orderBy('nomor_urut')->get()],
+            'dpr_ri' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dpr_ri')->configuredParty()->orderBy('nomor_urut')->get()],
+            'dprd_prov' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dprd_prov')->configuredParty()->orderBy('nomor_urut')->get()],
+            'dprd_kab' => ['partais' => RekapPartai::with('calegs')->where('jenis', 'dprd_kab')->configuredParty()->where('dapil_id', $kecamatan->dapil_id)->orderBy('nomor_urut')->get()],
         ];
     }
 
-    private function guardGarudaSuaraPayload(Request $request, string $jenis, Tps $tps): void
+    private function guardConfiguredPartySuaraPayload(Request $request, string $jenis, Tps $tps): void
     {
         $partais = RekapPartai::with('calegs')
             ->where('jenis', $jenis)
-            ->garuda()
+            ->configuredParty()
             ->when($jenis === 'dprd_kab', fn ($query) => $query->where('dapil_id', $tps->desa?->kecamatan?->dapil_id))
             ->get();
         $allowedPartaiIds = $partais->pluck('id')->map(fn ($id) => (string) $id)->all();
@@ -272,7 +273,7 @@ class KppsController extends Controller
         abort_if(
             array_diff($requestedPartaiIds, $allowedPartaiIds) || array_diff($requestedCalegIds, $allowedCalegIds),
             403,
-            'Input rekap hanya boleh untuk Partai Garuda dan calegnya.'
+            'Input rekap hanya boleh untuk '.PartyConfig::name().' dan calegnya.'
         );
     }
 
