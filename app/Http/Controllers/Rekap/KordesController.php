@@ -9,7 +9,7 @@ use App\Models\RekapHeader;
 use App\Services\PartyScopeService;
 use Illuminate\Support\Facades\Auth;
 
-class PpsController extends Controller
+class KordesController extends Controller
 {
     public function __construct(private PartyScopeService $partyScope)
     {
@@ -39,7 +39,7 @@ class PpsController extends Controller
             ->unique()
             ->flip();
 
-        return view('rekap.pps.index', compact('desa', 'rekaps', 'flaggedJenis'));
+        return view('rekap.kordes.index', compact('desa', 'rekaps', 'flaggedJenis'));
     }
 
     // Memastikan jenis pemilihan sedang aktif.
@@ -97,7 +97,7 @@ class PpsController extends Controller
         }
         $master = $this->getMaster($jenis, $desa);
 
-        return view('rekap.pps.show', compact('desa', 'jenis', 'rekaps', 'tpsList', 'master', 'tpsCellFlags', 'cellFlags'));
+        return view('rekap.kordes.show', compact('desa', 'jenis', 'rekaps', 'tpsList', 'master', 'tpsCellFlags', 'cellFlags'));
     }
 
     // Mengekspor rekap desa untuk jenis pemilihan.

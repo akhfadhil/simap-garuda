@@ -10,7 +10,7 @@ use App\Models\Tps;
 use App\Services\PartyScopeService;
 use Illuminate\Support\Facades\Auth;
 
-class PpkController extends Controller
+class KorcamController extends Controller
 {
     public function __construct(private PartyScopeService $partyScope)
     {
@@ -40,7 +40,7 @@ class PpkController extends Controller
             ->unique()
             ->flip();
 
-        return view('rekap.ppk.index', compact('kecamatan', 'rekaps', 'flaggedJenis'));
+        return view('rekap.korcam.index', compact('kecamatan', 'rekaps', 'flaggedJenis'));
     }
 
     // Memastikan jenis pemilihan sedang aktif.
@@ -181,7 +181,7 @@ class PpkController extends Controller
         }
         $master = $this->getMaster($jenis, $kecamatan);
 
-        return view('rekap.ppk.show', compact(
+        return view('rekap.korcam.show', compact(
             'kecamatan',
             'jenis',
             'rekaps',

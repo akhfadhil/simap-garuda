@@ -24,7 +24,7 @@ class DashboardController extends Controller
     }
 
     // Menampilkan dashboard Korcam sesuai kecamatan user.
-    public function ppk(DashboardElectionSummary $summary)
+    public function korcam(DashboardElectionSummary $summary)
     {
         $user = Auth::user();
         $viewKecamatan = null;
@@ -36,7 +36,7 @@ class DashboardController extends Controller
             $this->checkRole('korcam');
         }
 
-        return view('dashboard.ppk', [
+        return view('dashboard.korcam', [
             'electionSummary' => $summary->forUser($user),
             'viewKecamatan' => $viewKecamatan,
             'isAdminView' => (bool) $viewKecamatan,
@@ -44,7 +44,7 @@ class DashboardController extends Controller
     }
 
     // Menampilkan dashboard Kordes sesuai desa user.
-    public function pps(DashboardElectionSummary $summary)
+    public function kordes(DashboardElectionSummary $summary)
     {
         $user = Auth::user();
         $viewDesa = null;
@@ -57,7 +57,7 @@ class DashboardController extends Controller
             abort_if(! $this->partyScope->canAccessDesa($user, $viewDesa), 403, 'Akses ditolak.');
         }
 
-        return view('dashboard.pps', [
+        return view('dashboard.kordes', [
             'electionSummary' => $summary->forUser($user),
             'viewDesa' => $viewDesa,
             'isAdminView' => (bool) $viewDesa,
@@ -65,7 +65,7 @@ class DashboardController extends Controller
     }
 
     // Menampilkan dashboard Saksi TPS sesuai TPS user.
-    public function kpps(DashboardElectionSummary $summary)
+    public function saksi(DashboardElectionSummary $summary)
     {
         $user = Auth::user();
         $viewTps = null;
@@ -78,7 +78,7 @@ class DashboardController extends Controller
             abort_if(! $this->partyScope->canAccessTps($user, $viewTps), 403, 'Akses ditolak.');
         }
 
-        return view('dashboard.kpps', [
+        return view('dashboard.saksi', [
             'electionSummary' => $summary->forUser($user),
             'viewTps' => $viewTps,
             'isAdminView' => (bool) $viewTps,
@@ -92,7 +92,7 @@ class DashboardController extends Controller
     }
 
     // Menyimpan mode lihat sebagai Korcam untuk admin.
-    public function viewAsPpk(Kecamatan $kecamatan)
+    public function viewAsKorcam(Kecamatan $kecamatan)
     {
         session([
             'admin_view_kecamatan_id' => $kecamatan->id,
@@ -103,7 +103,7 @@ class DashboardController extends Controller
     }
 
     // Menyimpan mode lihat sebagai Kordes untuk admin.
-    public function viewAsPps(Desa $desa)
+    public function viewAsKordes(Desa $desa)
     {
         session([
             'admin_view_kecamatan_id' => $desa->kecamatan_id,
@@ -115,7 +115,7 @@ class DashboardController extends Controller
     }
 
     // Menyimpan mode lihat sebagai Saksi TPS untuk admin.
-    public function viewAsKpps(Tps $tps)
+    public function viewAsSaksi(Tps $tps)
     {
         $tps->load('desa');
         session([

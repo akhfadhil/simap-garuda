@@ -532,9 +532,9 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                         @endforeach
                     </select>
                 </div>
-                <div id="tambah-field-kecamatan-pps" class="hidden">
+                <div id="tambah-field-kecamatan-kordes" class="hidden">
                     <label class="{{ $labelClass }}">Kecamatan</label>
-                    <select id="tambah-kec-pps" onchange="loadDesa('tambah', this.value)" class="{{ $inputClass }}">
+                    <select id="tambah-kec-kordes" onchange="loadDesa('tambah', this.value)" class="{{ $inputClass }}">
                         <option value="">— Pilih Kecamatan —</option>
                         @foreach($kecamatans as $kec)
                         <option value="{{ $kec->id }}">{{ $kec->nama }}</option>
@@ -547,18 +547,18 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                         <option value="">— Pilih Desa —</option>
                     </select>
                 </div>
-                <div id="tambah-field-kecamatan-kpps" class="hidden">
+                <div id="tambah-field-kecamatan-saksi" class="hidden">
                     <label class="{{ $labelClass }}">Kecamatan</label>
-                    <select id="tambah-kec-kpps" onchange="loadDesa('tambah-kpps', this.value)" class="{{ $inputClass }}">
+                    <select id="tambah-kec-saksi" onchange="loadDesa('tambah-saksi', this.value)" class="{{ $inputClass }}">
                         <option value="">— Pilih Kecamatan —</option>
                         @foreach($kecamatans as $kec)
                         <option value="{{ $kec->id }}">{{ $kec->nama }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div id="tambah-field-desa-kpps" class="hidden">
+                <div id="tambah-field-desa-saksi" class="hidden">
                     <label class="{{ $labelClass }}">Desa</label>
-                    <select id="tambah-desa-kpps" onchange="loadTps('tambah', this.value)" class="{{ $inputClass }}">
+                    <select id="tambah-desa-saksi" onchange="loadTps('tambah', this.value)" class="{{ $inputClass }}">
                         <option value="">— Pilih Desa —</option>
                     </select>
                 </div>
@@ -615,7 +615,7 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                        class="w-full dark:bg-gray-900 bg-gray-100 border dark:border-gray-700 border-gray-200 dark:text-gray-500 text-gray-400 px-4 py-2.5 text-sm rounded-lg cursor-not-allowed" readonly>
             </div>
 
-            <div id="edit-wilayah-ppk" class="hidden">
+            <div id="edit-wilayah-korcam" class="hidden">
                 <label class="{{ $labelClass }}">Kecamatan</label>
                 <select name="kecamatan_id" id="edit-kecamatan" class="{{ $inputClass }}">
                     @foreach($kecamatans as $kec)
@@ -624,10 +624,10 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                 </select>
             </div>
 
-            <div id="edit-wilayah-pps" class="hidden space-y-4">
+            <div id="edit-wilayah-kordes" class="hidden space-y-4">
                 <div>
                     <label class="{{ $labelClass }}">Kecamatan</label>
-                    <select id="edit-kec-pps" onchange="loadDesaEdit(this.value)" class="{{ $inputClass }}">
+                    <select id="edit-kec-kordes" onchange="loadDesaEdit(this.value)" class="{{ $inputClass }}">
                         @foreach($kecamatans as $kec)
                         <option value="{{ $kec->id }}">{{ $kec->nama }}</option>
                         @endforeach
@@ -639,10 +639,10 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                 </div>
             </div>
 
-            <div id="edit-wilayah-kpps" class="hidden space-y-4">
+            <div id="edit-wilayah-saksi" class="hidden space-y-4">
                 <div>
                     <label class="{{ $labelClass }}">Kecamatan</label>
-                    <select id="edit-kec-kpps" onchange="loadDesaEditKpps(this.value)" class="{{ $inputClass }}">
+                    <select id="edit-kec-saksi" onchange="loadDesaEditSaksi(this.value)" class="{{ $inputClass }}">
                         @foreach($kecamatans as $kec)
                         <option value="{{ $kec->id }}">{{ $kec->nama }}</option>
                         @endforeach
@@ -650,7 +650,7 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                 </div>
                 <div>
                     <label class="{{ $labelClass }}">Desa</label>
-                    <select id="edit-desa-kpps" onchange="loadTpsEdit(this.value)" class="{{ $inputClass }}"></select>
+                    <select id="edit-desa-saksi" onchange="loadTpsEdit(this.value)" class="{{ $inputClass }}"></select>
                 </div>
                 <div>
                     <label class="{{ $labelClass }}">TPS</label>
@@ -694,15 +694,15 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
     function updateWilayahField(prefix) {
         const role = document.getElementById(prefix + '-role').value;
         const wrap = document.getElementById(prefix + '-wilayah');
-        ['kecamatan','kecamatan-pps','field-desa','kecamatan-kpps','field-desa-kpps','field-tps'].forEach(f => {
+        ['kecamatan','kecamatan-kordes','field-desa','kecamatan-saksi','field-desa-saksi','field-tps'].forEach(f => {
             const el = document.getElementById(prefix + '-field-' + f);
             if (el) el.classList.add('hidden');
         });
         if (!role || role === 'admin_partai') { wrap.classList.add('hidden'); return; }
         wrap.classList.remove('hidden');
         if (role === 'korcam')  document.getElementById(prefix + '-field-kecamatan').classList.remove('hidden');
-        else if (role === 'kordes')  document.getElementById(prefix + '-field-kecamatan-pps').classList.remove('hidden');
-        else if (role === 'saksi_tps') document.getElementById(prefix + '-field-kecamatan-kpps').classList.remove('hidden');
+        else if (role === 'kordes')  document.getElementById(prefix + '-field-kecamatan-kordes').classList.remove('hidden');
+        else if (role === 'saksi_tps') document.getElementById(prefix + '-field-kecamatan-saksi').classList.remove('hidden');
     }
 
     function loadDesa(prefix, kecId) {
@@ -711,9 +711,9 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
         if (prefix === 'tambah') {
             selId   = 'tambah-desa-select';
             fieldId = 'tambah-field-desa';
-        } else if (prefix === 'tambah-kpps') {
-            selId   = 'tambah-desa-kpps';
-            fieldId = 'tambah-field-desa-kpps';
+        } else if (prefix === 'tambah-saksi') {
+            selId   = 'tambah-desa-saksi';
+            fieldId = 'tambah-field-desa-saksi';
         }
         const sel = document.getElementById(selId);
         sel.innerHTML = '<option value="">— Pilih Desa —</option>';
@@ -735,22 +735,22 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
         const roleLabels = {admin_partai: 'Admin Partai', korcam: 'Korcam', kordes: 'Kordes', saksi_tps: 'Saksi TPS'};
         document.getElementById('edit-role-display').value = roleLabels[user.role] || 'Legacy';
         document.getElementById('edit-form').action        = `/admin/users/${user.id}`;
-        ['ppk','pps','kpps'].forEach(r => document.getElementById('edit-wilayah-' + r).classList.add('hidden'));
+        ['korcam','kordes','saksi'].forEach(r => document.getElementById('edit-wilayah-' + r).classList.add('hidden'));
         if (user.role === 'korcam') {
-            document.getElementById('edit-wilayah-ppk').classList.remove('hidden');
+            document.getElementById('edit-wilayah-korcam').classList.remove('hidden');
             if (user.kecamatan_id) document.getElementById('edit-kecamatan').value = user.kecamatan_id;
         } else if (user.role === 'kordes') {
-            document.getElementById('edit-wilayah-pps').classList.remove('hidden');
+            document.getElementById('edit-wilayah-kordes').classList.remove('hidden');
             if (user.desa_id) {
                 const desa = allDesas.find(d => d.id == user.desa_id);
-                if (desa) { document.getElementById('edit-kec-pps').value = desa.kecamatan_id; loadDesaEdit(desa.kecamatan_id, user.desa_id); }
+                if (desa) { document.getElementById('edit-kec-kordes').value = desa.kecamatan_id; loadDesaEdit(desa.kecamatan_id, user.desa_id); }
             }
         } else if (user.role === 'saksi_tps') {
-            document.getElementById('edit-wilayah-kpps').classList.remove('hidden');
+            document.getElementById('edit-wilayah-saksi').classList.remove('hidden');
             if (user.tps_id) {
                 const tps  = allTps.find(t => t.id == user.tps_id);
                 const desa = tps ? allDesas.find(d => d.id == tps.desa_id) : null;
-                if (desa) { document.getElementById('edit-kec-kpps').value = desa.kecamatan_id; loadDesaEditKpps(desa.kecamatan_id, tps.desa_id, user.tps_id); }
+                if (desa) { document.getElementById('edit-kec-saksi').value = desa.kecamatan_id; loadDesaEditSaksi(desa.kecamatan_id, tps.desa_id, user.tps_id); }
             }
         }
         openModal('edit');
@@ -763,9 +763,9 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
         desas.forEach(d => sel.innerHTML += `<option value="${d.id}" ${d.id == selectedDesaId ? 'selected' : ''}>${d.nama}</option>`);
     }
 
-    function loadDesaEditKpps(kecId, selectedDesaId = null, selectedTpsId = null) {
+    function loadDesaEditSaksi(kecId, selectedDesaId = null, selectedTpsId = null) {
         const desas = allDesas.filter(d => d.kecamatan_id == kecId);
-        const sel   = document.getElementById('edit-desa-kpps');
+        const sel   = document.getElementById('edit-desa-saksi');
         sel.innerHTML = '<option value="">— Pilih Desa —</option>';
         desas.forEach(d => sel.innerHTML += `<option value="${d.id}" ${d.id == selectedDesaId ? 'selected' : ''}>${d.nama}</option>`);
         if (selectedDesaId) loadTpsEdit(selectedDesaId, selectedTpsId);

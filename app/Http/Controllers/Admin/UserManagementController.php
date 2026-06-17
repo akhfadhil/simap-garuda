@@ -155,9 +155,9 @@ class UserManagementController extends Controller
             : collect();
 
         $rows = match ($role) {
-            'korcam' => $this->bulkPpkRows(),
-            'kordes' => $selectedKecamatanId ? $this->bulkPpsRows($selectedKecamatanId) : collect(),
-            'saksi_tps' => $selectedDesaId ? $this->bulkKppsRows($selectedDesaId) : collect(),
+            'korcam' => $this->bulkKorcamRows(),
+            'kordes' => $selectedKecamatanId ? $this->bulkKordesRows($selectedKecamatanId) : collect(),
+            'saksi_tps' => $selectedDesaId ? $this->bulkSaksiRows($selectedDesaId) : collect(),
         };
 
         return view('admin.users.bulk', compact(
@@ -270,7 +270,7 @@ class UserManagementController extends Controller
     }
 
     // Menyiapkan baris bulk user Korcam per kecamatan.
-    private function bulkPpkRows()
+    private function bulkKorcamRows()
     {
         return Kecamatan::with(['users' => fn($query) => $query->where('role', 'korcam')])
             ->orderBy('nama')
@@ -286,7 +286,7 @@ class UserManagementController extends Controller
     }
 
     // Menyiapkan baris bulk user Kordes per desa.
-    private function bulkPpsRows(int $kecamatanId)
+    private function bulkKordesRows(int $kecamatanId)
     {
         return Desa::with(['kecamatan', 'users' => fn($query) => $query->where('role', 'kordes')])
             ->where('kecamatan_id', $kecamatanId)
@@ -303,7 +303,7 @@ class UserManagementController extends Controller
     }
 
     // Menyiapkan baris bulk user Saksi TPS per TPS.
-    private function bulkKppsRows(int $desaId)
+    private function bulkSaksiRows(int $desaId)
     {
         return Tps::with(['desa.kecamatan', 'users' => fn($query) => $query->where('role', 'saksi_tps')])
             ->where('desa_id', $desaId)

@@ -163,7 +163,7 @@ Ditunda:
 - Mengubah migration lama pembuat tabel non-legislatif; lebih aman lewat migration drop baru dulu, lalu squash saat template/fresh schema.
 - File migration no-op `2026_03_02_000006_create_dokumens_table.php`; biarkan sampai migration squash agar histori migration existing DB tetap jelas.
 - Migration role legacy `2026_05_24_*` dan `2026_06_14_000001_*`; biarkan sampai migration squash karena masih menjadi jalur upgrade existing DB.
-- Backward route/URI `ppk`, `pps`, `kpps` serta nama class/view internal `Ppk`, `Pps`, dan `Kpps`; tunda sampai masa kompatibilitas lama selesai atau saat ekstraksi template.
+- Backward route/URI `ppk`, `pps`, dan `kpps`; tunda sampai masa kompatibilitas lama selesai. Nama class/view internal sudah direname ke istilah final Korcam/Kordes/Saksi.
 - `config.filesystems.backup_path` dan env `BACKUP_DOKUMEN_PATH`; tunda sampai audit config menyeluruh karena saat ini hanya tersisa sebagai config, bukan route runtime.
 - Enum historis jenis non-partai di migration/schema `rekap_headers`; tunda sampai migration squash atau migration enum khusus karena test guard masih butuh memastikan jenis non-partai tidak accessible.
 - Test guard non-party `ppwp`; tetap dipertahankan sebagai bukti jenis non-partai tidak bisa diakses.
@@ -182,14 +182,15 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 - [x] Siapkan daftar file/konsep reusable untuk template: `config/party.php`, role label, scope wilayah, form input TPS, dashboard, export, status internal, dan test.
 - [x] Generalisasi hardcode Garuda tahap pertama ke helper party generik tanpa mengubah behavior runtime.
 - [x] Ekstrak aturan scope wilayah ke `PartyScopeService` agar akses kecamatan/desa/TPS terpusat untuk template.
+- [x] Rename controller, method, folder view, dan DOM/helper internal legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`.
 - [ ] Siapkan standar import snapshot dari SIMAP utama jika nanti SIMAP utama membuat `export:party-snapshot`.
 - [x] Siapkan dokumentasi operasional yang bisa digeneralisasi untuk project partai lain.
 - [x] Pastikan cleanup role/URI teknis dilakukan dengan mempertimbangkan template, bukan hanya kebutuhan Garuda.
 
 ## Rekomendasi Urutan Kerja
 
-1. Lanjutkan rename controller/view legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi` tanpa membawa backward route ke template.
-2. Generalisasi test fixture dari Garuda ke party config agar template tidak membawa data contoh Garuda.
+1. Generalisasi test fixture dari Garuda ke party config agar template tidak membawa data contoh Garuda.
+2. Siapkan opsi pelepasan backward route `ppk/pps/kpps` saat masa kompatibilitas dianggap selesai; route lama tidak boleh dibawa ke template.
 3. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
 
 ## Mapping ke PARTAI_PORTAL_BRAINSTORM.md
@@ -247,4 +248,7 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - `php artisan test` lulus setelah generalisasi helper party.
 - Aturan scope wilayah sudah diekstrak ke `app/Services/PartyScopeService.php`; dashboard summary, dashboard role, Korcam/Kordes controller, dan input TPS memakai service yang sama untuk akses kecamatan/desa/TPS.
 - `php artisan test` lulus setelah ekstraksi `PartyScopeService`.
-- Next step untuk eksekusi berikutnya: rename controller/view legacy `Ppk/Pps/Kpps` ke istilah final `Korcam/Kordes/Saksi`.
+- Rename controller/view legacy selesai: `PpkController`, `PpsController`, dan `KppsController` sudah menjadi `KorcamController`, `KordesController`, dan `SaksiController`; folder view dashboard/rekap/data juga sudah memakai istilah final.
+- Helper method dan DOM id manajemen user yang masih memakai `ppk/pps/kpps` sudah direname ke `korcam/kordes/saksi`.
+- Backward route `ppk/pps/kpps` masih dipertahankan sebagai redirect sementara untuk kompatibilitas link lama, dan tidak boleh ikut ke template baru.
+- `php artisan test` dan `npm.cmd run build` lulus setelah rename controller/view legacy.

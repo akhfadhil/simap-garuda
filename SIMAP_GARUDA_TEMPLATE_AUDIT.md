@@ -45,8 +45,8 @@ File/konsep:
 - `routes/web.php`
 - `app/Http/Middleware/RoleMiddleware.php`
 - `app/Http/Controllers/DashboardController.php`
-- `app/Http/Controllers/PpkController.php`
-- `app/Http/Controllers/PpsController.php`
+- `app/Http/Controllers/KorcamController.php`
+- `app/Http/Controllers/KordesController.php`
 - `app/Http/Controllers/Admin/UserManagementController.php`
 - Relasi wilayah di `users`: `kecamatan_id`, `desa_id`, `tps_id`.
 
@@ -58,11 +58,10 @@ Yang bisa masuk template:
 - Bulk user generator untuk Korcam, Kordes, dan Saksi TPS.
 - Mode view Admin Partai ke wilayah bawah.
 
-Yang perlu dirapikan sebelum template:
+Status sebelum template:
 
-- Nama class `PpkController`, `PpsController`, dan view folder `ppk`, `pps`, `kpps` masih membawa istilah legacy.
-- Backward route `ppk`, `pps`, dan `kpps` sebaiknya tidak ikut template baru.
-- Nama method internal seperti `dataPps`, `viewPps`, dan `bulkKppsRows` perlu diganti agar konsisten dengan istilah partai.
+- Nama class, method, folder view, dan DOM/helper internal legacy `Ppk/Pps/Kpps` sudah direname ke `Korcam/Kordes/Saksi` di SIMAP Garuda.
+- Backward route `ppk`, `pps`, dan `kpps` masih ada untuk kompatibilitas SIMAP Garuda, tetapi tidak boleh ikut template baru.
 
 ### Master Wilayah dan Dapil
 
@@ -112,8 +111,8 @@ Yang perlu diparameterkan:
 
 File/konsep:
 
-- `app/Http/Controllers/Rekap/KppsController.php`
-- `resources/views/rekap/kpps/index.blade.php`
+- `app/Http/Controllers/Rekap/SaksiController.php`
+- `resources/views/rekap/saksi/index.blade.php`
 - `app/Models/RekapHeader.php`
 - `app/Models/RekapPartaiSuara.php`
 - `app/Models/RekapCalegSuara.php`
@@ -129,7 +128,6 @@ Yang bisa masuk template:
 
 Yang perlu dirapikan:
 
-- Nama controller/view masih memakai `Kpps`.
 - Pesan guard masih menyebut Partai Garuda.
 - Field administratif legacy bisa dipertimbangkan untuk dihapus saat template punya fresh schema sendiri.
 
@@ -245,7 +243,6 @@ Berikut item yang harus diganti, diparameterkan, atau ditahan saat ekstraksi tem
 Template baru sebaiknya tidak membawa:
 
 - Backward redirect `ppk`, `pps`, dan `kpps`.
-- Nama class/controller/view legacy `Ppk`, `Pps`, dan `Kpps`.
 - Migration lama pembuat tabel PPWP, DPD, Gubernur, Bupati.
 - Migration compatibility role lama jika template memakai fresh schema.
 - Config `BACKUP_DOKUMEN_PATH` jika tidak ada modul dokumen.
@@ -295,7 +292,7 @@ Helper yang perlu dibuat saat ekstraksi:
 1. Buat helper `PartyConfig` untuk menggantikan duplikasi query matching partai. Selesai di SIMAP Garuda.
 2. Rename konsep Garuda menjadi konsep party generik di SIMAP Garuda tanpa mengubah behavior. Sebagian selesai: matching partai, scope `configuredParty()`, dan label export/UI utama sudah berbasis config.
 3. Buat `PartyScopeService` untuk menyatukan aturan scope wilayah. Selesai di SIMAP Garuda.
-4. Rename controller/view legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`.
+4. Rename controller/view legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`. Selesai di SIMAP Garuda.
 5. Hapus backward route legacy dari calon template.
 6. Buat fresh migration template yang hanya membawa schema party app.
 7. Generalisasi test fixture dari Garuda ke party config.
@@ -309,4 +306,6 @@ Helper yang perlu dibuat saat ekstraksi:
 - Daftar legacy yang tidak boleh masuk template selesai.
 - Helper `PartyConfig` dan scope `configuredParty()` sudah dibuat sebagai langkah awal generalisasi.
 - `PartyScopeService` sudah dibuat untuk memusatkan akses kecamatan, desa, TPS, active scope dashboard, dan active entity per role.
+- Rename controller/view legacy selesai di SIMAP Garuda: class, method, folder view, dan DOM/helper internal sudah memakai istilah Korcam/Kordes/Saksi.
+- Backward route `ppk/pps/kpps` sengaja masih dipertahankan di SIMAP Garuda sebagai redirect kompatibilitas, tetapi ditandai tidak boleh masuk template.
 - Import snapshot dari SIMAP utama belum didesain; tetap menjadi pekerjaan terpisah setelah kebutuhan format data SIMAP utama jelas.

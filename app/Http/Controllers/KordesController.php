@@ -6,7 +6,7 @@ use App\Models\Desa;
 use App\Models\Tps;
 use App\Services\PartyScopeService;
 
-class PpsController extends Controller
+class KordesController extends Controller
 {
     public function __construct(private PartyScopeService $partyScope)
     {
@@ -21,7 +21,7 @@ class PpsController extends Controller
             ->with(['rekapHeaders', 'users' => fn($q) => $q->where('role', 'saksi_tps')])
             ->get();
 
-        return view('pps.data-tps', compact('tpsList'));
+        return view('kordes.data-tps', compact('tpsList'));
     }
 
     // Mengaktifkan mode lihat saksi TPS untuk TPS tertentu.

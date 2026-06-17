@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
-class KppsController extends Controller
+class SaksiController extends Controller
 {
     const JENIS = RekapHeader::LEGISLATIVE_TYPES;
 
@@ -30,7 +30,7 @@ class KppsController extends Controller
         $rekaps = RekapHeader::where('tps_id', $tps->id)
             ->get()->keyBy('jenis');
 
-        return view('rekap.kpps.index', compact('tps', 'rekaps'));
+        return view('rekap.saksi.index', compact('tps', 'rekaps'));
     }
 
     // Memastikan jenis pemilihan sedang aktif.
@@ -50,7 +50,7 @@ class KppsController extends Controller
         $rekap = RekapHeader::where('tps_id', $tps->id)->where('jenis', $jenis)->first();
         $data = $this->getMasterData($jenis, $rekap, $tps);
 
-        return view('rekap.kpps.form', compact('tps', 'jenis', 'rekap', 'data'));
+        return view('rekap.saksi.form', compact('tps', 'jenis', 'rekap', 'data'));
     }
 
     // Menyimpan draft rekap atau langsung finalisasi.

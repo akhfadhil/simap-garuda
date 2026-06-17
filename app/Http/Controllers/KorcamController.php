@@ -6,14 +6,14 @@ use App\Models\Desa;
 use App\Models\Kecamatan;
 use App\Services\PartyScopeService;
 
-class PpkController extends Controller
+class KorcamController extends Controller
 {
     public function __construct(private PartyScopeService $partyScope)
     {
     }
 
     // Menampilkan daftar kordes/desa dalam kecamatan korcam.
-    public function dataPps()
+    public function dataKordes()
     {
         $kecamatan = $this->activeKecamatan();
 
@@ -21,11 +21,11 @@ class PpkController extends Controller
             ->with(['tps.rekapHeaders', 'users' => fn($q) => $q->where('role', 'kordes')])
             ->get();
 
-        return view('ppk.data-pps', compact('desas'));
+        return view('korcam.data-kordes', compact('desas'));
     }
 
     // Mengaktifkan mode lihat kordes untuk desa tertentu.
-    public function viewPps(Desa $desa)
+    public function viewKordes(Desa $desa)
     {
         $kecamatan = $this->activeKecamatan();
 
