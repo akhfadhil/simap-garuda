@@ -16,7 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
-class GarudaRoleAccessTest extends TestCase
+class PartyRoleAccessTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -58,7 +58,7 @@ class GarudaRoleAccessTest extends TestCase
         $this->saksiA = $this->user('saksi_tps', ['tps_id' => $this->tpsA->id]);
     }
 
-    public function test_admin_can_enter_all_garuda_view_levels(): void
+    public function test_admin_can_enter_all_party_view_levels(): void
     {
         $this->actingAs($this->admin)
             ->get(route('admin.kecamatan.view', $this->kecamatanB))
@@ -95,7 +95,7 @@ class GarudaRoleAccessTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_legacy_kpu_roles_cannot_login_to_garuda(): void
+    public function test_legacy_kpu_roles_cannot_login_to_party(): void
     {
         $komisioner = $this->user('komisioner', [
             'username' => 'komisioner',
@@ -163,7 +163,7 @@ class GarudaRoleAccessTest extends TestCase
             ->assertDontSee('Bupati');
     }
 
-    public function test_admin_can_only_create_garuda_party_master(): void
+    public function test_admin_can_only_create_configured_party_master(): void
     {
         $this->actingAs($this->admin)
             ->from(route('admin.setup.index'))
@@ -186,19 +186,19 @@ class GarudaRoleAccessTest extends TestCase
             ->post(route('admin.setup.partai.store'), [
                 'jenis' => 'dpr_ri',
                 'partais' => [
-                    ['nomor_urut' => 11, 'nama_partai' => 'Partai Garuda'],
+                    ['nomor_urut' => $this->configuredPartyNumber(), 'nama_partai' => $this->configuredPartyName()],
                 ],
             ])
             ->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('rekap_partais', [
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
     }
 
-    public function test_admin_cannot_add_caleg_to_non_garuda_party(): void
+    public function test_admin_cannot_add_caleg_to_non_configured_party(): void
     {
         $competitor = RekapPartai::create([
             'jenis' => 'dpr_ri',
@@ -219,12 +219,12 @@ class GarudaRoleAccessTest extends TestCase
         ]);
     }
 
-    public function test_rekap_form_and_store_only_use_garuda_party(): void
+    public function test_rekap_form_and_store_only_use_configured_party(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
         $competitor = RekapPartai::create([
             'jenis' => 'dpr_ri',
@@ -235,7 +235,7 @@ class GarudaRoleAccessTest extends TestCase
         $response = $this->actingAs($this->saksiA)->get(route('rekap.form', 'dpr_ri'));
 
         $response->assertOk();
-        $response->assertSee('Partai Garuda');
+        $response->assertSee($this->configuredPartyName());
         $response->assertDontSee('Partai Kompetitor');
         $response->assertDontSee('Data Pemilih');
         $response->assertDontSee('Surat suara');
@@ -253,13 +253,13 @@ class GarudaRoleAccessTest extends TestCase
         $this->actingAs($this->saksiA)
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 99,
+                    $party->id => 99,
                 ],
             ])
             ->assertRedirect(route('rekap.index'));
 
         $this->assertDatabaseHas('rekap_partai_suaras', [
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 99,
         ]);
         $this->assertDatabaseHas('rekap_headers', [
@@ -274,9 +274,9 @@ class GarudaRoleAccessTest extends TestCase
         ]);
     }
 
-    public function test_garuda_rekap_sheet_export_omits_legacy_kpu_fields(): void
+    public function test_party_rekap_sheet_export_omits_legacy_kpu_fields(): void
     {
-        [$master, $rekaps] = $this->createGarudaRekapForExport();
+        [$master, $rekaps] = $this->createConfiguredPartyRekapForExport();
 
         $export = new \App\Exports\RekapSheetExport(
             'dpr_ri',
@@ -290,8 +290,8 @@ class GarudaRoleAccessTest extends TestCase
 
         $content = $this->flattenExportRows($export->array());
 
-        $this->assertStringContainsString('Partai Garuda', $content);
-        $this->assertStringContainsString('Caleg Garuda', $content);
+        $this->assertStringContainsString($this->configuredPartyName(), $content);
+        $this->assertStringContainsString($this->configuredCandidateName(), $content);
         $this->assertStringContainsString('Total Suara '.config('party.short_name'), $content);
         $this->assertStringContainsString('Status', $content);
         $this->assertStringContainsString('Final', $content);
@@ -303,9 +303,9 @@ class GarudaRoleAccessTest extends TestCase
         $this->assertStringNotContainsString('Tidak Sah', $content);
     }
 
-    public function test_garuda_total_export_omits_legacy_kpu_fields(): void
+    public function test_party_total_export_omits_legacy_kpu_fields(): void
     {
-        [$master, $rekaps] = $this->createGarudaRekapForExport();
+        [$master, $rekaps] = $this->createConfiguredPartyRekapForExport();
 
         $export = new \App\Exports\RekapTotalSheetExport(
             'dpr_ri',
@@ -319,8 +319,8 @@ class GarudaRoleAccessTest extends TestCase
 
         $content = $this->flattenExportRows($export->array());
 
-        $this->assertStringContainsString('Partai Garuda', $content);
-        $this->assertStringContainsString('Caleg Garuda', $content);
+        $this->assertStringContainsString($this->configuredPartyName(), $content);
+        $this->assertStringContainsString($this->configuredCandidateName(), $content);
         $this->assertStringContainsString('Total Suara '.config('party.short_name'), $content);
         $this->assertStringContainsString('1/1 final, 1 masuk', $content);
         $this->assertStringNotContainsString('DPT', $content);
@@ -330,22 +330,22 @@ class GarudaRoleAccessTest extends TestCase
         $this->assertStringNotContainsString('Tidak Sah', $content);
     }
 
-    public function test_admin_chart_defaults_to_garuda_total_and_calegs(): void
+    public function test_admin_chart_defaults_to_party_total_and_calegs(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
         $competitor = RekapPartai::create([
             'jenis' => 'dpr_ri',
             'nomor_urut' => 1,
             'nama_partai' => 'Partai Kompetitor',
         ]);
-        $garudaCaleg = RekapCaleg::create([
-            'partai_id' => $garuda->id,
+        $partyCaleg = RekapCaleg::create([
+            'partai_id' => $party->id,
             'nomor_urut' => 1,
-            'nama_caleg' => 'Caleg Garuda',
+            'nama_caleg' => $this->configuredCandidateName(),
         ]);
         $competitorCaleg = RekapCaleg::create([
             'partai_id' => $competitor->id,
@@ -360,7 +360,7 @@ class GarudaRoleAccessTest extends TestCase
         ]);
         RekapPartaiSuara::create([
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 20,
         ]);
         RekapPartaiSuara::create([
@@ -370,7 +370,7 @@ class GarudaRoleAccessTest extends TestCase
         ]);
         RekapCalegSuara::create([
             'rekap_id' => $rekap->id,
-            'caleg_id' => $garudaCaleg->id,
+            'caleg_id' => $partyCaleg->id,
             'suara' => 30,
         ]);
         RekapCalegSuara::create([
@@ -393,16 +393,16 @@ class GarudaRoleAccessTest extends TestCase
 
         $payload = $response->json();
         $this->assertSame(['Total Suara '.config('party.short_name')], $payload['labels']);
-        $this->assertSame('Caleg Garuda', $payload['candidate_rank'][0]['label']);
+        $this->assertSame($this->configuredCandidateName(), $payload['candidate_rank'][0]['label']);
         $this->assertSame(30, $payload['candidate_rank'][0]['suara']);
     }
 
     public function test_admin_can_mark_rekap_as_perlu_dicek_with_internal_note(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
 
         $this->actingAs($this->admin)
@@ -412,7 +412,7 @@ class GarudaRoleAccessTest extends TestCase
             ])
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 77,
+                    $party->id => 77,
                 ],
                 'status_internal' => 'perlu_dicek',
                 'catatan_internal' => 'Foto C1 perlu dicocokkan ulang.',
@@ -429,17 +429,17 @@ class GarudaRoleAccessTest extends TestCase
 
     public function test_saksi_cannot_set_internal_review_status(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
 
         $this->actingAs($this->saksiA)
             ->from(route('rekap.form', 'dpr_ri'))
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 77,
+                    $party->id => 77,
                 ],
                 'status_internal' => 'perlu_dicek',
             ])
@@ -455,10 +455,10 @@ class GarudaRoleAccessTest extends TestCase
 
     public function test_kordes_can_input_and_finalize_tps_rekap_inside_own_desa(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
 
         $this->actingAs($this->kordesA)
@@ -468,7 +468,7 @@ class GarudaRoleAccessTest extends TestCase
         $this->actingAs($this->kordesA)
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 88,
+                    $party->id => 88,
                 ],
                 'finalisasi' => '1',
             ])
@@ -481,17 +481,17 @@ class GarudaRoleAccessTest extends TestCase
             'diinput_oleh' => $this->kordesA->id,
         ]);
         $this->assertDatabaseHas('rekap_partai_suaras', [
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 88,
         ]);
     }
 
     public function test_korcam_can_input_tps_rekap_inside_own_kecamatan(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
 
         $this->actingAs($this->korcamA)
@@ -505,7 +505,7 @@ class GarudaRoleAccessTest extends TestCase
         $this->actingAs($this->korcamA)
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 99,
+                    $party->id => 99,
                 ],
             ])
             ->assertRedirect(route('rekap.index'));
@@ -517,24 +517,24 @@ class GarudaRoleAccessTest extends TestCase
             'diinput_oleh' => $this->korcamA->id,
         ]);
         $this->assertDatabaseHas('rekap_partai_suaras', [
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 99,
         ]);
     }
 
     public function test_kordes_and_korcam_cannot_input_tps_rekap_outside_scope(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
 
         $this->actingAs($this->kordesA)
             ->withSession(['admin_view_tps_id' => $this->tpsB->id])
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 77,
+                    $party->id => 77,
                 ],
             ])
             ->assertForbidden();
@@ -543,7 +543,7 @@ class GarudaRoleAccessTest extends TestCase
             ->withSession(['admin_view_tps_id' => $this->tpsB->id])
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 66,
+                    $party->id => 66,
                 ],
             ])
             ->assertForbidden();
@@ -556,10 +556,10 @@ class GarudaRoleAccessTest extends TestCase
 
     public function test_saksi_can_update_own_draft_rekap_without_duplicate_rows(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
         $rekap = RekapHeader::create([
             'tps_id' => $this->tpsA->id,
@@ -569,33 +569,33 @@ class GarudaRoleAccessTest extends TestCase
         ]);
         RekapPartaiSuara::create([
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 10,
         ]);
 
         $this->actingAs($this->saksiA)
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 35,
+                    $party->id => 35,
                 ],
             ])
             ->assertRedirect(route('rekap.index'));
 
         $this->assertSame(1, RekapHeader::where('tps_id', $this->tpsA->id)->where('jenis', 'dpr_ri')->count());
-        $this->assertSame(1, RekapPartaiSuara::where('rekap_id', $rekap->id)->where('partai_id', $garuda->id)->count());
+        $this->assertSame(1, RekapPartaiSuara::where('rekap_id', $rekap->id)->where('partai_id', $party->id)->count());
         $this->assertDatabaseHas('rekap_partai_suaras', [
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 35,
         ]);
     }
 
     public function test_kordes_and_korcam_can_update_existing_draft_rekap_inside_scope(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
         $rekap = RekapHeader::create([
             'tps_id' => $this->tpsA->id,
@@ -605,7 +605,7 @@ class GarudaRoleAccessTest extends TestCase
         ]);
         RekapPartaiSuara::create([
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 10,
         ]);
 
@@ -613,14 +613,14 @@ class GarudaRoleAccessTest extends TestCase
             ->withSession(['admin_view_tps_id' => $this->tpsA->id])
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 45,
+                    $party->id => 45,
                 ],
             ])
             ->assertRedirect(route('rekap.index'));
 
         $this->assertDatabaseHas('rekap_partai_suaras', [
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 45,
         ]);
 
@@ -628,7 +628,7 @@ class GarudaRoleAccessTest extends TestCase
             ->withSession(['admin_view_tps_id' => $this->tpsA->id])
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 55,
+                    $party->id => 55,
                 ],
             ])
             ->assertRedirect(route('rekap.index'));
@@ -641,17 +641,17 @@ class GarudaRoleAccessTest extends TestCase
         ]);
         $this->assertDatabaseHas('rekap_partai_suaras', [
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 55,
         ]);
     }
 
     public function test_admin_can_update_internal_status_without_erasing_existing_suara(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
         $rekap = RekapHeader::create([
             'tps_id' => $this->tpsA->id,
@@ -661,7 +661,7 @@ class GarudaRoleAccessTest extends TestCase
         ]);
         RekapPartaiSuara::create([
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 25,
         ]);
 
@@ -683,17 +683,17 @@ class GarudaRoleAccessTest extends TestCase
         ]);
         $this->assertDatabaseHas('rekap_partai_suaras', [
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 25,
         ]);
     }
 
     public function test_final_rekap_cannot_be_changed_by_non_admin_editors(): void
     {
-        $garuda = RekapPartai::create([
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
         $rekap = RekapHeader::create([
             'tps_id' => $this->tpsA->id,
@@ -704,7 +704,7 @@ class GarudaRoleAccessTest extends TestCase
         ]);
         RekapPartaiSuara::create([
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 40,
         ]);
 
@@ -712,7 +712,7 @@ class GarudaRoleAccessTest extends TestCase
             ->from(route('rekap.form', 'dpr_ri'))
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 90,
+                    $party->id => 90,
                 ],
             ])
             ->assertRedirect(route('rekap.form', 'dpr_ri'))
@@ -723,7 +723,7 @@ class GarudaRoleAccessTest extends TestCase
             ->from(route('rekap.form', 'dpr_ri'))
             ->post(route('rekap.store', 'dpr_ri'), [
                 'suara_partai' => [
-                    $garuda->id => 91,
+                    $party->id => 91,
                 ],
             ])
             ->assertRedirect(route('rekap.form', 'dpr_ri'))
@@ -735,7 +735,7 @@ class GarudaRoleAccessTest extends TestCase
         ]);
         $this->assertDatabaseHas('rekap_partai_suaras', [
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 40,
         ]);
     }
@@ -773,17 +773,32 @@ class GarudaRoleAccessTest extends TestCase
         return User::create(array_merge($defaults, $extra));
     }
 
-    private function createGarudaRekapForExport(): array
+    private function configuredPartyNumber(): int
     {
-        $garuda = RekapPartai::create([
+        return (int) config('party.historical_numbers.2024');
+    }
+
+    private function configuredPartyName(): string
+    {
+        return config('party.name');
+    }
+
+    private function configuredCandidateName(): string
+    {
+        return 'Caleg '.config('party.short_name');
+    }
+
+    private function createConfiguredPartyRekapForExport(): array
+    {
+        $party = RekapPartai::create([
             'jenis' => 'dpr_ri',
-            'nomor_urut' => 11,
-            'nama_partai' => 'Partai Garuda',
+            'nomor_urut' => $this->configuredPartyNumber(),
+            'nama_partai' => $this->configuredPartyName(),
         ]);
         $caleg = RekapCaleg::create([
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'nomor_urut' => 1,
-            'nama_caleg' => 'Caleg Garuda',
+            'nama_caleg' => $this->configuredCandidateName(),
         ]);
         $rekap = RekapHeader::create([
             'tps_id' => $this->tpsA->id,
@@ -800,7 +815,7 @@ class GarudaRoleAccessTest extends TestCase
         ]);
         RekapPartaiSuara::create([
             'rekap_id' => $rekap->id,
-            'partai_id' => $garuda->id,
+            'partai_id' => $party->id,
             'suara' => 20,
         ]);
         RekapCalegSuara::create([
@@ -810,7 +825,7 @@ class GarudaRoleAccessTest extends TestCase
         ]);
 
         return [
-            ['dpr_ri' => ['partais' => RekapPartai::with('calegs')->whereKey($garuda->id)->get()]],
+            ['dpr_ri' => ['partais' => RekapPartai::with('calegs')->whereKey($party->id)->get()]],
             RekapHeader::with(['partaiSuaras', 'calegSuaras'])->whereKey($rekap->id)->get(),
         ];
     }
@@ -823,4 +838,3 @@ class GarudaRoleAccessTest extends TestCase
             ->implode(' | ');
     }
 }
-

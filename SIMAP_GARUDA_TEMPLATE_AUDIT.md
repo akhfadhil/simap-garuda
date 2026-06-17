@@ -207,7 +207,7 @@ Yang perlu diputuskan:
 
 File/konsep:
 
-- `tests/Feature/GarudaRoleAccessTest.php`
+- `tests/Feature/PartyRoleAccessTest.php`
 - `tests/Unit/DashboardElectionSummaryTest.php`
 
 Yang bisa masuk template:
@@ -221,11 +221,12 @@ Yang bisa masuk template:
 - Test export tidak membawa field KPU legacy.
 - Test dashboard hanya menampilkan partai/caleg utama.
 
-Yang perlu diparameterkan:
+Status sebelum template:
 
-- Nama class test `GarudaRoleAccessTest`.
-- Fixture `Partai Garuda`, `Caleg Garuda`, nomor `11`, dan key `total_suara_garuda`.
-- Assertion label `Total Suara Garuda`.
+- Nama class test utama sudah generik: `PartyRoleAccessTest`.
+- Fixture partai/caleg utama di feature dan unit test sudah mengambil nama serta nomor historis dari `config('party.*')`.
+- Assertion label utama sudah memakai `config('party.short_name')`.
+- Key backward-compatible `total_suara_garuda` masih ada di service/dashboard sebagai fallback runtime lama dan perlu diaudit terpisah sebelum template.
 
 ## Spesifik Garuda Yang Tidak Boleh Masuk Template Apa Adanya
 
@@ -235,7 +236,7 @@ Berikut item yang harus diganti, diparameterkan, atau ditahan saat ekstraksi tem
 - Asset `public/images/logo-garuda.png`.
 - Method dan scope bernama `garuda`, `scopeGaruda`, `isGaruda`, `onlyGarudaPartai`, `applyGarudaPartaiQuery`, dan `guardGarudaSuaraPayload`.
 - Label UI/export `Garuda`, `Partai Garuda`, `Caleg Garuda`, `Total Suara Garuda`, dan `REKAPITULASI SUARA GARUDA`.
-- Test fixture dan assertion yang menyebut Garuda.
+- Test fixture dan assertion Garuda lama sudah digeneralisasi di SIMAP Garuda; template tetap perlu memastikan tidak ada fixture spesifik partai yang ikut.
 - Dokumentasi operasional Garuda harus dijadikan template dokumentasi generik dengan placeholder partai.
 
 ## Legacy Yang Jangan Dibawa Ke Template Baru
@@ -295,7 +296,7 @@ Helper yang perlu dibuat saat ekstraksi:
 4. Rename controller/view legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`. Selesai di SIMAP Garuda.
 5. Hapus backward route legacy dari calon template.
 6. Buat fresh migration template yang hanya membawa schema party app.
-7. Generalisasi test fixture dari Garuda ke party config.
+7. Generalisasi test fixture dari Garuda ke party config. Selesai di SIMAP Garuda.
 8. Baru copy ke folder/repo `simap-partai-template`.
 
 ## Status Audit
@@ -308,4 +309,5 @@ Helper yang perlu dibuat saat ekstraksi:
 - `PartyScopeService` sudah dibuat untuk memusatkan akses kecamatan, desa, TPS, active scope dashboard, dan active entity per role.
 - Rename controller/view legacy selesai di SIMAP Garuda: class, method, folder view, dan DOM/helper internal sudah memakai istilah Korcam/Kordes/Saksi.
 - Backward route `ppk/pps/kpps` sengaja masih dipertahankan di SIMAP Garuda sebagai redirect kompatibilitas, tetapi ditandai tidak boleh masuk template.
+- Generalisasi fixture test selesai: test feature utama sudah menjadi `PartyRoleAccessTest`, dan fixture/assertion partai utama di test memakai `config('party.*')`.
 - Import snapshot dari SIMAP utama belum didesain; tetap menjadi pekerjaan terpisah setelah kebutuhan format data SIMAP utama jelas.

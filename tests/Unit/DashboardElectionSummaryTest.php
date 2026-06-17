@@ -48,7 +48,7 @@ class DashboardElectionSummaryTest extends TestCase
         $this->assertSame([], $summary['sections']);
     }
 
-    public function test_legislative_dashboard_only_shows_garuda_calegs(): void
+    public function test_legislative_dashboard_only_shows_configured_party_calegs(): void
     {
         Cache::flush();
 
@@ -61,15 +61,15 @@ class DashboardElectionSummaryTest extends TestCase
         $tpsB = Tps::create(['nama' => 'TPS 3', 'desa_id' => $desaB->id]);
         $admin = User::create([
             'name' => 'Admin',
-            'username' => 'admin_garuda_test',
+            'username' => 'admin_party_test',
             'role' => 'admin_partai',
             'password' => 'password',
         ]);
 
         PemiluSetting::create(['jenis' => 'dpr_ri', 'is_active' => true]);
-        $garuda = RekapPartai::create(['jenis' => 'dpr_ri', 'nomor_urut' => 11, 'nama_partai' => 'Partai Garuda']);
+        $party = RekapPartai::create(['jenis' => 'dpr_ri', 'nomor_urut' => $this->configuredPartyNumber(), 'nama_partai' => $this->configuredPartyName()]);
         $competitor = RekapPartai::create(['jenis' => 'dpr_ri', 'nomor_urut' => 1, 'nama_partai' => 'Partai Kompetitor']);
-        $garudaCaleg = RekapCaleg::create(['partai_id' => $garuda->id, 'nomor_urut' => 1, 'nama_caleg' => 'Caleg Garuda']);
+        $partyCaleg = RekapCaleg::create(['partai_id' => $party->id, 'nomor_urut' => 1, 'nama_caleg' => $this->configuredCandidateName()]);
         $competitorCaleg = RekapCaleg::create(['partai_id' => $competitor->id, 'nomor_urut' => 1, 'nama_caleg' => 'Caleg Kompetitor']);
         $rekap = RekapHeader::create([
             'tps_id' => $tps->id,
@@ -85,12 +85,12 @@ class DashboardElectionSummaryTest extends TestCase
             'diinput_oleh' => $admin->id,
         ]);
 
-        RekapPartaiSuara::create(['rekap_id' => $rekap->id, 'partai_id' => $garuda->id, 'suara' => 20]);
+        RekapPartaiSuara::create(['rekap_id' => $rekap->id, 'partai_id' => $party->id, 'suara' => 20]);
         RekapPartaiSuara::create(['rekap_id' => $rekap->id, 'partai_id' => $competitor->id, 'suara' => 200]);
-        RekapCalegSuara::create(['rekap_id' => $rekap->id, 'caleg_id' => $garudaCaleg->id, 'suara' => 30]);
+        RekapCalegSuara::create(['rekap_id' => $rekap->id, 'caleg_id' => $partyCaleg->id, 'suara' => 30]);
         RekapCalegSuara::create(['rekap_id' => $rekap->id, 'caleg_id' => $competitorCaleg->id, 'suara' => 300]);
-        RekapPartaiSuara::create(['rekap_id' => $rekapB->id, 'partai_id' => $garuda->id, 'suara' => 5]);
-        RekapCalegSuara::create(['rekap_id' => $rekapB->id, 'caleg_id' => $garudaCaleg->id, 'suara' => 3]);
+        RekapPartaiSuara::create(['rekap_id' => $rekapB->id, 'partai_id' => $party->id, 'suara' => 5]);
+        RekapCalegSuara::create(['rekap_id' => $rekapB->id, 'caleg_id' => $partyCaleg->id, 'suara' => 3]);
 
         $summary = app(DashboardElectionSummary::class)->forUser($admin);
         $section = $summary['sections'][0];
@@ -98,7 +98,7 @@ class DashboardElectionSummaryTest extends TestCase
         $labels = collect($section['rows'])->pluck('label')->all();
 
         $this->assertSame('DPR RI - '.config('party.short_name'), $section['title']);
-        $this->assertContains('Caleg Garuda No. 1', $labels);
+        $this->assertContains('Caleg '.config('party.short_name').' No. 1', $labels);
         $this->assertNotContains('Caleg Kompetitor No. 1', $labels);
         $this->assertSame(33, $section['total_suara']);
         $this->assertSame(58, $overview['total_suara_partai']);
@@ -115,5 +115,19 @@ class DashboardElectionSummaryTest extends TestCase
         $this->assertSame('Kecamatan B', $overview['regions']['weak'][0]['label']);
         $this->assertSame(8, $overview['regions']['weak'][0]['suara']);
     }
-}
 
+    private function configuredPartyNumber(): int
+    {
+        return (int) config('party.historical_numbers.2024');
+    }
+
+    private function configuredPartyName(): string
+    {
+        return config('party.name');
+    }
+
+    private function configuredCandidateName(): string
+    {
+        return 'Caleg '.config('party.short_name');
+    }
+}

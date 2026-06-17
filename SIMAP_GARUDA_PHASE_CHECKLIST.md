@@ -183,13 +183,14 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 - [x] Generalisasi hardcode Garuda tahap pertama ke helper party generik tanpa mengubah behavior runtime.
 - [x] Ekstrak aturan scope wilayah ke `PartyScopeService` agar akses kecamatan/desa/TPS terpusat untuk template.
 - [x] Rename controller, method, folder view, dan DOM/helper internal legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`.
+- [x] Generalisasi test fixture dari Garuda ke party config agar template tidak membawa data contoh Garuda.
 - [ ] Siapkan standar import snapshot dari SIMAP utama jika nanti SIMAP utama membuat `export:party-snapshot`.
 - [x] Siapkan dokumentasi operasional yang bisa digeneralisasi untuk project partai lain.
 - [x] Pastikan cleanup role/URI teknis dilakukan dengan mempertimbangkan template, bukan hanya kebutuhan Garuda.
 
 ## Rekomendasi Urutan Kerja
 
-1. Generalisasi test fixture dari Garuda ke party config agar template tidak membawa data contoh Garuda.
+1. Audit dan generalisasi sisa label/key internal Garuda di dashboard/export yang masih bisa diganti ke istilah party generik tanpa mengubah UI runtime.
 2. Siapkan opsi pelepasan backward route `ppk/pps/kpps` saat masa kompatibilitas dianggap selesai; route lama tidak boleh dibawa ke template.
 3. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
 
@@ -252,3 +253,5 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Helper method dan DOM id manajemen user yang masih memakai `ppk/pps/kpps` sudah direname ke `korcam/kordes/saksi`.
 - Backward route `ppk/pps/kpps` masih dipertahankan sebagai redirect sementara untuk kompatibilitas link lama, dan tidak boleh ikut ke template baru.
 - `php artisan test` dan `npm.cmd run build` lulus setelah rename controller/view legacy.
+- Generalisasi fixture test selesai: `tests/Feature/GarudaRoleAccessTest.php` sudah menjadi `tests/Feature/PartyRoleAccessTest.php`, nama test memakai istilah party/configured party, dan nomor/nama partai/caleg fixture diambil dari `config('party.*')`.
+- `php artisan test` lulus setelah generalisasi fixture test.
