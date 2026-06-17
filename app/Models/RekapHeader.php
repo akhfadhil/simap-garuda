@@ -8,8 +8,6 @@ class RekapHeader extends Model
 {
     public const LEGISLATIVE_TYPES = ['dpr_ri', 'dprd_prov', 'dprd_kab'];
 
-    public const LEGACY_NON_PARTY_TYPES = ['ppwp', 'gubernur', 'bupati', 'dpd'];
-
     protected $fillable = [
         'tps_id', 'jenis',
         'dpt_lk', 'dpt_pr',
@@ -41,18 +39,6 @@ class RekapHeader extends Model
         return $this->belongsTo(User::class, 'diinput_oleh');
     }
 
-    // Relasi suara PPWP.
-    public function ppwpSuaras()
-    {
-        return $this->hasMany(RekapPpwpSuara::class, 'rekap_id');
-    }
-
-    // Relasi suara DPD.
-    public function dpdSuaras()
-    {
-        return $this->hasMany(RekapDpdSuara::class, 'rekap_id');
-    }
-
     // Relasi suara partai.
     public function partaiSuaras()
     {
@@ -65,28 +51,10 @@ class RekapHeader extends Model
         return $this->hasMany(RekapCalegSuara::class, 'rekap_id');
     }
 
-    // Relasi suara gubernur.
-    public function gubernurSuaras()
-    {
-        return $this->hasMany(RekapGubernurSuara::class, 'rekap_id');
-    }
-
-    // Relasi suara bupati.
-    public function bupatiSuaras()
-    {
-        return $this->hasMany(RekapBupatiSuara::class, 'rekap_id');
-    }
-
     // Menghitung total suara sah.
     public function getSuaraSahAttribute(): int
     {
-        return match ($this->jenis) {
-            'ppwp' => $this->ppwpSuaras->sum('suara'),
-            'gubernur' => $this->gubernurSuaras->sum('suara'),
-            'bupati' => $this->bupatiSuaras->sum('suara'),
-            'dpd' => $this->dpdSuaras->sum('suara'),
-            default => $this->partaiSuaras->sum('suara') + $this->calegSuaras->sum('suara'),
-        };
+        return $this->partaiSuaras->sum('suara') + $this->calegSuaras->sum('suara');
     }
 
     // Menghitung total pengguna hak pilih laki-laki.

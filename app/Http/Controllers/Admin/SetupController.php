@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 
 class SetupController extends Controller
 {
+    private const LEGACY_NON_PARTY_TYPES = ['ppwp', 'gubernur', 'bupati', 'dpd'];
+
     // Menampilkan halaman setup master data pemilu.
     public function index()
     {
@@ -49,7 +51,7 @@ class SetupController extends Controller
             ]);
         }
 
-        PemiluSetting::whereIn('jenis', RekapHeader::LEGACY_NON_PARTY_TYPES)->update(['is_active' => false]);
+        PemiluSetting::whereIn('jenis', self::LEGACY_NON_PARTY_TYPES)->update(['is_active' => false]);
 
         return back()->with('success', 'Pengaturan jenis pemilu berhasil disimpan.');
     }

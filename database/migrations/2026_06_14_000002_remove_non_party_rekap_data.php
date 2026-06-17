@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\RekapHeader;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -9,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $legacyTypes = RekapHeader::LEGACY_NON_PARTY_TYPES;
+        $legacyTypes = ['ppwp', 'gubernur', 'bupati', 'dpd'];
 
         if (Schema::hasTable('rekap_headers')) {
             DB::table('rekap_headers')

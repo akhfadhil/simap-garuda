@@ -66,7 +66,7 @@ class RekapExport implements WithMultipleSheets
             }
         } else {
             // Kordes: 1 sheet flat
-            $jenis = $this->jenis ?? 'ppwp';
+            $jenis = $this->jenis ?? 'dpr_ri';
             $sheets[] = new RekapSheetExport(
                 $jenis,
                 RekapHeader::JENIS_LABELS[$jenis],
