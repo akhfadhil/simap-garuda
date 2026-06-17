@@ -62,6 +62,8 @@ Status sebelum template:
 
 - Nama class, method, folder view, dan DOM/helper internal legacy `Ppk/Pps/Kpps` sudah direname ke `Korcam/Kordes/Saksi` di SIMAP Garuda.
 - Backward route `ppk`, `pps`, dan `kpps` masih ada untuk kompatibilitas SIMAP Garuda, tetapi tidak boleh ikut template baru.
+- Audit backward route SIMAP Garuda: sisa legacy hanya ada di `routes/web.php` sebagai redirect `dashboard.ppk`, `dashboard.pps`, `dashboard.kpps`, `ppk.data-pps`, `ppk.view-pps`, `pps.data-tps`, `pps.view-tps`, `ppk.rekap.*`, dan `pps.rekap.*`.
+- Tidak ada controller, view aktif, test, atau service yang masih bergantung ke route legacy tersebut.
 
 ### Master Wilayah dan Dapil
 
@@ -244,11 +246,92 @@ Berikut item yang harus diganti, diparameterkan, atau ditahan saat ekstraksi tem
 Template baru sebaiknya tidak membawa:
 
 - Backward redirect `ppk`, `pps`, dan `kpps`.
+- Nama route legacy `dashboard.ppk`, `dashboard.pps`, `dashboard.kpps`, `ppk.*`, dan `pps.*`.
 - Migration lama pembuat tabel PPWP, DPD, Gubernur, Bupati.
 - Migration compatibility role lama jika template memakai fresh schema.
 - Config `BACKUP_DOKUMEN_PATH` jika tidak ada modul dokumen.
 - Schema enum historis jenis non-party jika template memakai fresh migration yang sudah bersih.
 - Test guard route legacy yang hanya relevan untuk memastikan cleanup fork Garuda.
+
+## Audit Backward Route Legacy
+
+SIMAP Garuda masih mempertahankan backward route hanya sebagai jembatan link lama. Hasil audit:
+
+- Dipertahankan sementara di SIMAP Garuda:
+  - `/dashboard/ppk` -> `/dashboard/korcam`
+  - `/dashboard/pps` -> `/dashboard/kordes`
+  - `/dashboard/kpps` -> `/dashboard/saksi`
+  - `/ppk/data-pps` -> `/korcam/data-kordes`
+  - `/ppk/view-pps/{desa}` -> `korcam.view-kordes`
+  - `/pps/data-tps` -> `/kordes/data-tps`
+  - `/pps/view-tps/{tps}` -> `kordes.view-tps`
+  - `/ppk/rekap/*` -> `korcam.rekap.*`
+  - `/pps/rekap/*` -> `kordes.rekap.*`
+- Bisa dihapus saat masa kompatibilitas selesai karena semua controller/view aktif sudah memakai route final.
+- Tidak boleh disalin ke template fresh karena project baru tidak punya riwayat URL `ppk/pps/kpps`.
+- Template cukup memakai route final `dashboard.korcam`, `dashboard.kordes`, `dashboard.saksi`, `korcam.*`, `kordes.*`, `korcam.rekap.*`, dan `kordes.rekap.*`.
+
+## Fresh Schema Template
+
+Template partai sebaiknya memakai migration fresh/squashed, bukan membawa histori migration SIMAP Garuda apa adanya. Rekomendasi schema awal:
+
+### Wajib Masuk
+
+- Core Laravel:
+  - `users`
+  - `password_reset_tokens`
+  - `sessions`
+  - `cache`, `cache_locks`
+  - `jobs`, `job_batches`, `failed_jobs`
+- Wilayah dan dapil:
+  - `dapils`: `id`, `nama`, timestamps.
+  - `kecamatans`: `id`, `nama`, `dapil_id`, timestamps.
+  - `desas`: `id`, `kecamatan_id`, `nama`, timestamps.
+  - `tps`: `id`, `desa_id`, `nama`, timestamps.
+- User party final:
+  - `users.role` hanya `admin_partai`, `korcam`, `kordes`, `saksi_tps`.
+  - `users.kecamatan_id`, `users.desa_id`, `users.tps_id` langsung ada di migration awal.
+  - Tidak ada `partai_id`, `admin`, `ppk`, `pps`, `kpps`, `komisioner`, atau `partai` di enum awal.
+- Pemilu aktif:
+  - `pemilu_settings`: `jenis`, `is_active`.
+  - `jenis` dibatasi secara aplikasi ke `dpr_ri`, `dprd_prov`, `dprd_kab`.
+- Master legislatif:
+  - `rekap_partais`: `jenis`, `nomor_urut`, `nama_partai`, `dapil_id`.
+  - `rekap_calegs`: `partai_id`, `nomor_urut`, `nama_caleg`.
+- Rekap TPS:
+  - `rekap_headers`: `tps_id`, `jenis`, `status` (`draft`, `perlu_dicek`, `final`), `catatan_internal`, `diinput_oleh`, `difinalisasi_at`, timestamps, unique `tps_id + jenis`.
+  - Untuk kompatibilitas kode saat ini, field administratif legacy bisa tetap ada dengan default `0`: `dpt_*`, `pengguna_*`, `ss_*`, `disabilitas_*`, `suara_sah`, `suara_tidak_sah`.
+  - Saat template benar-benar dipisah, field administratif tersebut boleh dihapus jika controller/export sudah disesuaikan.
+- Suara legislatif:
+  - `rekap_partai_suaras`: `rekap_id`, `partai_id`, `suara`, unique `rekap_id + partai_id`.
+  - `rekap_caleg_suaras`: `rekap_id`, `caleg_id`, `suara`, unique `rekap_id + caleg_id`.
+- Flag internal:
+  - `rekap_cell_flags`: `jenis`, `level`, `entity_id`, `row_key`, `flagged_by`, timestamps, unique/index final.
+- Index final:
+  - Gabungkan index performa dari migration 2026-05-20 dan 2026-05-24 langsung ke migration create fresh, khusus tabel legislatif yang tetap ada.
+
+### Jangan Masuk Fresh Schema
+
+- Tabel non-legislatif:
+  - `rekap_ppwp_calons`
+  - `rekap_ppwp_suaras`
+  - `rekap_dpd_calons`
+  - `rekap_dpd_suaras`
+  - `rekap_gubernur_calons`
+  - `rekap_gubernur_suaras`
+  - `rekap_bupati_calons`
+  - `rekap_bupati_suaras`
+- Tabel dokumen internal:
+  - `dokumens`
+- Migration compatibility/cleanup:
+  - `remove_legacy_kpu_roles_from_users`
+  - `remove_non_party_rekap_data`
+  - `drop_legacy_partai_id_from_users_table`
+  - `migrate_users_to_party_roles`
+  - `drop_legacy_non_party_rekap_tables`
+  - migration enum role `komisioner`/`partai`
+- Enum `rekap_headers.jenis` yang masih memuat `ppwp` atau `dpd`.
+- Config backup dokumen jika modul dokumen tidak ikut template.
 
 ## Kandidat Struktur Template
 
@@ -294,8 +377,8 @@ Helper yang perlu dibuat saat ekstraksi:
 2. Rename konsep Garuda menjadi konsep party generik di SIMAP Garuda tanpa mengubah behavior. Sebagian besar selesai: matching partai, scope `configuredParty()`, label export/UI utama, key dashboard, fixture test, dan identifier Blade/JS internal sudah berbasis config/party.
 3. Buat `PartyScopeService` untuk menyatukan aturan scope wilayah. Selesai di SIMAP Garuda.
 4. Rename controller/view legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`. Selesai di SIMAP Garuda.
-5. Hapus backward route legacy dari calon template.
-6. Buat fresh migration template yang hanya membawa schema party app.
+5. Hapus backward route legacy dari calon template. Audit selesai; route legacy hanya redirect kompatibilitas di SIMAP Garuda.
+6. Buat fresh migration template yang hanya membawa schema party app. Audit schema selesai; daftar tabel wajib dan yang tidak boleh ikut sudah dicatat.
 7. Generalisasi test fixture dari Garuda ke party config. Selesai di SIMAP Garuda.
 8. Baru copy ke folder/repo `simap-partai-template`.
 
@@ -311,4 +394,6 @@ Helper yang perlu dibuat saat ekstraksi:
 - Backward route `ppk/pps/kpps` sengaja masih dipertahankan di SIMAP Garuda sebagai redirect kompatibilitas, tetapi ditandai tidak boleh masuk template.
 - Generalisasi fixture test selesai: test feature utama sudah menjadi `PartyRoleAccessTest`, dan fixture/assertion partai utama di test memakai `config('party.*')`.
 - Generalisasi identifier internal selesai: key dashboard `total_suara_partai` menjadi satu-satunya key aktif, alias model Garuda dihapus, dan DOM/variabel Blade rekap memakai istilah party.
+- Audit backward route legacy selesai: route lama `ppk/pps/kpps` hanya redirect kompatibilitas di `routes/web.php`, tidak dipakai controller/view aktif, dan tidak boleh masuk template.
+- Audit fresh schema template selesai: template perlu migration squashed legislatif-only dengan role final, wilayah, dapil, master partai/caleg, rekap TPS, status internal, flag internal, dan index final; migration cleanup/histori legacy tidak ikut.
 - Import snapshot dari SIMAP utama belum didesain; tetap menjadi pekerjaan terpisah setelah kebutuhan format data SIMAP utama jelas.

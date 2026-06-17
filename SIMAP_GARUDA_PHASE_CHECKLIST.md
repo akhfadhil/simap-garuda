@@ -185,14 +185,16 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 - [x] Rename controller, method, folder view, dan DOM/helper internal legacy `Ppk/Pps/Kpps` menjadi `Korcam/Kordes/Saksi`.
 - [x] Generalisasi test fixture dari Garuda ke party config agar template tidak membawa data contoh Garuda.
 - [x] Generalisasi sisa identifier/key internal Garuda di dashboard, model, dan view rekap ke istilah party/configured party.
+- [x] Audit backward route legacy `ppk/pps/kpps` dan tandai semuanya sebagai redirect kompatibilitas yang tidak boleh masuk template.
+- [x] Audit fresh schema/migration template dan tentukan tabel/kolom yang wajib masuk atau wajib ditinggal.
 - [ ] Siapkan standar import snapshot dari SIMAP utama jika nanti SIMAP utama membuat `export:party-snapshot`.
 - [x] Siapkan dokumentasi operasional yang bisa digeneralisasi untuk project partai lain.
 - [x] Pastikan cleanup role/URI teknis dilakukan dengan mempertimbangkan template, bukan hanya kebutuhan Garuda.
 
 ## Rekomendasi Urutan Kerja
 
-1. Siapkan opsi pelepasan backward route `ppk/pps/kpps` saat masa kompatibilitas dianggap selesai; route lama tidak boleh dibawa ke template.
-2. Audit ulang schema/migration fresh template agar hanya membawa struktur party app yang dibutuhkan.
+1. Mulai susun draft `simap-partai-template` plan: daftar file yang dicopy, file yang disanitasi, dan migration fresh yang dibuat dari audit.
+2. Siapkan opsi pelepasan backward route `ppk/pps/kpps` di SIMAP Garuda saat masa kompatibilitas dianggap selesai.
 3. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
 
 ## Mapping ke PARTAI_PORTAL_BRAINSTORM.md
@@ -259,3 +261,5 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Generalisasi identifier internal selesai: alias model `scopeGaruda()`/`isGaruda()` dihapus, key fallback `total_suara_garuda` dihapus dari dashboard summary, DOM id form input memakai `display-suara-partai`, dan variabel Blade rekap memakai istilah party.
 - Sisa kata `Garuda` di kode runtime hanya berada di `config/party.php` sebagai identitas deployment SIMAP Garuda.
 - `php artisan test` dan `npm.cmd run build` lulus setelah generalisasi identifier internal.
+- Audit backward route legacy selesai: route `dashboard.ppk`, `dashboard.pps`, `dashboard.kpps`, `ppk.*`, dan `pps.*` hanya redirect/link kompatibilitas di `routes/web.php`; controller, view, service, dan test aktif sudah memakai istilah final.
+- Audit fresh schema template selesai: template perlu migration fresh/squashed untuk role final, wilayah, dapil, legislatif-only rekap, status internal, flag internal, dan index final; migration dokumen, non-legislatif, role compatibility, dan cleanup legacy tidak ikut template.
