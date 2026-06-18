@@ -426,6 +426,71 @@ class AdminController extends Controller
         );
     }
 
+    public function updateTpsReviewStatus(Request $request, string $jenis, Tps $tps)
+    {
+        abort_unless(in_array($jenis, RekapHeader::LEGISLATIVE_TYPES, true), 404);
+
+        $data = $request->validate([
+            'status_internal' => ['required', 'string', 'in:draft,perlu_dicek,final'],
+            'catatan_internal' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $rekap = RekapHeader::firstOrCreate(
+            ['tps_id' => $tps->id, 'jenis' => $jenis],
+            [
+                'dpt_lk' => 0,
+                'dpt_pr' => 0,
+                'pengguna_dpt_lk' => 0,
+                'pengguna_dpt_pr' => 0,
+                'pengguna_dptb_lk' => 0,
+                'pengguna_dptb_pr' => 0,
+                'pengguna_dpk_lk' => 0,
+                'pengguna_dpk_pr' => 0,
+                'ss_diterima' => 0,
+                'ss_digunakan' => 0,
+                'ss_rusak' => 0,
+                'ss_sisa' => 0,
+                'disabilitas_lk' => 0,
+                'disabilitas_pr' => 0,
+                'suara_tidak_sah' => 0,
+                'diinput_oleh' => $request->user()->id,
+            ]
+        );
+        $previousStatus = $rekap->status;
+        $previousFinalizedAt = $rekap->difinalisasi_at;
+        $nextStatus = $data['status_internal'];
+
+        if ($nextStatus === 'draft' && $previousStatus === 'perlu_dicek' && $previousFinalizedAt) {
+            $nextStatus = 'final';
+        }
+
+        $rekap->update([
+            'status' => $nextStatus,
+            'catatan_internal' => $nextStatus === 'perlu_dicek' ? ($data['catatan_internal'] ?? null) : null,
+            'difinalisasi_at' => match ($nextStatus) {
+                'final' => $previousFinalizedAt ?? now(),
+                'perlu_dicek' => $previousFinalizedAt,
+                default => null,
+            },
+        ]);
+
+        RekapAdminCache::flushAggregate();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => $nextStatus,
+                'status_label' => match ($nextStatus) {
+                    'final' => 'Final',
+                    'perlu_dicek' => 'Perlu Dicek',
+                    default => 'Draft',
+                },
+                'catatan_internal' => $rekap->catatan_internal,
+            ]);
+        }
+
+        return back()->with('success', 'Status TPS '.$tps->nama.' berhasil diperbarui.');
+    }
+
     // Mengambil master data sesuai jenis pemilihan dan dapil.
     private function getMaster(string $jenis, ?int $dapilId = null): array
     {

@@ -198,6 +198,30 @@ class PartyRoleAccessTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_configured_party_caleg_without_manual_party_input(): void
+    {
+        $this->actingAs($this->admin)
+            ->from(route('admin.setup.index'))
+            ->post(route('admin.setup.caleg.configured.store'), [
+                'jenis' => 'dpr_ri',
+                'nomor_urut' => 1,
+                'nama_caleg' => 'Caleg Utama',
+            ])
+            ->assertRedirect(route('admin.setup.index'))
+            ->assertSessionHasNoErrors();
+
+        $party = RekapPartai::where('jenis', 'dpr_ri')
+            ->where('nomor_urut', $this->configuredPartyNumber())
+            ->first();
+
+        $this->assertNotNull($party);
+        $this->assertDatabaseHas('rekap_calegs', [
+            'partai_id' => $party->id,
+            'nomor_urut' => 1,
+            'nama_caleg' => 'Caleg Utama',
+        ]);
+    }
+
     public function test_admin_cannot_add_caleg_to_non_configured_party(): void
     {
         $competitor = RekapPartai::create([
@@ -424,6 +448,71 @@ class PartyRoleAccessTest extends TestCase
             'jenis' => 'dpr_ri',
             'status' => 'perlu_dicek',
             'catatan_internal' => 'Foto C1 perlu dicocokkan ulang.',
+        ]);
+    }
+
+    public function test_admin_can_mark_tps_perlu_dicek_from_admin_rekap_detail(): void
+    {
+        $this->actingAs($this->admin)
+            ->from(route('admin.rekap.show', [
+                'jenis' => 'dpr_ri',
+                'detail' => 1,
+                'detail_kecamatan_id' => $this->kecamatanA->id,
+                'detail_desa_id' => $this->desaA->id,
+            ]))
+            ->post(route('admin.rekap.review-status', ['jenis' => 'dpr_ri', 'tps' => $this->tpsA]), [
+                'status_internal' => 'perlu_dicek',
+                'catatan_internal' => 'Input TPS perlu dicocokkan ulang.',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('rekap_headers', [
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'perlu_dicek',
+            'catatan_internal' => 'Input TPS perlu dicocokkan ulang.',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.rekap.review-status', ['jenis' => 'dpr_ri', 'tps' => $this->tpsA]), [
+                'status_internal' => 'draft',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('rekap_headers', [
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'draft',
+            'catatan_internal' => null,
+        ]);
+
+        RekapHeader::where('tps_id', $this->tpsA->id)
+            ->where('jenis', 'dpr_ri')
+            ->update([
+                'status' => 'final',
+                'difinalisasi_at' => now(),
+            ]);
+
+        $this->actingAs($this->admin)
+            ->postJson(route('admin.rekap.review-status', ['jenis' => 'dpr_ri', 'tps' => $this->tpsA]), [
+                'status_internal' => 'perlu_dicek',
+                'catatan_internal' => 'Final perlu dicek ulang.',
+            ])
+            ->assertOk()
+            ->assertJsonPath('status', 'perlu_dicek');
+
+        $this->actingAs($this->admin)
+            ->postJson(route('admin.rekap.review-status', ['jenis' => 'dpr_ri', 'tps' => $this->tpsA]), [
+                'status_internal' => 'draft',
+            ])
+            ->assertOk()
+            ->assertJsonPath('status', 'final');
+
+        $this->assertDatabaseHas('rekap_headers', [
+            'tps_id' => $this->tpsA->id,
+            'jenis' => 'dpr_ri',
+            'status' => 'final',
+            'catatan_internal' => null,
         ]);
     }
 

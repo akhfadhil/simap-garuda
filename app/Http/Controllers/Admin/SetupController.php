@@ -120,6 +120,24 @@ class SetupController extends Controller
         return back()->with('success', config('party.name').' berhasil disimpan.');
     }
 
+    public function storeConfiguredCaleg(Request $request)
+    {
+        $data = $request->validate([
+            'jenis' => 'required|in:dpr_ri,dprd_prov,dprd_kab',
+            'dapil_id' => 'required_if:jenis,dprd_kab|nullable|exists:dapils,id',
+            'nomor_urut' => 'required|integer|min:1|max:999',
+            'nama_caleg' => 'required|string|max:200',
+        ]);
+
+        $partai = $this->configuredPartyFor($data['jenis'], $data['jenis'] === 'dprd_kab' ? (int) $data['dapil_id'] : null);
+        $partai->calegs()->create([
+            'nomor_urut' => $data['nomor_urut'],
+            'nama_caleg' => $data['nama_caleg'],
+        ]);
+
+        return back()->with('success', 'Caleg '.PartyConfig::shortName().' berhasil ditambahkan.');
+    }
+
     // Menghapus partai beserta calegnya.
     public function destroyPartai(RekapPartai $partai)
     {
@@ -188,5 +206,17 @@ class SetupController extends Controller
     private function isConfiguredPartyRow(array $row): bool
     {
         return PartyConfig::matchesSubmittedParty($row['nomor_urut'], $row['nama_partai']);
+    }
+
+    private function configuredPartyFor(string $jenis, ?int $dapilId): RekapPartai
+    {
+        return RekapPartai::firstOrCreate(
+            [
+                'jenis' => $jenis,
+                'nomor_urut' => (int) (config('party.historical_numbers.2024') ?? 0),
+                'dapil_id' => $jenis === 'dprd_kab' ? $dapilId : null,
+            ],
+            ['nama_partai' => config('party.name')]
+        );
     }
 }

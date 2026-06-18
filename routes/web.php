@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
 
         Route::post('partai', [App\Http\Controllers\Admin\SetupController::class, 'storePartai'])->name('partai.store');
         Route::delete('partai/{partai}', [App\Http\Controllers\Admin\SetupController::class, 'destroyPartai'])->name('partai.destroy');
+        Route::post('caleg', [App\Http\Controllers\Admin\SetupController::class, 'storeConfiguredCaleg'])->name('caleg.configured.store');
         Route::post('partai/{partai}/caleg', [App\Http\Controllers\Admin\SetupController::class, 'storeCaleg'])->name('caleg.store');
         Route::delete('caleg/{caleg}', [App\Http\Controllers\Admin\SetupController::class, 'destroyCaleg'])->name('caleg.destroy');
 
@@ -115,6 +116,7 @@ Route::middleware('auth')->group(function () {
         Route::get('export/download', [App\Http\Controllers\Rekap\AdminController::class, 'exportDownload'])->name('export.download');
         Route::get('export/tps-belum-masuk', [App\Http\Controllers\Rekap\AdminController::class, 'exportMissingTps'])->name('export.missing-tps');
         Route::get('export/tps-perlu-dicek', [App\Http\Controllers\Rekap\AdminController::class, 'exportReviewTps'])->name('export.review-tps');
+        Route::post('{jenis}/tps/{tps}/review-status', [App\Http\Controllers\Rekap\AdminController::class, 'updateTpsReviewStatus'])->name('review-status');
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\AdminController::class, 'export'])->name('export');
         Route::get('{jenis}', [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');
     });

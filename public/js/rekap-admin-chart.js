@@ -19,15 +19,17 @@ const WINNER_MAP_TYPES = ['ppwp', 'gubernur', 'bupati'];
 const WINNER_COLORS = ['#c81924', '#002147', '#f59e0b', '#10b981', '#7c3aed', '#0891b2', '#db2777', '#ea580c'];
 
 // Leaflet dipakai untuk peta interaktif dan highlight wilayah.
-const map = L.map('map', {
+const map = window.L ? L.map('map', {
     zoomControl: true,
     scrollWheelZoom: true,
-}).setView([-8.25, 114.35], 9);
+}).setView([-8.25, 114.35], 9) : null;
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    maxZoom: 18,
-}).addTo(map);
+if (map) {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        maxZoom: 18,
+    }).addTo(map);
+}
 
 function formatNumber(value) {
     return (Number(value) || 0).toLocaleString('id-ID');
@@ -397,26 +399,30 @@ function mapTooltipContent(feature) {
     `;
 }
 
-fetch(`/geojson/banyuwangi_kecamatan.geojson?v=${geojsonVersion}`)
-    .then((response) => response.json())
-    .then((data) => {
-        kecamatanGeojson = data;
-        renderMapLayer('kecamatan');
-    })
-    .catch(() => showError('Peta kecamatan gagal dimuat.'));
+if (map) {
+    fetch(`/geojson/banyuwangi_kecamatan.geojson?v=${geojsonVersion}`)
+        .then((response) => response.json())
+        .then((data) => {
+            kecamatanGeojson = data;
+            renderMapLayer('kecamatan');
+        })
+        .catch(() => showError('Peta kecamatan gagal dimuat.'));
 
-fetch(`/geojson/banyuwangi_desa_full.geojson?v=${geojsonVersion}`)
-    .then((response) => response.json())
-    .then((data) => {
-        desaGeojson = data;
-        if (document.getElementById('f-level').value === 'kecamatan' && selectedKec) {
-            renderMapLayer('desa');
-            geojsonLayer?.setStyle(styleFeature);
-        }
-    })
-    .catch(() => showError('Peta desa gagal dimuat.'));
+    fetch(`/geojson/banyuwangi_desa_full.geojson?v=${geojsonVersion}`)
+        .then((response) => response.json())
+        .then((data) => {
+            desaGeojson = data;
+            if (document.getElementById('f-level').value === 'kecamatan' && selectedKec) {
+                renderMapLayer('desa');
+                geojsonLayer?.setStyle(styleFeature);
+            }
+        })
+        .catch(() => showError('Peta desa gagal dimuat.'));
+}
 
 function renderMapLayer(mode) {
+    if (!map || !window.L) return;
+
     const source = mode === 'desa' ? desaGeojson : kecamatanGeojson;
     if (!source) return;
 
@@ -1095,6 +1101,8 @@ document.addEventListener('keydown', (event) => {
 
 let mapResizeTimer = null;
 window.addEventListener('resize', () => {
+    if (!map) return;
+
     clearTimeout(mapResizeTimer);
     mapResizeTimer = setTimeout(() => {
         map.invalidateSize();
@@ -1102,6 +1110,8 @@ window.addEventListener('resize', () => {
 });
 
 window.addEventListener('orientationchange', () => {
+    if (!map) return;
+
     setTimeout(() => map.invalidateSize(), 250);
 });
 

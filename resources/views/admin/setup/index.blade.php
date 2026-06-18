@@ -68,34 +68,29 @@
 <div id="panel-{{ $jenis }}" class="tab-panel hidden">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Partai</p>
-            <form method="POST" action="{{ route('admin.setup.partai.store') }}">
+            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Caleg {{ $label }}</p>
+            <form method="POST" action="{{ route('admin.setup.caleg.configured.store') }}">
                 @csrf
                 <input type="hidden" name="jenis" value="{{ $jenis }}">
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut</label>
-                    <input type="number" name="partais[0][nomor_urut]" min="1" placeholder="1"
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut Caleg</label>
+                    <input type="number" name="nomor_urut" min="1" placeholder="1"
                            class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
                 </div>
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Partai</label>
-                    <input type="text" name="partais[0][nama_partai]" placeholder="cth: Partai Kebangkitan Bangsa"
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Caleg</label>
+                    <input type="text" name="nama_caleg" placeholder="Nama caleg {{ $party['short_name'] }}"
                            class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
                 </div>
-                <div class="partai-extra-rows"></div>
-                <button type="button" onclick="addPartaiFields(this)"
-                        class="w-full mb-3 border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 hover:border-red-400 hover:text-red-500 font-semibold py-2.5 rounded-lg text-xs transition">
-                    + Tambah Baris Partai
-                </button>
                 <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                    Tambah Partai →
+                    Tambah Caleg
                 </button>
             </form>
         </div>
 
         <div class="lg:col-span-2 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
             <div class="p-5 border-b dark:border-gray-700 border-gray-200">
-                <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Daftar Partai {{ $label }} ({{ $$var->count() }})</p>
+                <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Caleg {{ $party['short_name'] }} {{ $label }}</p>
             </div>
             @forelse($$var as $partai)
             <div class="border-b dark:border-gray-700 border-gray-100 last:border-0">
@@ -110,11 +105,6 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <span id="arrow-partai-{{ $partai->id }}" class="dark:text-gray-500 text-gray-400 text-xs">▾</span>
-                        <form method="POST" action="{{ route('admin.setup.partai.destroy', $partai) }}"
-                              onsubmit="return confirm('Hapus partai dan semua calegnya?')" class="opacity-0 group-hover:opacity-100 transition">
-                            @csrf @method('DELETE')
-                            <button class="px-3 py-1 rounded-lg text-xs font-medium border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">Hapus</button>
-                        </form>
                     </div>
                 </div>
                 <div id="partai-{{ $partai->id }}" class="hidden">
@@ -144,7 +134,7 @@
                 </div>
             </div>
             @empty
-            <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada partai.</div>
+            <div class="px-6 py-10 text-center dark:text-gray-600 text-gray-400 text-sm">Belum ada caleg. Tambahkan caleg dari form di samping.</div>
             @endforelse
         </div>
     </div>
@@ -215,11 +205,11 @@
         </div>
     </div>
 
-    {{-- Row 2: Tambah Partai per Dapil --}}
+    {{-- Row 2: Tambah Caleg per Dapil --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
-            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Partai DPRD Kab</p>
-            <form method="POST" action="{{ route('admin.setup.partai.store') }}">
+            <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Caleg DPRD Kab</p>
+            <form method="POST" action="{{ route('admin.setup.caleg.configured.store') }}">
                 @csrf
                 <input type="hidden" name="jenis" value="dprd_kab">
                 <div class="mb-4">
@@ -233,22 +223,17 @@
                     </select>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut</label>
-                    <input type="number" name="partais[0][nomor_urut]" min="1" placeholder="1"
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">No. Urut Caleg</label>
+                    <input type="number" name="nomor_urut" min="1" placeholder="1"
                            class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
                 </div>
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Partai</label>
-                    <input type="text" name="partais[0][nama_partai]" placeholder="cth: Partai Kebangkitan Bangsa"
+                    <label class="block text-xs font-semibold dark:text-gray-400 text-gray-600 uppercase tracking-wider mb-2">Nama Caleg</label>
+                    <input type="text" name="nama_caleg" placeholder="Nama caleg {{ $party['short_name'] }}"
                            class="w-full dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-4 py-2.5 text-sm rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
                 </div>
-                <div class="partai-extra-rows"></div>
-                <button type="button" onclick="addPartaiFields(this)"
-                        class="w-full mb-3 border dark:border-gray-700 border-gray-300 dark:text-gray-400 text-gray-500 hover:border-red-400 hover:text-red-500 font-semibold py-2.5 rounded-lg text-xs transition">
-                    + Tambah Baris Partai
-                </button>
                 <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">
-                    Tambah Partai →
+                    Tambah Caleg
                 </button>
             </form>
         </div>
@@ -256,7 +241,7 @@
         {{-- Daftar partai per dapil --}}
         <div class="lg:col-span-2 dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-hidden">
             <div class="p-5 border-b dark:border-gray-700 border-gray-200">
-                <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Daftar Partai DPRD Kab per Dapil</p>
+                <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase font-semibold">// Caleg {{ $party['short_name'] }} DPRD Kab per Dapil</p>
             </div>
 
             @if($dapils->isEmpty())

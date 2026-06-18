@@ -15,6 +15,15 @@
         $baseQuery['dapil_id'] = $selectedDapilId;
     }
 
+    $detailDesasByKecamatan = $kecamatans->mapWithKeys(function ($kecamatan) {
+        return [
+            $kecamatan->id => $kecamatan->desas->map(fn ($desa) => [
+                'id' => $desa->id,
+                'nama' => $desa->nama,
+            ])->values(),
+        ];
+    });
+
     $formatCell = function ($value, string $classes = '') {
         $content = is_null($value) ? '&mdash;' : number_format($value);
 
@@ -306,7 +315,7 @@
                 <td class="px-5 py-2 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold tracking-wider">Status</td>
                 @foreach($desa->tps as $tps)
                 @php $r = $detailRekaps[$tps->id] ?? null; @endphp
-                <td class="px-3 py-2 text-center">
+                <td class="px-3 py-2 text-center" data-review-status-cell="{{ $tps->id }}">
                     @if(!$r)
                         <span class="text-[9px] px-2 py-1 rounded font-semibold bg-gray-500/20 dark:text-gray-400 text-gray-500 border border-gray-400/30">Kosong</span>
                     @elseif($r->status === 'final')
@@ -320,6 +329,34 @@
                 @endforeach
                 <td></td>
             </tr>
+            <tr class="dark:bg-gray-900/40 bg-white border-t dark:border-gray-700 border-gray-200">
+                <td class="px-5 py-3 text-[10px] dark:text-gray-500 text-gray-400 uppercase font-semibold tracking-wider align-top">Tandai TPS</td>
+                @foreach($desa->tps as $tps)
+                @php $r = $detailRekaps[$tps->id] ?? null; @endphp
+                <td class="px-2 py-3 align-top">
+                    <form method="POST" action="{{ route('admin.rekap.review-status', ['jenis' => $jenis, 'tps' => $tps]) }}" class="space-y-2" data-review-form data-tps-id="{{ $tps->id }}" data-return-status="{{ $r?->difinalisasi_at ? 'final' : 'draft' }}">
+                        @csrf
+                        @if($r?->status === 'perlu_dicek')
+                            <input type="hidden" name="status_internal" value="{{ $r->difinalisasi_at ? 'final' : 'draft' }}">
+                            <button class="w-full px-2 py-1.5 rounded text-[10px] font-semibold border border-gray-300 dark:border-gray-600 dark:text-gray-300 text-gray-600 dark:hover:bg-gray-700 hover:bg-gray-100 transition" data-review-button>
+                                Clear
+                            </button>
+                            @if($r->catatan_internal)
+                            <p class="text-[10px] leading-snug dark:text-red-300 text-red-600" data-review-note>{{ $r->catatan_internal }}</p>
+                            @endif
+                        @else
+                            <input type="hidden" name="status_internal" value="perlu_dicek">
+                            <textarea name="catatan_internal" rows="2" placeholder="Catatan"
+                                      class="w-full min-w-[96px] dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-200 text-gray-700 px-2 py-1.5 text-[10px] rounded focus:border-red-500 focus:ring-0 focus:outline-none"></textarea>
+                            <button class="w-full px-2 py-1.5 rounded text-[10px] font-semibold bg-red-500 hover:bg-red-600 text-white transition" data-review-button>
+                                Perlu Dicek
+                            </button>
+                        @endif
+                    </form>
+                </td>
+                @endforeach
+                <td></td>
+            </tr>
             </tbody>
         </table>
     </div>
@@ -327,5 +364,117 @@
 @endforeach
 @endforeach
 @endif
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const kecamatanSelect = document.getElementById('detail_kecamatan_id');
+    const desaSelect = document.getElementById('detail_desa_id');
+    const selectedDesaId = @json((int) $detailDesaId);
+    const desasByKecamatan = @json($detailDesasByKecamatan);
+
+    if (!kecamatanSelect || !desaSelect) {
+        return;
+    }
+
+    const refreshDesaOptions = () => {
+        const kecamatanId = kecamatanSelect.value;
+        const options = desasByKecamatan[kecamatanId] || [];
+        desaSelect.innerHTML = '<option value="">Semua Desa</option>';
+
+        options.forEach((desa) => {
+            const option = document.createElement('option');
+            option.value = desa.id;
+            option.textContent = desa.nama;
+            option.selected = Number(desa.id) === selectedDesaId;
+            desaSelect.appendChild(option);
+        });
+    };
+
+    kecamatanSelect.addEventListener('change', refreshDesaOptions);
+    refreshDesaOptions();
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const statusBadgeHtml = (status, label) => {
+        const classes = {
+            final: 'bg-teal-500/20 text-teal-400 border-teal-500/40',
+            perlu_dicek: 'bg-red-500/20 text-red-400 border-red-500/40',
+            draft: 'bg-orange-400/20 text-orange-400 border-orange-400/40',
+        };
+
+        return `<span class="text-[9px] px-2 py-1 rounded font-semibold border ${classes[status] || classes.draft}">${label}</span>`;
+    };
+    const reviewFormHtml = (status, note, returnStatus) => {
+        if (status === 'perlu_dicek') {
+            const escapedNote = String(note || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+
+            return `
+                <input type="hidden" name="_token" value="${csrfToken}">
+                <input type="hidden" name="status_internal" value="${returnStatus}">
+                <button class="w-full px-2 py-1.5 rounded text-[10px] font-semibold border border-gray-300 dark:border-gray-600 dark:text-gray-300 text-gray-600 dark:hover:bg-gray-700 hover:bg-gray-100 transition" data-review-button>
+                    Clear
+                </button>
+                ${escapedNote ? `<p class="text-[10px] leading-snug dark:text-red-300 text-red-600" data-review-note>${escapedNote}</p>` : ''}
+            `;
+        }
+
+        return `
+            <input type="hidden" name="_token" value="${csrfToken}">
+            <input type="hidden" name="status_internal" value="perlu_dicek">
+            <textarea name="catatan_internal" rows="2" placeholder="Catatan"
+                      class="w-full min-w-[96px] dark:bg-gray-900 bg-gray-50 border dark:border-gray-700 border-gray-300 dark:text-gray-200 text-gray-700 px-2 py-1.5 text-[10px] rounded focus:border-red-500 focus:ring-0 focus:outline-none"></textarea>
+            <button class="w-full px-2 py-1.5 rounded text-[10px] font-semibold bg-red-500 hover:bg-red-600 text-white transition" data-review-button>
+                Perlu Dicek
+            </button>
+        `;
+    };
+
+    document.querySelectorAll('[data-review-form]').forEach((form) => {
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const button = form.querySelector('[data-review-button]');
+            const tpsId = form.dataset.tpsId;
+            const returnStatus = form.dataset.returnStatus || 'draft';
+            button?.setAttribute('disabled', 'disabled');
+            button?.classList.add('opacity-60');
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: new FormData(form),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                const payload = await response.json();
+                const statusCell = document.querySelector(`[data-review-status-cell="${tpsId}"]`);
+                if (statusCell) {
+                    statusCell.innerHTML = statusBadgeHtml(payload.status, payload.status_label);
+                }
+
+                form.innerHTML = reviewFormHtml(payload.status, payload.catatan_internal, returnStatus);
+            } catch (error) {
+                form.submit();
+            } finally {
+                button?.removeAttribute('disabled');
+                button?.classList.remove('opacity-60');
+            }
+        });
+    });
+});
+</script>
+@endpush
 
 @endsection
