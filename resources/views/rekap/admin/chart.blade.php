@@ -1,4 +1,18 @@
-@php($party = $party ?? config('party'))
+@php
+    $party = $party ?? config('party');
+    $roleLabel = $party['roles']['admin_partai'] ?? 'Admin Partai';
+    $homeRoute = route('dashboard.admin_partai');
+    $adminMenus = [
+        ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin_partai')],
+        ['key' => 'users', 'label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
+        ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
+        ['key' => 'kecamatan', 'label' => 'Kelola Kecamatan', 'icon' => 'map', 'route' => route('admin.kecamatan.index')],
+        ['key' => 'desa', 'label' => 'Kelola Desa', 'icon' => 'location_city', 'route' => route('admin.desa.index')],
+        ['key' => 'tps', 'label' => 'Kelola TPS', 'icon' => 'pin_drop', 'route' => route('admin.tps.index')],
+        ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
+        ['key' => 'setup', 'label' => 'Setup Data ' . $party['short_name'], 'icon' => 'settings', 'route' => route('admin.setup.index')],
+    ];
+@endphp
 <!DOCTYPE html>
 <html lang="id" class="light">
 <head>
@@ -525,18 +539,6 @@
     $defaultJenis = collect(\App\Models\RekapHeader::JENIS_LABELS)
         ->keys()
         ->first(fn ($key) => in_array($key, $aktifJenis));
-    $roleLabel = $party['roles']['admin_partai'];
-    $homeRoute = route('dashboard.admin_partai');
-    $adminMenus = [
-        ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin_partai')],
-        ['key' => 'users', 'label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
-        ['key' => 'chart', 'label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
-        ['key' => 'kecamatan', 'label' => 'Kelola Kecamatan', 'icon' => 'map', 'route' => route('admin.kecamatan.index')],
-        ['key' => 'desa', 'label' => 'Kelola Desa', 'icon' => 'location_city', 'route' => route('admin.desa.index')],
-        ['key' => 'tps', 'label' => 'Kelola TPS', 'icon' => 'pin_drop', 'route' => route('admin.tps.index')],
-        ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
-        ['key' => 'setup', 'label' => 'Setup Data ' . $party['short_name'], 'icon' => 'settings', 'route' => route('admin.setup.index')],
-    ];
 @endphp
 
 <input id="admin-mobile-menu" type="checkbox" class="hidden">

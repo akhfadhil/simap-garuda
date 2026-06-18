@@ -421,6 +421,14 @@ class PartyRoleAccessTest extends TestCase
         $this->assertSame(30, $payload['candidate_rank'][0]['suara']);
     }
 
+    public function test_admin_chart_page_can_render(): void
+    {
+        $this->actingAs($this->admin)
+            ->get(route('admin.rekap.chart'))
+            ->assertOk()
+            ->assertSee('Grafik & Statistik');
+    }
+
     public function test_admin_can_mark_rekap_as_perlu_dicek_with_internal_note(): void
     {
         $party = RekapPartai::create([
