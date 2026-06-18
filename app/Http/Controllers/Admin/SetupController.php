@@ -130,10 +130,28 @@ class SetupController extends Controller
         ]);
 
         $partai = $this->configuredPartyFor($data['jenis'], $data['jenis'] === 'dprd_kab' ? (int) $data['dapil_id'] : null);
-        $partai->calegs()->create([
+        $caleg = $partai->calegs()->create([
             'nomor_urut' => $data['nomor_urut'],
             'nama_caleg' => $data['nama_caleg'],
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Caleg '.PartyConfig::shortName().' berhasil ditambahkan.',
+                'partai_id' => $partai->id,
+                'partai' => [
+                    'id' => $partai->id,
+                    'nomor_urut' => $partai->nomor_urut,
+                    'nama_partai' => $partai->nama_partai,
+                ],
+                'caleg' => [
+                    'id' => $caleg->id,
+                    'nomor_urut' => $caleg->nomor_urut,
+                    'nama_caleg' => $caleg->nama_caleg,
+                    'destroy_url' => route('admin.setup.caleg.destroy', $caleg),
+                ],
+            ]);
+        }
 
         return back()->with('success', 'Caleg '.PartyConfig::shortName().' berhasil ditambahkan.');
     }
@@ -156,7 +174,20 @@ class SetupController extends Controller
         abort_unless($partai->isConfiguredParty(), 403, 'Caleg hanya bisa ditambahkan untuk '.PartyConfig::name().'.');
 
         $request->validate(['nomor_urut' => 'required|integer', 'nama_caleg' => 'required|string|max:200']);
-        $partai->calegs()->create($request->only('nomor_urut', 'nama_caleg'));
+        $caleg = $partai->calegs()->create($request->only('nomor_urut', 'nama_caleg'));
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Caleg berhasil ditambahkan.',
+                'partai_id' => $partai->id,
+                'caleg' => [
+                    'id' => $caleg->id,
+                    'nomor_urut' => $caleg->nomor_urut,
+                    'nama_caleg' => $caleg->nama_caleg,
+                    'destroy_url' => route('admin.setup.caleg.destroy', $caleg),
+                ],
+            ]);
+        }
 
         return back()->with('success', 'Caleg berhasil ditambahkan.');
     }
@@ -165,6 +196,10 @@ class SetupController extends Controller
     public function destroyCaleg(RekapCaleg $caleg)
     {
         $caleg->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Caleg dihapus.']);
+        }
 
         return back()->with('success', 'Caleg dihapus.');
     }

@@ -222,6 +222,23 @@ class PartyRoleAccessTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_configured_party_caleg_with_ajax(): void
+    {
+        $this->actingAs($this->admin)
+            ->postJson(route('admin.setup.caleg.configured.store'), [
+                'jenis' => 'dpr_ri',
+                'nomor_urut' => 2,
+                'nama_caleg' => 'Caleg Ajax',
+            ])
+            ->assertOk()
+            ->assertJsonPath('caleg.nama_caleg', 'Caleg Ajax');
+
+        $this->assertDatabaseHas('rekap_calegs', [
+            'nomor_urut' => 2,
+            'nama_caleg' => 'Caleg Ajax',
+        ]);
+    }
+
     public function test_admin_cannot_add_caleg_to_non_configured_party(): void
     {
         $competitor = RekapPartai::create([

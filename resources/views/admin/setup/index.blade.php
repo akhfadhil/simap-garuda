@@ -69,7 +69,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
             <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Caleg {{ $label }}</p>
-            <form method="POST" action="{{ route('admin.setup.caleg.configured.store') }}">
+            <form method="POST" action="{{ route('admin.setup.caleg.configured.store') }}" data-ajax-caleg>
                 @csrf
                 <input type="hidden" name="jenis" value="{{ $jenis }}">
                 <div class="mb-4">
@@ -101,7 +101,7 @@
                             {{ $partai->nomor_urut }}
                         </span>
                         <p class="text-sm font-semibold dark:text-gray-100 text-gray-800">{{ $partai->nama_partai }}</p>
-                        <span class="text-[10px] dark:text-gray-500 text-gray-400">{{ $partai->calegs->count() }} caleg</span>
+                        <span class="text-[10px] dark:text-gray-500 text-gray-400" data-caleg-count="{{ $partai->id }}">{{ $partai->calegs->count() }} caleg</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span id="arrow-partai-{{ $partai->id }}" class="dark:text-gray-500 text-gray-400 text-xs">▾</span>
@@ -115,14 +115,14 @@
                             <p class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</p>
                         </div>
                         <form method="POST" action="{{ route('admin.setup.caleg.destroy', $caleg) }}"
-                              onsubmit="return confirm('Hapus caleg ini?')" class="opacity-0 group-hover:opacity-100 transition">
+                              data-ajax-delete="caleg" class="opacity-0 group-hover:opacity-100 transition">
                             @csrf @method('DELETE')
                             <button class="px-2 py-1 rounded text-xs border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">×</button>
                         </form>
                     </div>
                     @endforeach
                     <div class="px-8 py-4 border-t dark:border-gray-700 border-gray-100 dark:bg-gray-900/30 bg-gray-50">
-                        <form method="POST" action="{{ route('admin.setup.caleg.store', $partai) }}" class="flex gap-2">
+                        <form method="POST" action="{{ route('admin.setup.caleg.store', $partai) }}" class="flex gap-2" data-ajax-caleg data-partai-id="{{ $partai->id }}">
                             @csrf
                             <input type="number" name="nomor_urut" placeholder="No" min="1"
                                    class="w-16 dark:bg-gray-900 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-xs rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
@@ -209,7 +209,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 p-6 shadow-sm">
             <p class="text-[10px] tracking-[3px] dark:text-gray-500 text-gray-400 uppercase mb-5 font-semibold">// Tambah Caleg DPRD Kab</p>
-            <form method="POST" action="{{ route('admin.setup.caleg.configured.store') }}">
+            <form method="POST" action="{{ route('admin.setup.caleg.configured.store') }}" data-ajax-caleg>
                 @csrf
                 <input type="hidden" name="jenis" value="dprd_kab">
                 <div class="mb-4">
@@ -277,7 +277,7 @@
                                 {{ $partai->nomor_urut }}
                             </span>
                             <p class="text-sm font-semibold dark:text-gray-100 text-gray-800">{{ $partai->nama_partai }}</p>
-                            <span class="text-[10px] dark:text-gray-500 text-gray-400">{{ $partai->calegs->count() }} caleg</span>
+                            <span class="text-[10px] dark:text-gray-500 text-gray-400" data-caleg-count="{{ $partai->id }}">{{ $partai->calegs->count() }} caleg</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span id="arrow-partai-{{ $partai->id }}" class="dark:text-gray-500 text-gray-400 text-xs">▸</span>
@@ -297,7 +297,7 @@
                                 <p class="text-sm dark:text-gray-200 text-gray-700">{{ $caleg->nama_caleg }}</p>
                             </div>
                             <form method="POST" action="{{ route('admin.setup.caleg.destroy', $caleg) }}"
-                                onsubmit="return confirm('Hapus caleg ini?')" class="opacity-0 group-hover:opacity-100 transition">
+                                data-ajax-delete="caleg" class="opacity-0 group-hover:opacity-100 transition">
                                 @csrf @method('DELETE')
                                 <button class="px-2 py-1 rounded text-xs border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">×</button>
                             </form>
@@ -305,7 +305,7 @@
                         @endforeach
                         {{-- Form tambah caleg --}}
                         <div class="px-8 py-4 border-t dark:border-gray-700 border-gray-100 dark:bg-gray-900/30 bg-gray-50">
-                            <form method="POST" action="{{ route('admin.setup.caleg.store', $partai) }}" class="flex gap-2">
+                            <form method="POST" action="{{ route('admin.setup.caleg.store', $partai) }}" class="flex gap-2" data-ajax-caleg data-partai-id="{{ $partai->id }}">
                                 @csrf
                                 <input type="number" name="nomor_urut" placeholder="No" min="1"
                                     class="w-16 dark:bg-gray-900 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-800 px-3 py-2 text-xs rounded-lg focus:border-red-500 focus:ring-0 focus:outline-none">
@@ -429,6 +429,174 @@ document.querySelectorAll('.partai-extra-rows').forEach((container) => {
     if (addButton) {
         addPartaiFields(addButton);
         addPartaiFields(addButton);
+    }
+});
+
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+const escapeHtml = (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+function calegRowHtml(caleg) {
+    return `
+        <div class="flex items-center justify-between px-8 py-3 border-t dark:border-gray-700 border-gray-100 group">
+            <div class="flex items-center gap-3">
+                <span class="text-xs dark:text-gray-500 text-gray-400 w-4">${escapeHtml(caleg.nomor_urut)}</span>
+                <p class="text-sm dark:text-gray-200 text-gray-700">${escapeHtml(caleg.nama_caleg)}</p>
+            </div>
+            <form method="POST" action="${escapeHtml(caleg.destroy_url)}" data-ajax-delete="caleg" class="opacity-0 group-hover:opacity-100 transition">
+                <input type="hidden" name="_token" value="${escapeHtml(csrfToken)}">
+                <input type="hidden" name="_method" value="DELETE">
+                <button class="px-2 py-1 rounded text-xs border border-red-400 text-red-400 hover:bg-red-500 hover:text-white transition">x</button>
+            </form>
+        </div>
+    `;
+}
+
+function appendCalegRow(partaiId, caleg) {
+    const panel = document.getElementById('partai-' + partaiId);
+    const formWrapper = panel?.querySelector('form[data-ajax-caleg]')?.closest('.px-8');
+    let appended = false;
+    if (formWrapper) {
+        formWrapper.insertAdjacentHTML('beforebegin', calegRowHtml(caleg));
+        appended = true;
+        panel.classList.remove('hidden');
+        const arrow = document.getElementById('arrow-partai-' + partaiId);
+        if (arrow) arrow.textContent = '\u25be';
+    }
+
+    updateCalegCount(partaiId, 1);
+
+    return appended;
+}
+
+function updateCalegCount(partaiId, delta) {
+    const counter = document.querySelector(`[data-caleg-count="${partaiId}"]`);
+    if (counter) {
+        const current = parseInt(counter.textContent, 10) || 0;
+        counter.textContent = `${Math.max(0, current + delta)} caleg`;
+    }
+}
+
+function confirmDeleteCaleg() {
+    let dialog = document.querySelector('[data-delete-caleg-dialog]');
+    if (!dialog) {
+        dialog = document.createElement('div');
+        dialog.dataset.deleteCalegDialog = '1';
+        dialog.className = 'fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4';
+        dialog.innerHTML = `
+            <div class="w-full max-w-sm rounded-xl border dark:border-gray-700 border-gray-200 dark:bg-gray-900 bg-white p-5 shadow-xl">
+                <p class="text-sm font-semibold dark:text-gray-100 text-gray-800 mb-2">Hapus caleg ini?</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 mb-5">Data caleg akan dihapus dari daftar setup.</p>
+                <div class="flex justify-end gap-2">
+                    <button type="button" data-delete-cancel class="px-4 py-2 rounded-lg text-xs font-semibold border dark:border-gray-700 border-gray-300 dark:text-gray-300 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition">Batal</button>
+                    <button type="button" data-delete-confirm class="px-4 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white transition">Hapus</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(dialog);
+    }
+
+    return new Promise((resolve) => {
+        const close = (value) => {
+            dialog.classList.add('hidden');
+            dialog.classList.remove('flex');
+            dialog.querySelector('[data-delete-cancel]').onclick = null;
+            dialog.querySelector('[data-delete-confirm]').onclick = null;
+            resolve(value);
+        };
+
+        dialog.querySelector('[data-delete-cancel]').onclick = () => close(false);
+        dialog.querySelector('[data-delete-confirm]').onclick = () => close(true);
+        dialog.classList.remove('hidden');
+        dialog.classList.add('flex');
+        dialog.querySelector('[data-delete-cancel]').focus();
+    });
+}
+
+document.querySelectorAll('form[data-ajax-caleg]').forEach((form) => {
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const button = form.querySelector('button[type="submit"], button:not([type])');
+        button?.setAttribute('disabled', 'disabled');
+        button?.classList.add('opacity-60');
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: new FormData(form),
+            });
+
+            if (!response.ok) throw new Error('Request failed');
+
+            const payload = await response.json();
+            const partaiId = payload.partai_id || form.dataset.partaiId;
+            const appended = partaiId && payload.caleg ? appendCalegRow(partaiId, payload.caleg) : false;
+            form.reset();
+            if (!appended) {
+                let status = form.querySelector('[data-ajax-caleg-status]');
+                if (!status) {
+                    status = document.createElement('p');
+                    status.dataset.ajaxCalegStatus = '1';
+                    status.className = 'mt-3 text-xs font-semibold text-green-500';
+                    form.appendChild(status);
+                }
+                status.textContent = payload.message || 'Caleg berhasil ditambahkan.';
+            }
+        } catch (error) {
+            form.submit();
+        } finally {
+            button?.removeAttribute('disabled');
+            button?.classList.remove('opacity-60');
+        }
+    });
+});
+
+document.addEventListener('submit', async (event) => {
+    const form = event.target.closest('form[data-ajax-delete="caleg"]');
+    if (!form) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const confirmed = await confirmDeleteCaleg();
+    if (!confirmed) return;
+
+    const button = form.querySelector('button[type="submit"], button:not([type])');
+    button?.setAttribute('disabled', 'disabled');
+    button?.classList.add('opacity-60');
+
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: new FormData(form),
+        });
+
+        if (!response.ok) throw new Error('Request failed');
+
+        const panel = form.closest('[id^="partai-"]');
+        const partaiId = panel?.id.replace('partai-', '');
+        form.closest('.group')?.remove();
+        if (partaiId) updateCalegCount(partaiId, -1);
+    } catch (error) {
+        form.submit();
+    } finally {
+        button?.removeAttribute('disabled');
+        button?.classList.remove('opacity-60');
     }
 });
 </script>
