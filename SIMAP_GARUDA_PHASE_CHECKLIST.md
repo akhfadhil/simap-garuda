@@ -207,6 +207,22 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 4. Siapkan opsi pelepasan backward route `ppk/pps/kpps` di SIMAP Garuda saat masa kompatibilitas dianggap selesai.
 5. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
 
+## State Setelah Restart
+
+Jika sesi dilanjutkan setelah restart, jangan mulai dari SIMAP Garuda lagi kecuali ada bug baru. Status terakhir:
+
+- SIMAP Garuda sudah fix untuk MVP operasional.
+- Perubahan kode terakhir sudah dicommit di `simap-garuda` dan `../simap`.
+- Dokumentasi finalisasi sudah dicommit.
+- Next task utama adalah menyusun dan mengeksekusi `simap-partai-template`.
+
+Langkah pertama setelah restart:
+
+1. Baca ulang `SIMAP_GARUDA_TEMPLATE_AUDIT.md`.
+2. Baca bagian `Rekomendasi Urutan Kerja` di file ini.
+3. Buat rencana eksekusi `simap-partai-template`: file yang dicopy, file yang disanitasi, migration fresh, config partai, dan fitur yang tidak boleh ikut dari legacy.
+4. Setelah rencana disetujui, baru buat folder/project template.
+
 ## Catatan Commit Sesi Finalisasi SIMAP Garuda - 2026-06-18 sampai 2026-06-19
 
 - `1ef21b2 Improve party rekap review workflow`
