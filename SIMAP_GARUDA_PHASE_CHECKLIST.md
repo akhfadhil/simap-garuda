@@ -38,6 +38,7 @@ Target Phase 1: fork SIMAP menjadi aplikasi mandiri untuk Partai Garuda, databas
 - [x] Dashboard sudah fokus pada performa Partai Garuda.
 - [x] Master partai sudah difilter ke Partai Garuda dan identitas permanen disimpan di `config/party.php`.
 - [x] Logo Garuda sudah tersedia sebagai asset lokal dan dipakai lewat konfigurasi `config/party.php`.
+- [x] SIMAP Garuda dinyatakan fix untuk MVP operasional setelah uji manual admin setup, rekap, TPS perlu dicek, dan grafik.
 
 ## Keputusan Phase 1
 
@@ -83,6 +84,9 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Batasi input caleg hanya untuk Partai Garuda.
 - [x] Batasi dashboard dan export agar fokus pada suara Partai Garuda dan calegnya.
 - [x] Tambahkan guard agar admin tidak tanpa sengaja membuat data partai lain jika mode single-party aktif.
+- [x] Setup data pemilu disederhanakan lagi: Admin Partai cukup menambahkan caleg, sedangkan master Partai Garuda dibuat otomatis dari `config/party.php`.
+- [x] Tambah dan hapus caleg di halaman setup memakai AJAX agar tidak reload dan tidak kembali ke posisi halaman paling atas.
+- [x] Hapus caleg memakai dialog konfirmasi custom; tombol batal tidak mengirim request hapus.
 
 ### 4. Dashboard Khusus Partai
 
@@ -106,6 +110,9 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Bersihkan export laporan dari field suara tidak sah, DPT, surat suara, dan disabilitas.
 - [x] Tambahkan status internal: draft, perlu dicek, final.
 - [x] Tambahkan catatan internal partai untuk TPS bermasalah jika diperlukan.
+- [x] Tambahkan kontrol cepat di Admin Rekapitulasi Data untuk menandai atau clear TPS `perlu_dicek` langsung dari detail kecamatan/desa tanpa masuk lewat Kelola TPS.
+- [x] Tombol `Perlu Dicek` dan `Clear` di detail rekap admin berjalan via AJAX agar halaman tidak reload dan posisi scroll tidak kembali ke atas.
+- [x] Clear status mempertahankan finalisasi: TPS yang sebelumnya final kembali ke `final`, TPS yang belum final kembali ke `draft`.
 - [x] Izinkan Kordes menginput dan mengedit suara TPS di dalam desa yang menjadi scope-nya.
 - [x] Izinkan Korcam menginput dan mengedit suara TPS di dalam kecamatan yang menjadi scope-nya.
 - [x] Pastikan Admin Partai tetap bisa koreksi/input TPS lintas wilayah.
@@ -187,15 +194,40 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 - [x] Generalisasi sisa identifier/key internal Garuda di dashboard, model, dan view rekap ke istilah party/configured party.
 - [x] Audit backward route legacy `ppk/pps/kpps` dan tandai semuanya sebagai redirect kompatibilitas yang tidak boleh masuk template.
 - [x] Audit fresh schema/migration template dan tentukan tabel/kolom yang wajib masuk atau wajib ditinggal.
+- [x] Perbaiki halaman grafik admin agar role label tersedia stabil dan halaman chart bisa dirender oleh test.
 - [ ] Siapkan standar import snapshot dari SIMAP utama jika nanti SIMAP utama membuat `export:party-snapshot`.
 - [x] Siapkan dokumentasi operasional yang bisa digeneralisasi untuk project partai lain.
 - [x] Pastikan cleanup role/URI teknis dilakukan dengan mempertimbangkan template, bukan hanya kebutuhan Garuda.
 
 ## Rekomendasi Urutan Kerja
 
-1. Mulai susun draft `simap-partai-template` plan: daftar file yang dicopy, file yang disanitasi, dan migration fresh yang dibuat dari audit.
-2. Siapkan opsi pelepasan backward route `ppk/pps/kpps` di SIMAP Garuda saat masa kompatibilitas dianggap selesai.
-3. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
+1. Mulai task `simap-partai-template`: buat rencana file yang dicopy dari SIMAP Garuda, file yang disanitasi dari identitas Garuda, dan migration fresh hasil audit schema.
+2. Tentukan format konfigurasi partai di template: `config/party.php`, logo, warna, nama role, nomor historis per pemilu, dan data awal caleg/partai.
+3. Siapkan migration fresh template yang hanya membawa fitur legislatif single-party, status internal, wilayah, dapil, user role final, export, dan rekap manual.
+4. Siapkan opsi pelepasan backward route `ppk/pps/kpps` di SIMAP Garuda saat masa kompatibilitas dianggap selesai.
+5. Setelah SIMAP utama punya format snapshot, tambahkan import snapshot partai jika masih dibutuhkan.
+
+## Catatan Commit Sesi Finalisasi SIMAP Garuda - 2026-06-18 sampai 2026-06-19
+
+- `1ef21b2 Improve party rekap review workflow`
+  - Setup data pemilu disederhanakan agar Admin Partai cukup menambah caleg; master Partai Garuda dibuat otomatis berdasarkan `config/party.php`.
+  - Admin Rekapitulasi Data mendapat kontrol cepat untuk menandai TPS `perlu_dicek` dari detail kecamatan/desa.
+  - Dropdown desa pada detail rekap admin otomatis mengikuti kecamatan yang dipilih.
+  - Aksi `Perlu Dicek` dan `Clear` memakai AJAX dengan CSRF token sehingga halaman tidak reload dan posisi scroll tetap.
+  - Clear status menjaga status final jika TPS sebelumnya sudah final, dan kembali ke draft jika belum final.
+  - Cache Laravel Excel diabaikan lewat `.gitignore`.
+- `4d27144 Fix admin chart page role label`
+  - Halaman Grafik & Statistik admin diperbaiki agar `$roleLabel`, `$homeRoute`, dan menu admin tersedia stabil.
+  - Test render halaman grafik admin ditambahkan.
+- `4134ec3 Improve setup caleg ajax workflow`
+  - Tambah caleg di halaman setup SIMAP Garuda berjalan via AJAX sehingga tidak reload dan tidak kembali ke atas halaman.
+  - Hapus caleg memakai dialog konfirmasi custom dan AJAX; batal tidak mengirim request hapus.
+  - Counter jumlah caleg diperbarui otomatis saat tambah/hapus.
+  - Response JSON untuk store/destroy caleg dan test AJAX setup caleg ditambahkan.
+- `e0affdb Improve setup caleg ajax workflow` di project `../simap`
+  - Perilaku tambah/hapus caleg tanpa reload diterapkan juga di SIMAP utama.
+  - Layout SIMAP utama mendapat CSRF meta token untuk kebutuhan AJAX setup.
+  - Test AJAX tambah caleg di SIMAP utama ditambahkan.
 
 ## Mapping ke PARTAI_PORTAL_BRAINSTORM.md
 
@@ -263,3 +295,4 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - `php artisan test` dan `npm.cmd run build` lulus setelah generalisasi identifier internal.
 - Audit backward route legacy selesai: route `dashboard.ppk`, `dashboard.pps`, `dashboard.kpps`, `ppk.*`, dan `pps.*` hanya redirect/link kompatibilitas di `routes/web.php`; controller, view, service, dan test aktif sudah memakai istilah final.
 - Audit fresh schema template selesai: template perlu migration fresh/squashed untuk role final, wilayah, dapil, legislatif-only rekap, status internal, flag internal, dan index final; migration dokumen, non-legislatif, role compatibility, dan cleanup legacy tidak ikut template.
+- Finalisasi UX setup caleg selesai: tambah/hapus caleg tidak reload, konfirmasi hapus tidak tembus saat batal, dan perilaku yang sama sudah diterapkan ke SIMAP utama.

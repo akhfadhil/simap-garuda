@@ -84,7 +84,8 @@ Jenis PPWP, DPD, Gubernur, dan Bupati sudah dinonaktifkan dari aplikasi dan dibe
 - Kelola pengguna Admin Partai, Korcam, Kordes, dan Saksi TPS.
 - Setup jenis rekap legislatif aktif.
 - Setup dapil dan assign kecamatan ke dapil.
-- Setup master Partai Garuda dan caleg Garuda.
+- Setup caleg Garuda; master Partai Garuda dibuat otomatis dari konfigurasi aplikasi.
+- Tambah dan hapus caleg dari halaman setup berjalan tanpa reload halaman.
 - Melihat dashboard, grafik, rekap kabupaten, dan export.
 - Mode view sebagai Korcam, Kordes, atau Saksi TPS untuk monitoring wilayah.
 
@@ -115,6 +116,8 @@ Jenis PPWP, DPD, Gubernur, dan Bupati sudah dinonaktifkan dari aplikasi dan dibe
 4. Saksi TPS menyimpan draft atau finalisasi data.
 5. Kordes, Korcam, dan Admin Partai memantau progres dan agregasi.
 6. Export dibuat dari data manual yang sudah masuk.
+
+Catatan setup: Admin cukup menambahkan caleg pada jenis/dapil yang aktif. Master Partai Garuda dibuat otomatis berdasarkan `config/party.php`, sehingga admin tidak perlu menginput partai secara manual.
 
 ## Struktur Data Penting
 

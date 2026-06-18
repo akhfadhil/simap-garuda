@@ -179,9 +179,8 @@ Urutan setup data yang disarankan:
 5. Isi master dapil.
 6. Hubungkan kecamatan ke dapil jika DPRD Kabupaten dipakai.
 7. Aktifkan jenis rekap legislatif yang dipakai di `Admin > Setup`.
-8. Tambahkan master Partai Garuda untuk DPR RI, DPRD Provinsi, dan DPRD Kabupaten.
-9. Tambahkan caleg Partai Garuda pada masing-masing jenis/dapil.
-10. Buat akun Korcam, Kordes, dan Saksi TPS sesuai wilayah.
+8. Tambahkan caleg Partai Garuda pada masing-masing jenis/dapil. Master Partai Garuda dibuat otomatis oleh sistem sesuai konfigurasi aplikasi.
+9. Buat akun Korcam, Kordes, dan Saksi TPS sesuai wilayah.
 
 ## Konfigurasi Identitas Partai
 
@@ -250,19 +249,27 @@ Alur:
 
 1. Buat dapil di `Admin > Setup`.
 2. Assign kecamatan ke dapil.
-3. Tambahkan Partai Garuda pada jenis `dprd_kab` untuk dapil terkait.
-4. Tambahkan caleg Garuda pada partai/dapil tersebut.
+3. Tambahkan caleg Garuda untuk dapil terkait.
+4. Sistem otomatis membuat master Partai Garuda untuk jenis/dapil tersebut jika belum ada.
 
-### Kelola Partai dan Caleg
+### Kelola Caleg
 
-Admin hanya boleh menambahkan Partai Garuda.
+Admin hanya mengisi caleg Partai Garuda. Admin tidak perlu mengisi master partai secara manual karena SIMAP Garuda adalah aplikasi satu partai.
 
 Validasi utama:
 
-- Nomor historis Garuda: `11`.
-- Nama harus cocok dengan identitas Partai Garuda.
-- Caleg hanya bisa ditambahkan pada master Partai Garuda.
-- Partai kompetitor ditolak oleh sistem.
+- Identitas Partai Garuda diambil dari `config/party.php`.
+- Nomor historis Garuda 2024 (`11`) hanya metadata untuk matching data periode 2024, bukan identitas permanen.
+- Master Partai Garuda dibuat otomatis saat admin menambahkan caleg pada DPR RI, DPRD Provinsi, atau DPRD Kabupaten.
+- Caleg hanya bisa masuk ke master Partai Garuda.
+- Partai kompetitor tetap ditolak oleh sistem.
+
+Perilaku halaman setup:
+
+- Tambah caleg memakai AJAX, sehingga halaman tidak reload dan posisi scroll tidak kembali ke atas.
+- Caleg yang berhasil ditambahkan langsung muncul di daftar jika panel partai/dapil sedang tersedia.
+- Hapus caleg memakai dialog konfirmasi custom. Jika memilih `Batal`, sistem tidak mengirim request hapus. Jika memilih `Hapus`, baris caleg hilang tanpa reload.
+- Counter jumlah caleg ikut diperbarui saat tambah atau hapus caleg.
 
 ### Kelola User
 
@@ -302,6 +309,13 @@ Admin Partai bisa menandai TPS sebagai:
 Status `perlu_dicek` dipakai untuk TPS yang perlu verifikasi internal, misalnya angka perlu dicocokkan ulang dengan foto C1 atau laporan saksi.
 
 Catatan internal bisa diisi agar alasan koreksi jelas.
+
+Ada dua jalur koreksi status internal:
+
+1. Dari form input rekap TPS saat Admin Partai sedang melihat konteks TPS tertentu.
+2. Dari `Admin > Rekapitulasi Data`, pilih jenis pemilihan, pilih kecamatan dan desa pada bagian detail wilayah, lalu gunakan baris `Tandai TPS` pada tabel TPS.
+
+Pada jalur `Admin > Rekapitulasi Data`, tombol `Perlu Dicek` dan `Clear` berjalan tanpa reload halaman. Jika TPS yang sudah final ditandai `perlu_dicek`, tombol `Clear` akan mengembalikan statusnya ke `final`. Jika TPS belum final, `Clear` mengembalikan statusnya ke `draft`.
 
 ## Penggunaan Korcam
 
@@ -511,8 +525,8 @@ Untuk Saksi TPS:
 - Semua TPS sudah masuk dan terhubung ke desa.
 - Dapil sudah dibuat jika DPRD Kabupaten dipakai.
 - Kecamatan sudah diassign ke dapil.
-- Partai Garuda sudah tersedia untuk setiap jenis rekap aktif.
-- Caleg Garuda sudah lengkap.
+- Caleg Garuda sudah lengkap untuk setiap jenis rekap aktif.
+- Master Partai Garuda sudah otomatis tersedia dari proses tambah caleg.
 - Akun Admin Partai, Korcam, Kordes, dan Saksi TPS sudah dibuat.
 - Setiap akun wilayah sudah punya scope yang benar.
 - Login tiap role sudah diuji.
@@ -687,4 +701,3 @@ Ini tidak normal untuk SIMAP Garuda. Cek:
 3. Siapkan format snapshot dari SIMAP utama jika kebutuhan import muncul.
 4. Tambahkan seed/demo data Garuda untuk testing internal.
 5. Bersihkan backward route legacy setelah masa kompatibilitas selesai.
-
