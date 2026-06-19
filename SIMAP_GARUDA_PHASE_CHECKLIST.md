@@ -214,14 +214,15 @@ Jika sesi dilanjutkan setelah restart, jangan mulai dari SIMAP Garuda lagi kecua
 - SIMAP Garuda sudah fix untuk MVP operasional.
 - Perubahan kode terakhir sudah dicommit di `simap-garuda` dan `../simap`.
 - Dokumentasi finalisasi sudah dicommit.
-- Next task utama adalah menyusun dan mengeksekusi `simap-partai-template`.
+- Next task utama adalah melanjutkan ekstraksi bertahap `simap-partai-template`.
+- Fondasi awal `../simap-partai-template` sudah dibuat dengan `config/party.php`, `PartyConfig`, `PartyScopeService`, README, dan dokumen operasional awal.
 
 Langkah pertama setelah restart:
 
 1. Baca ulang `SIMAP_GARUDA_TEMPLATE_AUDIT.md`.
-2. Baca bagian `Rekomendasi Urutan Kerja` di file ini.
-3. Buat rencana eksekusi `simap-partai-template`: file yang dicopy, file yang disanitasi, migration fresh, config partai, dan fitur yang tidak boleh ikut dari legacy.
-4. Setelah rencana disetujui, baru buat folder/project template.
+2. Baca `../simap-partai-template/README.md` dan `../simap-partai-template/PARTY_PROJECT_OPERASIONAL.md`.
+3. Lanjutkan batch kecil berikutnya: pilih satu area saja, misalnya skeleton Laravel minimal atau migration fresh/squashed.
+4. Setelah setiap batch kecil, update dokumentasi dan commit.
 
 ## Catatan Commit Sesi Finalisasi SIMAP Garuda - 2026-06-18 sampai 2026-06-19
 
@@ -312,3 +313,4 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Audit backward route legacy selesai: route `dashboard.ppk`, `dashboard.pps`, `dashboard.kpps`, `ppk.*`, dan `pps.*` hanya redirect/link kompatibilitas di `routes/web.php`; controller, view, service, dan test aktif sudah memakai istilah final.
 - Audit fresh schema template selesai: template perlu migration fresh/squashed untuk role final, wilayah, dapil, legislatif-only rekap, status internal, flag internal, dan index final; migration dokumen, non-legislatif, role compatibility, dan cleanup legacy tidak ikut template.
 - Finalisasi UX setup caleg selesai: tambah/hapus caleg tidak reload, konfirmasi hapus tidak tembus saat batal, dan perilaku yang sama sudah diterapkan ke SIMAP utama.
+- Eksekusi awal `simap-partai-template` dimulai: folder template dibuat di `../simap-partai-template` dengan fondasi konfigurasi partai generik, helper identitas partai, service scope wilayah, `.gitignore`, README, dan dokumen operasional awal. Belum ada skeleton Laravel lengkap, migration fresh, controller, route, view, export, dashboard, atau test.

@@ -397,3 +397,6 @@ Helper yang perlu dibuat saat ekstraksi:
 - Audit backward route legacy selesai: route lama `ppk/pps/kpps` hanya redirect kompatibilitas di `routes/web.php`, tidak dipakai controller/view aktif, dan tidak boleh masuk template.
 - Audit fresh schema template selesai: template perlu migration squashed legislatif-only dengan role final, wilayah, dapil, master partai/caleg, rekap TPS, status internal, flag internal, dan index final; migration cleanup/histori legacy tidak ikut.
 - Import snapshot dari SIMAP utama belum didesain; tetap menjadi pekerjaan terpisah setelah kebutuhan format data SIMAP utama jelas.
+- Eksekusi template tahap pertama sudah dimulai di `../simap-partai-template`.
+- Isi tahap pertama: `config/party.php`, `app/Support/PartyConfig.php`, `app/Services/PartyScopeService.php`, `.gitignore`, `README.md`, dan `PARTY_PROJECT_OPERASIONAL.md`.
+- Tahap pertama sengaja kecil dan belum membawa skeleton Laravel lengkap, migration, route, controller, view, export, dashboard, atau test.
