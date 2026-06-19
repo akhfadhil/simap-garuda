@@ -398,5 +398,5 @@ Helper yang perlu dibuat saat ekstraksi:
 - Audit fresh schema template selesai: template perlu migration squashed legislatif-only dengan role final, wilayah, dapil, master partai/caleg, rekap TPS, status internal, flag internal, dan index final; migration cleanup/histori legacy tidak ikut.
 - Import snapshot dari SIMAP utama belum didesain; tetap menjadi pekerjaan terpisah setelah kebutuhan format data SIMAP utama jelas.
 - Eksekusi template tahap pertama sudah dimulai di `../simap-partai-template`.
-- Isi tahap pertama: `config/party.php`, `app/Support/PartyConfig.php`, `app/Services/PartyScopeService.php`, `.gitignore`, `README.md`, dan `PARTY_PROJECT_OPERASIONAL.md`.
-- Tahap pertama sengaja kecil dan belum membawa skeleton Laravel lengkap, migration, route, controller, view, export, dashboard, atau test.
+- Isi tahap pertama: `config/party.php`, `app/Support/PartyConfig.php`, `app/Services/PartyScopeService.php`, `database/migrations/0001_01_01_000000_create_party_app_schema.php`, `.gitignore`, `README.md`, dan `PARTY_PROJECT_OPERASIONAL.md`.
+- Tahap pertama sengaja kecil dan belum membawa skeleton Laravel lengkap, route, controller, view, export, dashboard, atau test.
