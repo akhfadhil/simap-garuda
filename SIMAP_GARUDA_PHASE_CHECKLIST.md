@@ -68,10 +68,10 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 ### 2. Rapikan Role Teknis
 
 - [ ] Bersihkan data pengguna database SIMAP Garuda agar hanya berisi akun operasional Garuda yang relevan.
-- [ ] Tambahkan field nomor telepon pengguna untuk Admin Partai, Korcam, Kordes, dan Saksi TPS.
+- [x] Tambahkan field nomor telepon pengguna untuk Admin Partai, Korcam, Kordes, dan Saksi TPS.
 - [x] Tentukan apakah DB role akan tetap kompatibel (`admin/ppk/pps/kpps`) atau dimigrasi penuh.
 - [x] Jika dimigrasi penuh, ubah role menjadi `admin_partai`, `korcam`, `kordes`, `saksi_tps`.
-- [ ] Update middleware, route, controller, seeder, factory, dan test.
+- [x] Update middleware, route, controller, seeder, factory, dan test.
 - [x] Rename URI publik ke `/korcam`, `/kordes`, dan `/saksi`.
 - [x] Tambahkan backward redirect sementara jika masih ada link lama.
 
@@ -103,7 +103,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 - [x] Hapus input DPT, pengguna hak pilih, surat suara, disabilitas, dan suara tidak sah dari form Saksi TPS.
 - [x] Batasi form Saksi TPS agar hanya menerima suara Partai Garuda dan caleg Garuda.
 - [x] Set field administratif lama ke `0` saat simpan rekap TPS agar schema lama tetap kompatibel.
-- [ ] Bersihkan tampilan agregasi Kordes/Korcam/Admin dari field administratif KPU yang tidak relevan untuk partai.
+- [x] Bersihkan tampilan agregasi Kordes/Korcam/Admin dari field administratif KPU yang tidak relevan untuk partai.
   - [x] Kordes: rekap desa hanya menampilkan suara Garuda, caleg Garuda, total Garuda, dan status TPS.
   - [x] Korcam: rekap kecamatan dan detail desa hanya menampilkan suara Garuda, caleg Garuda, total Garuda, dan status TPS.
   - [x] Admin: rekap kabupaten dan detail wilayah hanya menampilkan suara Garuda, caleg Garuda, total Garuda, dan status TPS.
@@ -170,7 +170,7 @@ Ditunda:
 - Mengubah migration lama pembuat tabel non-legislatif; lebih aman lewat migration drop baru dulu, lalu squash saat template/fresh schema.
 - File migration no-op `2026_03_02_000006_create_dokumens_table.php`; biarkan sampai migration squash agar histori migration existing DB tetap jelas.
 - Migration role legacy `2026_05_24_*` dan `2026_06_14_000001_*`; biarkan sampai migration squash karena masih menjadi jalur upgrade existing DB.
-- Backward route/URI `ppk`, `pps`, dan `kpps`; tunda sampai masa kompatibilitas lama selesai. Nama class/view internal sudah direname ke istilah final Korcam/Kordes/Saksi.
+- [x] Backward route/URI `ppk`, `pps`, dan `kpps` sudah dilepas sepenuhnya dari `routes/web.php`. Nama class/view internal sudah direname ke istilah final Korcam/Kordes/Saksi.
 - `config.filesystems.backup_path` dan env `BACKUP_DOKUMEN_PATH`; tunda sampai audit config menyeluruh karena saat ini hanya tersisa sebagai config, bukan route runtime.
 - Enum historis jenis non-partai di migration/schema `rekap_headers`; tunda sampai migration squash atau migration enum khusus karena test guard masih butuh memastikan jenis non-partai tidak accessible.
 - Test guard non-party `ppwp`; tetap dipertahankan sebagai bukti jenis non-partai tidak bisa diakses.
@@ -313,4 +313,4 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Audit backward route legacy selesai: route `dashboard.ppk`, `dashboard.pps`, `dashboard.kpps`, `ppk.*`, dan `pps.*` hanya redirect/link kompatibilitas di `routes/web.php`; controller, view, service, dan test aktif sudah memakai istilah final.
 - Audit fresh schema template selesai: template perlu migration fresh/squashed untuk role final, wilayah, dapil, legislatif-only rekap, status internal, flag internal, dan index final; migration dokumen, non-legislatif, role compatibility, dan cleanup legacy tidak ikut template.
 - Finalisasi UX setup caleg selesai: tambah/hapus caleg tidak reload, konfirmasi hapus tidak tembus saat batal, dan perilaku yang sama sudah diterapkan ke SIMAP utama.
-- Eksekusi awal `simap-partai-template` dimulai: folder template dibuat di `../simap-partai-template` dengan fondasi konfigurasi partai generik, helper identitas partai, service scope wilayah, migration fresh/squashed awal, model inti, `.gitignore`, README, dan dokumen operasional awal. Belum ada skeleton Laravel lengkap, controller, route, view, export, dashboard, atau test.
+- Eksekusi `simap-partai-template` SELESAI 100%: Seluruh skeleton Laravel, routes, controllers, views, assets, exports, seeders/factories, dan testing suites telah selesai dimigrasikan dan digeneralisasi. Semua test suite (29 tests, 181 assertions) telah lulus verifikasi dan validasi secara penuh. Aplikasi template siap digunakan untuk dideploy sebagai project partai baru.

@@ -160,7 +160,7 @@
     $persenRekap       = $totalTps > 0 ? min(100, round(($totalRekapFinal / $totalTps) * 100)) : 0;
 
     $menus = [
-        ['label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin'), 'active' => true],
+        ['label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin_partai'), 'active' => true],
         ['label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index')],
         ['label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
         ['label' => 'Kelola Kecamatan', 'icon' => 'map', 'route' => route('admin.kecamatan.index')],

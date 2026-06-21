@@ -944,6 +944,60 @@ class PartyRoleAccessTest extends TestCase
         ];
     }
 
+    public function test_admin_can_manage_user_with_phone_field(): void
+    {
+        // 1. Simpan user baru dengan phone
+        $response = $this->actingAs($this->admin)
+            ->post(route('admin.users.store'), [
+                'name' => 'Saksi TPS 01',
+                'username' => 'saksi_tps01',
+                'phone' => '08987654321',
+                'role' => 'saksi_tps',
+                'tps_id' => $this->tpsA->id,
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('users', [
+            'username' => 'saksi_tps01',
+            'phone' => '08987654321',
+            'role' => 'saksi_tps',
+            'tps_id' => $this->tpsA->id,
+        ]);
+
+        $user = User::where('username', 'saksi_tps01')->firstOrFail();
+
+        // 2. Update user phone
+        $response = $this->actingAs($this->admin)
+            ->put(route('admin.users.update', $user), [
+                'name' => 'Saksi TPS 01 Baru',
+                'username' => 'saksi_tps01',
+                'phone' => '081212121212',
+                'tps_id' => $this->tpsA->id,
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'Saksi TPS 01 Baru',
+            'phone' => '081212121212',
+        ]);
+    }
+
+    public function test_garuda_demo_seeder_runs_successfully(): void
+    {
+        $this->seed(\Database\Seeders\GarudaDemoSeeder::class);
+
+        $this->assertDatabaseHas('dapils', ['nama' => 'Banyuwangi 1']);
+        $this->assertDatabaseHas('dapils', ['nama' => 'Banyuwangi 2']);
+        $this->assertDatabaseHas('users', ['username' => 'korcam_banyuwangi']);
+        $this->assertDatabaseHas('users', ['username' => 'kordes_lateng']);
+        $this->assertDatabaseHas('users', ['username' => 'saksi_lateng_tps01']);
+        $this->assertDatabaseHas('rekap_calegs', ['nama_caleg' => 'H. Sumarsono, S.E.']);
+        $this->assertDatabaseHas('rekap_headers', ['status' => 'final']);
+        $this->assertDatabaseHas('rekap_headers', ['status' => 'draft']);
+        $this->assertDatabaseHas('rekap_headers', ['status' => 'perlu_dicek']);
+    }
+
     private function flattenExportRows(array $rows): string
     {
         return collect($rows)

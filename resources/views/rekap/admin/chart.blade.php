@@ -550,7 +550,7 @@
                 <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }} Logo" class="w-8 h-8 object-contain">
             </div>
             <div>
-                <p class="text-lg font-extrabold text-[var(--primary)] leading-none">SIMAP</p>
+                <p class="text-lg font-extrabold text-[var(--primary)] leading-none">{{ $party['app_name'] }}</p>
                 <p class="font-mono-data text-[10px] uppercase tracking-widest text-slate-500 mt-1">{{ $roleLabel }}</p>
             </div>
         </div>
@@ -604,7 +604,7 @@
                 <div class="w-9 h-9 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center overflow-hidden">
                     <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }} Logo" class="w-8 h-8 object-contain">
                 </div>
-                <p class="text-xl font-extrabold text-[var(--primary)] leading-none">SIMAP</p>
+                <p class="text-xl font-extrabold text-[var(--primary)] leading-none">{{ $party['app_name'] }}</p>
             </div>
             <span class="font-mono-data text-[10px] uppercase tracking-widest text-red-600 bg-red-50 px-2 py-1 rounded">{{ $roleLabel }}</span>
         </div>

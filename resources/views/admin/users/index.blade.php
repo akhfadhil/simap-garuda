@@ -115,7 +115,7 @@
 @php
     $party = $party ?? config('party');
     $menus = [
-        ['label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin')],
+        ['label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.admin_partai')],
         ['label' => 'Pengguna', 'icon' => 'group', 'route' => route('admin.users.index'), 'active' => true],
         ['label' => 'Grafik & Statistik', 'icon' => 'bar_chart', 'route' => route('admin.rekap.chart')],
         ['label' => 'Kelola Kecamatan', 'icon' => 'map', 'route' => route('admin.kecamatan.index')],
@@ -343,10 +343,11 @@
 @else
 <div class="dark:bg-gray-800 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-sm overflow-x-auto">
     <div class="grid grid-cols-12 min-w-[860px] px-6 py-3 border-b dark:border-gray-700 border-gray-200">
-        <div class="col-span-3 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Nama</div>
+        <div class="col-span-2 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Nama</div>
         <div class="col-span-2 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Username</div>
+        <div class="col-span-2 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Nomor Telepon</div>
         <div class="col-span-1 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Role</div>
-        <div class="col-span-4 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Wilayah</div>
+        <div class="col-span-3 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold">Wilayah</div>
         <div class="col-span-2 text-[10px] tracking-[2px] dark:text-gray-500 text-gray-400 uppercase font-semibold text-right">Aksi</div>
     </div>
 
@@ -374,11 +375,14 @@
         };
     @endphp
     <div class="grid grid-cols-12 min-w-[860px] px-6 py-4 border-b dark:border-gray-700 border-gray-100 last:border-0 dark:hover:bg-gray-750 hover:bg-gray-50 transition group items-center">
-        <div class="col-span-3">
+        <div class="col-span-2">
             <p class="text-sm font-medium dark:text-gray-100 text-gray-800">{{ $user->name }}</p>
         </div>
         <div class="col-span-2">
             <p class="text-xs dark:text-gray-400 text-gray-500">{{ $user->username }}</p>
+        </div>
+        <div class="col-span-2">
+            <p class="text-xs dark:text-gray-400 text-gray-500">{{ $user->phone ?? '-' }}</p>
         </div>
         <div class="col-span-1">
             <span class="text-[9px] tracking-widest uppercase px-2 py-1 rounded font-semibold"
@@ -386,7 +390,7 @@
                 {{ $roleDisplay }}
             </span>
         </div>
-        <div class="col-span-4">
+        <div class="col-span-3">
             <p class="text-xs dark:text-gray-500 text-gray-400">{{ $wilayah }}</p>
         </div>
         <div class="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition">
@@ -508,6 +512,10 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
                 <input type="text" name="username" value="{{ old('username') }}" placeholder="cth: korcam_banyuwangi" class="{{ $inputClass }}">
             </div>
             <div>
+                <label class="{{ $labelClass }}">Nomor Telepon</label>
+                <input type="text" name="phone" value="{{ old('phone') }}" placeholder="cth: 081234567890" class="{{ $inputClass }}">
+            </div>
+            <div>
                 <label class="{{ $labelClass }}">Password <span class="dark:text-gray-600 text-gray-400 normal-case tracking-normal font-normal">(kosong = username)</span></label>
                 <input type="password" name="password" placeholder="Opsional, min. 6 karakter" class="{{ $inputClass }}">
             </div>
@@ -604,6 +612,10 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
             <div>
                 <label class="{{ $labelClass }}">Username</label>
                 <input type="text" name="username" id="edit-username" class="{{ $inputClass }}">
+            </div>
+            <div>
+                <label class="{{ $labelClass }}">Nomor Telepon</label>
+                <input type="text" name="phone" id="edit-phone" placeholder="cth: 081234567890" class="{{ $inputClass }}">
             </div>
             <div>
                 <label class="{{ $labelClass }}">Password <span class="dark:text-gray-600 text-gray-400 normal-case tracking-normal font-normal">(kosongkan jika tidak diganti)</span></label>
@@ -732,6 +744,7 @@ $labelClass = "block text-xs font-semibold dark:text-gray-400 text-gray-600 uppe
     function openEdit(user) {
         document.getElementById('edit-name').value         = user.name;
         document.getElementById('edit-username').value     = user.username;
+        document.getElementById('edit-phone').value        = user.phone ?? '';
         const roleLabels = {admin_partai: 'Admin Partai', korcam: 'Korcam', kordes: 'Kordes', saksi_tps: 'Saksi TPS'};
         document.getElementById('edit-role-display').value = roleLabels[user.role] || 'Legacy';
         document.getElementById('edit-form').action        = `/admin/users/${user.id}`;
