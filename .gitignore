@@ -24,3 +24,11 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Laravel generated cache and exports
+/bootstrap/cache/*.php
+/storage/framework/views/*.php
+/storage/framework/sessions/
+/storage/framework/testing/
+/storage/app/private/rekap_exports/
+
