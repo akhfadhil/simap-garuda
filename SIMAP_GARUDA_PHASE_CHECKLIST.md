@@ -67,7 +67,7 @@ Tujuan Phase 2 adalah mengubah fork yang sudah bersih secara permukaan menjadi a
 
 ### 2. Rapikan Role Teknis
 
-- [ ] Bersihkan data pengguna database SIMAP Garuda agar hanya berisi akun operasional Garuda yang relevan.
+- [x] Bersihkan data pengguna database SIMAP Garuda agar hanya berisi akun operasional Garuda yang relevan.
 - [x] Tambahkan field nomor telepon pengguna untuk Admin Partai, Korcam, Kordes, dan Saksi TPS.
 - [x] Tentukan apakah DB role akan tetap kompatibel (`admin/ppk/pps/kpps`) atau dimigrasi penuh.
 - [x] Jika dimigrasi penuh, ubah role menjadi `admin_partai`, `korcam`, `kordes`, `saksi_tps`.
@@ -195,7 +195,7 @@ Bagian ini menyesuaikan SIMAP Garuda dengan arah terbaru di `../simap/PARTAI_POR
 - [x] Audit backward route legacy `ppk/pps/kpps` dan tandai semuanya sebagai redirect kompatibilitas yang tidak boleh masuk template.
 - [x] Audit fresh schema/migration template dan tentukan tabel/kolom yang wajib masuk atau wajib ditinggal.
 - [x] Perbaiki halaman grafik admin agar role label tersedia stabil dan halaman chart bisa dirender oleh test.
-- [ ] Siapkan standar import snapshot dari SIMAP utama jika nanti SIMAP utama membuat `export:party-snapshot`.
+- [x] Siapkan compatibility dengan format snapshot/export dari SIMAP utama.
 - [x] Siapkan dokumentasi operasional yang bisa digeneralisasi untuk project partai lain.
 - [x] Pastikan cleanup role/URI teknis dilakukan dengan mempertimbangkan template, bukan hanya kebutuhan Garuda.
 
