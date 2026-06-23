@@ -65,37 +65,66 @@ class ImportPartySnapshot extends Command
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            $dapils->chunk(20)->each(fn($chunk) => DB::table('dapils')->insert($chunk->toArray()));
+            $dapils->chunk(1000)->each(fn($chunk) => DB::table('dapils')->insert($chunk->toArray()));
 
             // 2. Kecamatans
-            $kecamatans = collect($data['kecamatans'])->map(fn($item) => [
-                'id' => $item['id'],
-                'nama' => $item['nama'],
-                'dapil_id' => $item['dapil_id'] ?? null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            $kecamatans->chunk(20)->each(fn($chunk) => DB::table('kecamatans')->insert($chunk->toArray()));
+            $seenKecamatans = [];
+            $kecamatans = collect($data['kecamatans'])
+                ->filter(function ($item) use (&$seenKecamatans) {
+                    if (in_array($item['nama'], $seenKecamatans, true)) {
+                        return false;
+                    }
+                    $seenKecamatans[] = $item['nama'];
+                    return true;
+                })
+                ->map(fn($item) => [
+                    'id' => $item['id'],
+                    'nama' => $item['nama'],
+                    'dapil_id' => $item['dapil_id'] ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            $kecamatans->chunk(1000)->each(fn($chunk) => DB::table('kecamatans')->insert($chunk->toArray()));
 
             // 3. Desas
-            $desas = collect($data['desas'])->map(fn($item) => [
-                'id' => $item['id'],
-                'kecamatan_id' => $item['kecamatan_id'],
-                'nama' => $item['nama'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            $desas->chunk(20)->each(fn($chunk) => DB::table('desas')->insert($chunk->toArray()));
+            $seenDesas = [];
+            $desas = collect($data['desas'])
+                ->filter(function ($item) use (&$seenDesas) {
+                    $key = $item['kecamatan_id'] . '_' . $item['nama'];
+                    if (in_array($key, $seenDesas, true)) {
+                        return false;
+                    }
+                    $seenDesas[] = $key;
+                    return true;
+                })
+                ->map(fn($item) => [
+                    'id' => $item['id'],
+                    'kecamatan_id' => $item['kecamatan_id'],
+                    'nama' => $item['nama'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            $desas->chunk(1000)->each(fn($chunk) => DB::table('desas')->insert($chunk->toArray()));
 
             // 4. Tps
-            $tps = collect($data['tps'])->map(fn($item) => [
-                'id' => $item['id'],
-                'desa_id' => $item['desa_id'],
-                'nama' => $item['nama'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            $tps->chunk(20)->each(fn($chunk) => DB::table('tps')->insert($chunk->toArray()));
+            $seenTps = [];
+            $tps = collect($data['tps'])
+                ->filter(function ($item) use (&$seenTps) {
+                    $key = $item['desa_id'] . '_' . $item['nama'];
+                    if (in_array($key, $seenTps, true)) {
+                        return false;
+                    }
+                    $seenTps[] = $key;
+                    return true;
+                })
+                ->map(fn($item) => [
+                    'id' => $item['id'],
+                    'desa_id' => $item['desa_id'],
+                    'nama' => $item['nama'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            $tps->chunk(1000)->each(fn($chunk) => DB::table('tps')->insert($chunk->toArray()));
 
             // 5. Rekap Partais
             $rekapPartais = collect($data['rekap_partais'])->map(fn($item) => [
@@ -107,7 +136,7 @@ class ImportPartySnapshot extends Command
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            $rekapPartais->chunk(20)->each(fn($chunk) => DB::table('rekap_partais')->insert($chunk->toArray()));
+            $rekapPartais->chunk(1000)->each(fn($chunk) => DB::table('rekap_partais')->insert($chunk->toArray()));
 
             // 6. Rekap Calegs
             $rekapCalegs = collect($data['rekap_calegs'])->map(fn($item) => [
@@ -118,64 +147,85 @@ class ImportPartySnapshot extends Command
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            $rekapCalegs->chunk(20)->each(fn($chunk) => DB::table('rekap_calegs')->insert($chunk->toArray()));
+            $rekapCalegs->chunk(1000)->each(fn($chunk) => DB::table('rekap_calegs')->insert($chunk->toArray()));
 
             // 7. Rekap Headers
             if (isset($data['rekap_headers'])) {
-                $rekapHeaders = collect($data['rekap_headers'])->map(fn($item) => [
-                    'id' => $item['id'],
-                    'tps_id' => $item['tps_id'],
-                    'jenis' => $item['jenis'],
-                    'status' => $item['status'] ?? 'draft',
-                    'catatan_internal' => $item['catatan_internal'] ?? null,
-                    'dpt_lk' => $item['dpt_lk'] ?? 0,
-                    'dpt_pr' => $item['dpt_pr'] ?? 0,
-                    'pengguna_dpt_lk' => $item['pengguna_dpt_lk'] ?? 0,
-                    'pengguna_dpt_pr' => $item['pengguna_dpt_pr'] ?? 0,
-                    'pengguna_dptb_lk' => $item['pengguna_dptb_lk'] ?? 0,
-                    'pengguna_dptb_pr' => $item['pengguna_dptb_pr'] ?? 0,
-                    'pengguna_dpk_lk' => $item['pengguna_dpk_lk'] ?? 0,
-                    'pengguna_dpk_pr' => $item['pengguna_dpk_pr'] ?? 0,
-                    'ss_diterima' => $item['ss_diterima'] ?? 0,
-                    'ss_digunakan' => $item['ss_digunakan'] ?? 0,
-                    'ss_rusak' => $item['ss_rusak'] ?? 0,
-                    'ss_sisa' => $item['ss_sisa'] ?? 0,
-                    'disabilitas_lk' => $item['disabilitas_lk'] ?? 0,
-                    'disabilitas_pr' => $item['disabilitas_pr'] ?? 0,
-                    'suara_sah' => $item['suara_sah'] ?? 0,
-                    'suara_tidak_sah' => $item['suara_tidak_sah'] ?? 0,
-                    'diinput_oleh' => $item['diinput_oleh'] ?? null,
-                    'difinalisasi_at' => isset($item['difinalisasi_at']) ? \Illuminate\Support\Carbon::parse($item['difinalisasi_at'])->toDateTimeString() : null,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                $rekapHeaders->chunk(20)->each(fn($chunk) => DB::table('rekap_headers')->insert($chunk->toArray()));
+                $nowStr = now()->toDateTimeString();
+                $chunks = array_chunk($data['rekap_headers'], 1000);
+                foreach ($chunks as $chunk) {
+                    $insertData = [];
+                    foreach ($chunk as $item) {
+                        $insertData[] = [
+                            'id' => $item['id'],
+                            'tps_id' => $item['tps_id'],
+                            'jenis' => $item['jenis'],
+                            'status' => $item['status'] ?? 'draft',
+                            'catatan_internal' => $item['catatan_internal'] ?? null,
+                            'dpt_lk' => $item['dpt_lk'] ?? 0,
+                            'dpt_pr' => $item['dpt_pr'] ?? 0,
+                            'pengguna_dpt_lk' => $item['pengguna_dpt_lk'] ?? 0,
+                            'pengguna_dpt_pr' => $item['pengguna_dpt_pr'] ?? 0,
+                            'pengguna_dptb_lk' => $item['pengguna_dptb_lk'] ?? 0,
+                            'pengguna_dptb_pr' => $item['pengguna_dptb_pr'] ?? 0,
+                            'pengguna_dpk_lk' => $item['pengguna_dpk_lk'] ?? 0,
+                            'pengguna_dpk_pr' => $item['pengguna_dpk_pr'] ?? 0,
+                            'ss_diterima' => $item['ss_diterima'] ?? 0,
+                            'ss_digunakan' => $item['ss_digunakan'] ?? 0,
+                            'ss_rusak' => $item['ss_rusak'] ?? 0,
+                            'ss_sisa' => $item['ss_sisa'] ?? 0,
+                            'disabilitas_lk' => $item['disabilitas_lk'] ?? 0,
+                            'disabilitas_pr' => $item['disabilitas_pr'] ?? 0,
+                            'suara_sah' => $item['suara_sah'] ?? 0,
+                            'suara_tidak_sah' => $item['suara_tidak_sah'] ?? 0,
+                            'diinput_oleh' => $item['diinput_oleh'] ?? null,
+                            'difinalisasi_at' => isset($item['difinalisasi_at']) ? \Illuminate\Support\Carbon::parse($item['difinalisasi_at'])->toDateTimeString() : null,
+                            'created_at' => $nowStr,
+                            'updated_at' => $nowStr,
+                        ];
+                    }
+                    DB::table('rekap_headers')->insert($insertData);
+                }
             }
 
             // 8. Rekap Partai Suaras
             if (isset($data['rekap_partai_suaras'])) {
-                $partaiSuaras = collect($data['rekap_partai_suaras'])->map(fn($item) => [
-                    'id' => $item['id'],
-                    'rekap_id' => $item['rekap_id'],
-                    'partai_id' => $item['partai_id'],
-                    'suara' => $item['suara'] ?? 0,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                $partaiSuaras->chunk(20)->each(fn($chunk) => DB::table('rekap_partai_suaras')->insert($chunk->toArray()));
+                $nowStr = now()->toDateTimeString();
+                $chunks = array_chunk($data['rekap_partai_suaras'], 1000);
+                foreach ($chunks as $chunk) {
+                    $insertData = [];
+                    foreach ($chunk as $item) {
+                        $insertData[] = [
+                            'id' => $item['id'],
+                            'rekap_id' => $item['rekap_id'],
+                            'partai_id' => $item['partai_id'],
+                            'suara' => $item['suara'] ?? 0,
+                            'created_at' => $nowStr,
+                            'updated_at' => $nowStr,
+                        ];
+                    }
+                    DB::table('rekap_partai_suaras')->insert($insertData);
+                }
             }
 
             // 9. Rekap Caleg Suaras
             if (isset($data['rekap_caleg_suaras'])) {
-                $calegSuaras = collect($data['rekap_caleg_suaras'])->map(fn($item) => [
-                    'id' => $item['id'],
-                    'rekap_id' => $item['rekap_id'],
-                    'caleg_id' => $item['caleg_id'],
-                    'suara' => $item['suara'] ?? 0,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                $calegSuaras->chunk(20)->each(fn($chunk) => DB::table('rekap_caleg_suaras')->insert($chunk->toArray()));
+                $nowStr = now()->toDateTimeString();
+                $chunks = array_chunk($data['rekap_caleg_suaras'], 1000);
+                foreach ($chunks as $chunk) {
+                    $insertData = [];
+                    foreach ($chunk as $item) {
+                        $insertData[] = [
+                            'id' => $item['id'],
+                            'rekap_id' => $item['rekap_id'],
+                            'caleg_id' => $item['caleg_id'],
+                            'suara' => $item['suara'] ?? 0,
+                            'created_at' => $nowStr,
+                            'updated_at' => $nowStr,
+                        ];
+                    }
+                    DB::table('rekap_caleg_suaras')->insert($insertData);
+                }
             }
 
             Schema::enableForeignKeyConstraints();
@@ -185,7 +235,7 @@ class ImportPartySnapshot extends Command
             try {
                 DB::rollBack();
             } catch (\Exception $rollbackEx) {
-                // Ignore
+                // Ignore rollback exception
             }
             Schema::enableForeignKeyConstraints();
             $this->error("Terjadi kesalahan saat mengimpor data: " . $e->getMessage());

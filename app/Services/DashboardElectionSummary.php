@@ -349,12 +349,36 @@ class DashboardElectionSummary
             ->sortByDesc('suara')
             ->values();
         $totalSuara = $allRows->sum('suara');
+        $totalAllPartySuara = (int) $this->applyScope(
+            DB::table('rekap_partai_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->join('rekap_partais as p', 'p.id', '=', 's.partai_id')
+                ->where('h.jenis', $jenis)
+                ->when($jenis === 'dprd_kab' && $dapilId, fn ($query) => $query->where('p.dapil_id', $dapilId)),
+            $scope
+        )->sum('s.suara')
+        + (int) $this->applyScope(
+            DB::table('rekap_caleg_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
+                ->join('rekap_partais as p', 'p.id', '=', 'c.partai_id')
+                ->where('h.jenis', $jenis)
+                ->when($jenis === 'dprd_kab' && $dapilId, fn ($query) => $query->where('p.dapil_id', $dapilId)),
+            $scope
+        )->sum('s.suara');
+
         $rows = $allRows
             ->take(5)
             ->values()
-            ->map(function ($row, $index) use ($totalSuara) {
+            ->map(function ($row, $index) use ($totalAllPartySuara) {
                 $row['rank'] = $index + 1;
-                $row['persentase'] = $totalSuara > 0 ? round(($row['suara'] / $totalSuara) * 100, 2) : 0;
+                $row['persentase'] = $totalAllPartySuara > 0 ? round(($row['suara'] / $totalAllPartySuara) * 100, 2) : 0;
 
                 return $row;
             })
@@ -432,12 +456,14 @@ class DashboardElectionSummary
             ->sortByDesc('suara')
             ->values();
         $totalSuara = $allRows->sum('suara');
+        $totalAllCalegSuara = $this->fetchTotalAllCalegSuara($jenis, $scope, $dapilId);
+
         $rows = $allRows
             ->take(5)
             ->values()
-            ->map(function ($row, $index) use ($totalSuara) {
+            ->map(function ($row, $index) use ($totalAllCalegSuara) {
                 $row['rank'] = $index + 1;
-                $row['persentase'] = $totalSuara > 0 ? round(($row['suara'] / $totalSuara) * 100, 2) : 0;
+                $row['persentase'] = $totalAllCalegSuara > 0 ? round(($row['suara'] / $totalAllCalegSuara) * 100, 2) : 0;
 
                 return $row;
             })
@@ -477,10 +503,55 @@ class DashboardElectionSummary
         return RekapHeader::JENIS_LABELS[$jenis] ?? strtoupper($jenis);
     }
 
+    private function fetchTotalAllCalegSuara(string $jenis, array $scope, ?int $dapilId = null): int
+    {
+        $apiHost = config('party.main_simap_url', 'http://simap.test');
+        $cacheKey = "api_legislative_totals_" . md5(json_encode([$jenis, $scope, $dapilId]));
+
+        try {
+            $response = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($apiHost, $scope) {
+                $url = "{$apiHost}/api/legislative-totals";
+                $res = \Illuminate\Support\Facades\Http::timeout(3)->get($url, [
+                    'scope_type' => $scope['type'] ?? 'kabupaten',
+                    'scope_id' => $scope['id'] ?? null,
+                ]);
+
+                if ($res->successful()) {
+                    return $res->json();
+                }
+
+                return null;
+            });
+
+            if ($response !== null) {
+                if ($jenis === 'dprd_kab') {
+                    return (int) ($response['dprd_kab'][$dapilId] ?? 0);
+                }
+                return (int) ($response[$jenis] ?? 0);
+            }
+        } catch (\Exception $e) {
+            \Log::warning("Failed to fetch totals from SIMAP Utama API: " . $e->getMessage());
+        }
+
+        // Fallback to Local Query
+        return (int) $this->applyScope(
+            DB::table('rekap_caleg_suaras as s')
+                ->join('rekap_headers as h', 'h.id', '=', 's.rekap_id')
+                ->join('tps as t', 't.id', '=', 'h.tps_id')
+                ->join('desas as d', 'd.id', '=', 't.desa_id')
+                ->join('kecamatans as k', 'k.id', '=', 'd.kecamatan_id')
+                ->join('rekap_calegs as c', 'c.id', '=', 's.caleg_id')
+                ->join('rekap_partais as p', 'p.id', '=', 'c.partai_id')
+                ->where('h.jenis', $jenis)
+                ->when($jenis === 'dprd_kab' && $dapilId, fn ($query) => $query->where('p.dapil_id', $dapilId)),
+            $scope
+        )->sum('s.suara');
+    }
+
     private function cacheParts(User $user, array $scope, array $activeJenis): array
     {
         return [
-            'version' => 8,
+            'version' => 9,
             'user_role' => $user->role,
             'scope' => $scope,
             'active' => $activeJenis,

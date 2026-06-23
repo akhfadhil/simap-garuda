@@ -44,11 +44,14 @@ class WilayahSeeder extends Seeder
         ];
 
         foreach ($kecamatans as $k) {
-            DB::table('kecamatans')->insertOrIgnore([
-                'nama'       => $k[0],
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
+            $exists = DB::table('kecamatans')->where('nama', $k[0])->exists();
+            if (!$exists) {
+                DB::table('kecamatans')->insert([
+                    'nama'       => $k[0],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
         }
 
         // =====================
@@ -86,12 +89,18 @@ class WilayahSeeder extends Seeder
             $kec = DB::table('kecamatans')->where('nama', $kecNama)->first();
             if (!$kec) continue;
             foreach ($desas as $desaNama) {
-                DB::table('desas')->insertOrIgnore([
-                    'nama'          => $desaNama,
-                    'kecamatan_id'  => $kec->id,
-                    'created_at'    => $now,
-                    'updated_at'    => $now,
-                ]);
+                $exists = DB::table('desas')
+                    ->where('kecamatan_id', $kec->id)
+                    ->where('nama', $desaNama)
+                    ->exists();
+                if (!$exists) {
+                    DB::table('desas')->insert([
+                        'nama'          => $desaNama,
+                        'kecamatan_id'  => $kec->id,
+                        'created_at'    => $now,
+                        'updated_at'    => $now,
+                    ]);
+                }
             }
         }
     }
