@@ -10,7 +10,7 @@ Panduan operasional rinci tersedia di `SIMAP_GARUDA_OPERASIONAL.md`.
 
 | Item | Nilai |
 | --- | --- |
-| Nama aplikasi | SIMAP Garuda |
+| Nama aplikasi | BASIS DATA PEROLEHAN SUARA PARTAI GARUDA |
 | Folder project | `simap-garuda` |
 | Database | `simap_garuda` |
 | Partai | Partai Garuda |

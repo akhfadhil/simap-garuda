@@ -13,4 +13,6 @@ class Kecamatan extends Model
     public function users() { return $this->hasMany(User::class); }
     // Relasi dapil kecamatan.
     public function dapil() { return $this->belongsTo(Dapil::class); }
+    // Relasi pendukung.
+    public function pendukungs() { return $this->hasMany(Pendukung::class); }
 }

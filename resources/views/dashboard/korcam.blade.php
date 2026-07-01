@@ -28,7 +28,7 @@
 
 <div class="mb-10">
     <p class="admin-mono admin-muted-soft tracking-[.3em] text-xs mb-2">// KOORDINATOR KECAMATAN</p>
-    <h1 class="admin-display text-5xl lg:text-6xl admin-text leading-tight">DASHBOARD KORCAM</h1>
+    <h1 class="admin-display text-4xl lg:text-5xl admin-text leading-tight">SISTEM KORCAM {{ strtoupper($party['short_name']) }}</h1>
     <p class="admin-muted text-lg max-w-2xl mt-2">Pantau progress input dan finalisasi rekap saksi di tingkat kecamatan.</p>
 </div>
 

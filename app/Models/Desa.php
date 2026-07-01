@@ -13,4 +13,6 @@ class Desa extends Model
     public function tps()       { return $this->hasMany(Tps::class); }
     // Relasi user Kordes di desa.
     public function users()     { return $this->hasMany(User::class); }
+    // Relasi pendukung.
+    public function pendukungs() { return $this->hasMany(Pendukung::class); }
 }

@@ -121,6 +121,7 @@
         ['label' => 'Kelola Kecamatan', 'icon' => 'map', 'route' => route('admin.kecamatan.index')],
         ['label' => 'Kelola Desa', 'icon' => 'location_city', 'route' => route('admin.desa.index')],
         ['label' => 'Kelola TPS', 'icon' => 'pin_drop', 'route' => route('admin.tps.index')],
+        ['label' => 'Pemetaan Dukungan', 'icon' => 'contact_phone', 'route' => route('pemetaan-dukungan.index')],
         ['label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('admin.rekap.index')],
         ['label' => 'Setup Data ' . $party['short_name'], 'icon' => 'settings', 'route' => route('admin.setup.index')],
     ];

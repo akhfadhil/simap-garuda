@@ -94,11 +94,13 @@
         'korcam' => [
             ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.korcam')],
             ['key' => 'kordes', 'label' => 'Data Kordes', 'icon' => 'location_city', 'route' => route('korcam.data-kordes')],
+            ['key' => 'pemetaan-dukungan', 'label' => 'Pemetaan Dukungan', 'icon' => 'contact_phone', 'route' => route('pemetaan-dukungan.index')],
             ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('korcam.rekap.index')],
         ],
         'kordes' => [
             ['key' => 'dashboard', 'label' => 'Beranda', 'icon' => 'dashboard', 'route' => route('dashboard.kordes')],
             ['key' => 'tps', 'label' => 'Data TPS', 'icon' => 'pin_drop', 'route' => route('kordes.data-tps')],
+            ['key' => 'pemetaan-dukungan', 'label' => 'Pemetaan Dukungan', 'icon' => 'contact_phone', 'route' => route('pemetaan-dukungan.index')],
             ['key' => 'rekap', 'label' => 'Rekapitulasi Data', 'icon' => 'analytics', 'route' => route('kordes.rekap.index')],
         ],
         default => [
@@ -114,11 +116,11 @@
 <aside class="admin-mobile-drawer admin-sidebar flex flex-col border-r backdrop-blur-xl" style="--role-accent: {{ $accent }}">
     <div class="p-5 flex items-center justify-between border-b admin-border">
         <div class="flex items-center gap-3">
-            <div class="role-accent-bg w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+            <div class="role-accent-bg w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                 <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }} Logo" class="w-full h-full object-contain">
             </div>
             <div>
-                <h1 class="admin-display role-accent text-2xl leading-none">{{ $party['app_name'] }}</h1>
+                <h1 class="admin-display admin-primary text-[13px] font-bold uppercase tracking-wider leading-tight">{{ $party['full_name'] ?? $party['app_name'] }}</h1>
                 <span class="admin-mono admin-muted-soft text-[10px] uppercase tracking-widest">{{ $roleTitle }}</span>
             </div>
         </div>
@@ -140,10 +142,10 @@
     <aside class="admin-sidebar hidden md:flex flex-col h-screen sticky top-0 w-64 border-r backdrop-blur-xl z-[60]">
         <div class="p-6 flex flex-col gap-1">
             <div class="flex items-center gap-3 mb-2">
-                <div class="role-accent-bg w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+                <div class="role-accent-bg w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                     <img src="{{ asset($party['assets']['logo']) }}" alt="{{ $party['app_name'] }} Logo" class="w-full h-full object-contain">
                 </div>
-                <h1 class="admin-display role-accent text-2xl leading-none">{{ $party['app_name'] }}</h1>
+                <h1 class="admin-display admin-primary text-[13px] font-bold uppercase tracking-wider leading-tight">{{ $party['full_name'] ?? $party['app_name'] }}</h1>
             </div>
             <div class="role-accent-bg px-2 py-1 w-max rounded-sm">
                 <span class="admin-display role-accent uppercase text-[10px] tracking-[.2em]">{{ $roleTitle }}</span>

@@ -8,7 +8,7 @@ SIMAP Garuda adalah aplikasi mandiri untuk Partai Garuda. Aplikasi ini tidak mem
 
 | Item | Nilai |
 | --- | --- |
-| Nama aplikasi | SIMAP Garuda |
+| Nama aplikasi | BASIS DATA PEROLEHAN SUARA PARTAI GARUDA |
 | Folder project | `simap-garuda` |
 | Database default | `simap_garuda` |
 | Partai | Partai Garuda |
@@ -114,6 +114,9 @@ DB_PORT=3306
 DB_DATABASE=simap_garuda
 DB_USERNAME=root
 DB_PASSWORD=
+
+PARTY_APP_NAME="BASIS DATA PEROLEHAN SUARA PARTAI GARUDA"
+PARTY_COLOR_BG_DARK="#140404"
 ```
 
 Untuk production:

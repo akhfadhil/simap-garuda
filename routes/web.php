@@ -102,4 +102,17 @@ Route::middleware('auth')->group(function () {
         Route::get('{jenis}/export', [App\Http\Controllers\Rekap\AdminController::class, 'export'])->name('export');
         Route::get('{jenis}', [App\Http\Controllers\Rekap\AdminController::class, 'show'])->name('show');
     });
+
+    // Pemetaan Dukungan
+    Route::middleware('role:kordes,korcam,admin_partai')->prefix('pemetaan-dukungan')->name('pemetaan-dukungan.')->group(function () {
+        Route::get('/', [App\Http\Controllers\PemetaanDukunganController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\PemetaanDukunganController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\PemetaanDukunganController::class, 'store'])->name('store');
+        Route::get('/statistik', [App\Http\Controllers\PemetaanDukunganController::class, 'statistik'])->name('statistik');
+        Route::get('/export', [App\Http\Controllers\PemetaanDukunganController::class, 'export'])->name('export');
+        Route::get('/{pendukung}/edit', [App\Http\Controllers\PemetaanDukunganController::class, 'edit'])->name('edit');
+        Route::put('/{pendukung}', [App\Http\Controllers\PemetaanDukunganController::class, 'update'])->name('update');
+        Route::delete('/{pendukung}', [App\Http\Controllers\PemetaanDukunganController::class, 'destroy'])->name('destroy');
+        Route::get('/{pendukung}/ktp', [App\Http\Controllers\PemetaanDukunganController::class, 'downloadKtp'])->name('ktp');
+    });
 });

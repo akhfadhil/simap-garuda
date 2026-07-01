@@ -314,3 +314,10 @@ Bagian ini memetakan 12 tahapan eksekusi awal di `PARTAI_PORTAL_BRAINSTORM.md` k
 - Audit fresh schema template selesai: template perlu migration fresh/squashed untuk role final, wilayah, dapil, legislatif-only rekap, status internal, flag internal, dan index final; migration dokumen, non-legislatif, role compatibility, dan cleanup legacy tidak ikut template.
 - Finalisasi UX setup caleg selesai: tambah/hapus caleg tidak reload, konfirmasi hapus tidak tembus saat batal, dan perilaku yang sama sudah diterapkan ke SIMAP utama.
 - Eksekusi `simap-partai-template` SELESAI 100%: Seluruh skeleton Laravel, routes, controllers, views, assets, exports, seeders/factories, dan testing suites telah selesai dimigrasikan dan digeneralisasi. Semua test suite (29 tests, 181 assertions) telah lulus verifikasi dan validasi secara penuh. Aplikasi template siap digunakan untuk dideploy sebagai project partai baru.
+- Phase 2F (Pembaruan Judul Aplikasi & Harmonisasi Desain Login - Juli 2026) SELESAI 100%:
+  - Judul aplikasi diubah secara dinamis menjadi `'BASIS DATA PEROLEHAN SUARA {PARTAI}'` (untuk Garuda: `BASIS DATA PEROLEHAN SUARA PARTAI GARUDA`).
+  - Menghapus override hardcoded `PARTY_APP_NAME` dari `.env` dan menggantinya dengan logika dinamis di `config/party.php`.
+  - Menambahkan kustomisasi warna latar belakang gelap (`PARTY_COLOR_BG_DARK`) di berkas `.env` dan dihubungkan ke CSS variable `--color-bg-dark` untuk visualisasi premium (navy gelap untuk NasDem, marun gelap untuk Gerindra/PSI/Garuda).
+  - Memperbaiki tipografi judul pada halaman login (`login.blade.php`) menggunakan `text-3xl sm:text-4xl` dan `leading-tight` agar teks judul yang panjang tidak bertumpuk.
+  - Membuat dan menerapkan kelas utilitas dinamis (`brand-*`) di `guest.blade.php` agar bebas dari Tailwind CSS arbitrary values yang kurang kompatibel.
+  - Menyalin dan menerapkan standardisasi yang sama ke proyek turunan (`simap-nasdem`, `simap-gerindra`, `simap-psi`, dan `simap-partai-template`). Seluruh test suite pada semua proyek lulus 100%.
